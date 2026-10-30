@@ -167,7 +167,7 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 
 /* Telefon idarəetməsi */
 #mobile-controls { display: none; }
-@media (pointer: coarse), (max-width: 760px) {
+@media (pointer: coarse), (max-width: 900px), (max-height: 500px) {
   #mobile-controls { display: block; position: fixed; inset: 0; z-index: 8; pointer-events: none; }
   .mobile-joystick { position: absolute; left: 18px; bottom: 24px; width: 164px; height: 164px; border-radius: 50%; pointer-events: auto; touch-action: none; background: radial-gradient(circle, rgba(35,44,65,.88) 0%, rgba(15,20,34,.82) 65%, rgba(5,8,16,.9) 100%); border: 2px solid rgba(255,255,255,.22); box-shadow: inset 0 0 0 8px rgba(255,255,255,.035), 0 8px 24px rgba(0,0,0,.35); }
   .joystick-ring { position: absolute; inset: 24px; border: 1px dashed rgba(255,255,255,.16); border-radius: 50%; pointer-events: none; }
