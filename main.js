@@ -999,7 +999,7 @@ $('#mobile-list').addEventListener('pointerdown', (e) => {
 
 // Qaç və tullan düymələri: basılı saxlayanda aktiv, buraxanda sönür.
 const mobileKeyPointers = new Map();
-$ ('#mobile-controls [data-key]').forEach((button) => {
+document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
   const key = button.dataset.key;
   button.addEventListener('pointerdown', (e) => {
     if (!inGame) return;
