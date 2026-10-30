@@ -1,0 +1,19 @@
+{
+  "name": "market-qacisi",
+  "version": "1.0.0",
+  "description": "Market Qaçışı - 3D onlayn komanda oyunu",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0",
+    "three": "^0.187.0",
+    "ws": "^8.22.0"
+  },
+  "type": "module"
+}
