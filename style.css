@@ -204,3 +204,77 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #hud-banner small { font-size: 12px; }
   #hud-flash { font-size: 34px; }
 }
+
+
+/* Mobil ekranlarda elementlərin üst-üstə düşməsinin qarşısını al */
+@media (max-width: 600px) {
+  .brand { left: 5vw; top: 5vh; right: 5vw; }
+  .brand h1 { font-size: clamp(38px, 12vw, 62px); }
+  .tagline { font-size: 13px; max-width: 85vw; }
+  .logo-sub { font-size: 10px; }
+  .menu { left: 5vw; bottom: 4vh; width: 78vw; gap: 7px; }
+  .mbtn { font-size: 15px; padding: 10px 12px; }
+  .chip { top: 10px; right: 10px; padding: 7px 10px; font-size: 11px; }
+  .ver { right: 10px; bottom: 8px; }
+  .screen.center { overflow-y: auto; align-items: flex-start; padding: 12px 0; }
+  .panel, .panel.wide { width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 16px; margin: auto; }
+  .panel h2 { font-size: 21px; }
+  .row { flex-wrap: wrap; }
+  .row .btn { padding: 10px 12px; }
+  .thead, .trow { grid-template-columns: minmax(0, 1fr) 54px 68px 48px; padding: 8px 6px; gap: 4px; font-size: 10px; }
+  #scr-lobby { padding: 12px; gap: 10px; overflow-y: auto; }
+  .lobby-head { gap: 8px; align-items: center; }
+  .lobby-head h2 { font-size: 18px; }
+  .lobby-actions { gap: 4px; }
+  .teams { gap: 8px; grid-template-columns: 1fr 1fr; overflow: auto; }
+  .team { padding: 9px; gap: 7px; min-width: 0; }
+  .team h3 { font-size: 12px; letter-spacing: .04em; }
+  .pcard { padding: 7px; gap: 5px; font-size: 11px; overflow-wrap: anywhere; }
+  .tbtn { padding: 8px 4px; font-size: 11px; }
+  .lobby-foot { gap: 8px; flex-wrap: wrap; }
+  #lobby-hint { font-size: 11px; }
+  .start { font-size: 15px; padding: 11px 15px; }
+  #hud-list { width: 124px; max-height: 25dvh; }
+  #hud-list h3 { font-size: 10px; }
+  #hud-items { font-size: 9px; }
+  #hud-players { top: 66px; right: 6px; width: 112px; min-width: 0; max-width: 112px; max-height: 22dvh; overflow: auto; font-size: 9px; }
+  #hud-top { top: 5px; }
+  #hud-timer { font-size: 21px; }
+  #hud-role { font-size: 9px; padding: 3px 8px; }
+  #btn-fullscreen { top: 6px; right: 6px; padding: 6px 8px; font-size: 10px; }
+  #hud-mic { top: 48px; left: 6px; font-size: 9px; padding: 4px 7px; max-width: 115px; }
+  #hud-banner { top: 28%; font-size: 18px; max-width: 85vw; }
+  #hud-flash { font-size: 30px; }
+  #hud-prompt { bottom: 150px; font-size: 12px; padding: 6px 10px; }
+  #hud-release { bottom: 130px; }
+  #hud-stamina { bottom: 7px; width: 90px; }
+  .mobile-joystick { left: 10px; bottom: 14px; width: clamp(94px, 28vw, 124px); height: clamp(94px, 28vw, 124px); }
+  .joystick-ring { inset: 16px; }
+  .joystick-knob { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
+  .joystick-label { font-size: 9px; }
+  .joystick-label.top { top: 6px; }
+  .joystick-label.bottom { bottom: 6px; }
+  .joystick-label.left { left: 6px; }
+  .joystick-label.right { right: 6px; }
+  .mobile-actions { right: 8px; bottom: 14px; gap: 5px; }
+  .mobile-btn { min-width: 42px; min-height: 38px; padding: 7px; font-size: 12px; border-radius: 10px; }
+  .mobile-actions .mobile-btn { min-width: 68px; min-height: 36px; font-size: 10px; padding: 6px; }
+  .mobile-actions .action { min-width: 88px; }
+  #mobile-look-hint { display: none; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #hud-list { width: 118px; max-height: 45vh; padding: 5px; }
+  #hud-items { font-size: 9px; }
+  #hud-players { top: 56px; max-height: 38vh; }
+  #hud-mic { top: 6px; left: 130px; }
+  .mobile-joystick { left: 10px; bottom: 10px; width: 96px; height: 96px; }
+  .joystick-ring { inset: 14px; }
+  .joystick-knob { width: 38px; height: 38px; margin: -19px 0 0 -19px; }
+  .mobile-actions { right: 8px; bottom: 8px; gap: 4px; }
+  .mobile-actions .mobile-btn { min-height: 32px; min-width: 66px; padding: 4px 6px; font-size: 10px; }
+  .mobile-actions .action { min-width: 82px; }
+  #hud-stamina { bottom: 4px; }
+  #hud-prompt { bottom: 82px; }
+  #hud-release { bottom: 72px; }
+}
