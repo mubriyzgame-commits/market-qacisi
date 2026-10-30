@@ -86,6 +86,7 @@ const speaking = new Set();
 const keys = {};
 let showList = true;
 let catchCd = 0;
+let lastPosSent = 0;
 let nearItem = null, nearFriend = null;
 
 /* =====================================================================
@@ -1015,6 +1016,13 @@ function updateGame(dt) {
     pos.z = clamp(pos.z, PRISON.inner.minZ, PRISON.inner.maxZ);
   }
   me.x = pos.x; me.z = pos.z;
+
+  // Serverə mövqeyi müntəzəm göndər; yoxsa server oyunçunu köhnə yerdə saxlayır.
+  const nowPos = performance.now();
+  if (inGame && wsOpen && nowPos - lastPosSent >= 50) {
+    lastPosSent = nowPos;
+    send({ t: 'pos', x: me.x, y: me.y, z: me.z, ry: me.yaw });
+  }
 
   // Kamera
   const bob = me.moving && me.y <= 0.001 ? Math.sin(me.bob) * 0.04 : 0;
