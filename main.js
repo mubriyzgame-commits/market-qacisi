@@ -853,17 +853,41 @@ $('#btn-resume').addEventListener('click', tryLock);
 $('#pause').addEventListener('click', (e) => { if (e.target.id === 'pause') tryLock(); });
 $('#btn-quit').addEventListener('click', leaveRoom);
 
-// Tam ekran düyməsi
+// Tam ekran düyməsi — telefon və kompüter
 const fullscreenBtn = document.querySelector('#btn-fullscreen');
 fullscreenBtn?.addEventListener('click', async () => {
   try {
-    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
-    else await document.exitFullscreen();
-  } catch (err) { console.warn('Tam ekran açıla bilmədi:', err); }
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      if (document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      return;
+    }
+
+    const root = document.documentElement;
+    if (root.requestFullscreen) {
+      await root.requestFullscreen();
+    } else if (root.webkitRequestFullscreen) {
+      root.webkitRequestFullscreen();
+    } else {
+      toast('Bu brauzer tam ekranı dəstəkləmir. Chrome-da aç.');
+      return;
+    }
+
+    // Dəstəkləyən telefonlarda oyunu üfüqi rejimə keçir.
+    if (screen.orientation?.lock) {
+      try { await screen.orientation.lock('landscape'); } catch (_) {}
+    }
+  } catch (err) {
+    console.warn('Tam ekran açıla bilmədi:', err);
+    toast('Tam ekran alınmadı. Brauzerin menyusundan “Tam ekran” seç.');
+  }
 });
-document.addEventListener('fullscreenchange', () => {
-  if (fullscreenBtn) fullscreenBtn.textContent = document.fullscreenElement ? '⤢ Pəncərə' : '⛶ Tam ekran';
-});
+function updateFullscreenButton() {
+  if (fullscreenBtn) fullscreenBtn.textContent =
+    (document.fullscreenElement || document.webkitFullscreenElement) ? '⤢ Pəncərə' : '⛶ Tam ekran';
+}
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 
 document.addEventListener('mousemove', (e) => {
   if (!inGame || !isLocked() || touchMode) return;
