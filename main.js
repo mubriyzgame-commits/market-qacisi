@@ -1043,7 +1043,7 @@ function doAction() {
   if (me.team === 'friends') {
     // Düymə basılan anda ən yaxın ərzağı yenidən hesabla; köhnə nearItem dəyərinə güvənmə.
     let target = null;
-    let best = 6.0;
+    let best = 1.5;
     for (const it of itemsMap.values()) {
       if (it.got) continue;
       const d = Math.hypot(it.x - me.x, it.z - me.z);
@@ -1131,7 +1131,7 @@ function updateGame(dt) {
   nearItem = null; nearFriend = null;
   if (gamePhase === 'play' && !me.jailed) {
     if (me.team === 'friends') {
-      let best = 6.0;
+      let best = 1.5;
       for (const it of itemsMap.values()) {
         if (it.got) continue;
         const d = Math.hypot(it.x - me.x, it.z - me.z);
