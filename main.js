@@ -853,9 +853,21 @@ $('#btn-resume').addEventListener('click', tryLock);
 $('#pause').addEventListener('click', (e) => { if (e.target.id === 'pause') tryLock(); });
 $('#btn-quit').addEventListener('click', leaveRoom);
 
-// Tam ekran düyməsi — telefon və kompüter
+// Tam ekran düyməsi — kompüter, Android və iPhone üçün
 const fullscreenBtn = document.querySelector('#btn-fullscreen');
+const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+
 fullscreenBtn?.addEventListener('click', async () => {
+  // iPhone Safari adi səhifələrə tam ekran icazəsi verməyə bilər.
+  // Ana ekrana əlavə edilmiş web-app isə brauzer çərçivəsiz açılır.
+  if (isIOSDevice && !isStandaloneApp) {
+    toast('iPhone: Safari-də Paylaş ⬆ → “Add to Home Screen” seç, sonra oyunu ana ekrandakı ikonla aç.');
+    return;
+  }
+
   try {
     if (document.fullscreenElement || document.webkitFullscreenElement) {
       if (document.exitFullscreen) await document.exitFullscreen();
@@ -865,29 +877,37 @@ fullscreenBtn?.addEventListener('click', async () => {
 
     const root = document.documentElement;
     if (root.requestFullscreen) {
-      await root.requestFullscreen();
+      await root.requestFullscreen({ navigationUI: 'hide' });
     } else if (root.webkitRequestFullscreen) {
       root.webkitRequestFullscreen();
+    } else if (isIOSDevice && isStandaloneApp) {
+      toast('Oyun iPhone-da artıq tam ekran tətbiq kimi açılıb.');
+      return;
     } else {
-      toast('Bu brauzer tam ekranı dəstəkləmir. Chrome-da aç.');
+      toast('Bu brauzer tam ekranı dəstəkləmir. Brauzer menyusundan Tam ekran seç.');
       return;
     }
 
-    // Dəstəkləyən telefonlarda oyunu üfüqi rejimə keçir.
     if (screen.orientation?.lock) {
       try { await screen.orientation.lock('landscape'); } catch (_) {}
     }
   } catch (err) {
     console.warn('Tam ekran açıla bilmədi:', err);
-    toast('Tam ekran alınmadı. Brauzerin menyusundan “Tam ekran” seç.');
+    if (isIOSDevice) {
+      toast('iPhone-da Safari → Paylaş ⬆ → “Add to Home Screen” seç və ana ekrandakı ikonla aç.');
+    } else {
+      toast('Tam ekran alınmadı. Brauzerin menyusundan “Tam ekran” seç.');
+    }
   }
 });
 function updateFullscreenButton() {
   if (fullscreenBtn) fullscreenBtn.textContent =
-    (document.fullscreenElement || document.webkitFullscreenElement) ? '⤢ Pəncərə' : '⛶ Tam ekran';
+    (document.fullscreenElement || document.webkitFullscreenElement || isStandaloneApp)
+      ? '⤢ Pəncərə' : '⛶ Tam ekran';
 }
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+updateFullscreenButton();
 
 document.addEventListener('mousemove', (e) => {
   if (!inGame || !isLocked() || touchMode) return;
