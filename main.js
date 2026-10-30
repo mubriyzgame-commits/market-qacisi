@@ -901,9 +901,16 @@ fullscreenBtn?.addEventListener('click', async () => {
   }
 });
 function updateFullscreenButton() {
-  if (fullscreenBtn) fullscreenBtn.textContent =
-    (document.fullscreenElement || document.webkitFullscreenElement || isStandaloneApp)
-      ? '⤢ Pəncərə' : '⛶ Tam ekran';
+  if (!fullscreenBtn) return;
+  if (isIOSDevice && !isStandaloneApp) {
+    fullscreenBtn.textContent = '⛶ Tam ekran';
+  } else if (isIOSDevice && isStandaloneApp) {
+    fullscreenBtn.textContent = '✓ Tətbiq rejimi';
+  } else {
+    fullscreenBtn.textContent =
+      (document.fullscreenElement || document.webkitFullscreenElement)
+        ? '⤢ Pəncərə' : '⛶ Tam ekran';
+  }
 }
 document.addEventListener('fullscreenchange', updateFullscreenButton);
 document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
