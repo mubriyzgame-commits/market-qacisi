@@ -877,11 +877,13 @@ document.addEventListener('mousedown', (e) => {
 // Telefon: ekranda barmaqla sürüşdürərək kameraya bax.
 let lookPointer = null, lookX = 0, lookY = 0;
 canvas.style.touchAction = 'none';
-canvas.addEventListener('pointerdown', (e) => {
+document.addEventListener('pointerdown', (e) => {
   if (!touchMode || !inGame || e.pointerType !== 'touch') return;
+  // İdarəetmə düymələrinə toxunanda kamera dönməsin.
+  if (e.target.closest('#mobile-controls, button, input, .panel')) return;
   lookPointer = e.pointerId;
   lookX = e.clientX; lookY = e.clientY;
-});
+}, { passive: true });
 document.addEventListener('pointermove', (e) => {
   if (!touchMode || !inGame || e.pointerId !== lookPointer) return;
   const dx = e.clientX - lookX, dy = e.clientY - lookY;
