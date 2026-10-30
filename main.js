@@ -495,11 +495,11 @@ function renderLobby() {
   const slots = (n, cap) => Array.from({ length: Math.max(0, cap - n) }, () => '<div class="pcard slot">boş yer</div>').join('');
   $('#list-police').innerHTML = pol.map(playerCard).join('') + slots(pol.length, 3);
   $('#list-friends').innerHTML = fr.map(playerCard).join('') + slots(fr.length, 5);
-  $('#cnt-police').textContent = `${pol.length}/3`;
-  $('#cnt-friends').textContent = `${fr.length}/5`;
+  $('#cnt-police').textContent = `${pol.length}/${room.max}`;
+  $('#cnt-friends').textContent = `${fr.length}/${room.max}`;
   const mine = room.players.find((p) => p.id === myId);
-  $('#join-police').disabled = !mine || mine.team === 'police' || pol.length >= 3;
-  $('#join-friends').disabled = !mine || mine.team === 'friends' || fr.length >= 5;
+  $('#join-police').disabled = !mine || mine.team === 'police';
+  $('#join-friends').disabled = !mine || mine.team === 'friends';
   const host = room.hostId === myId;
   const btn = $('#btn-start');
   btn.classList.toggle('hidden', !host);
@@ -910,7 +910,7 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k of Object.keys(keys)) keys[k] = false; });
 
 function doAction() {
-  if (!inGame || !isLocked() || gamePhase !== 'play' || me.jailed) return;
+  if (!inGame || gamePhase !== 'play' || me.jailed) return;
   if (me.team === 'friends' && nearItem) send({ t: 'pickup', id: nearItem.id });
   else if (me.team === 'police' && nearFriend && performance.now() > catchCd) {
     catchCd = performance.now() + 800;
@@ -982,7 +982,7 @@ function updateGame(dt) {
   nearItem = null; nearFriend = null;
   if (gamePhase === 'play' && !me.jailed) {
     if (me.team === 'friends') {
-      let best = 2.9;
+      let best = 4.5;
       for (const it of itemsMap.values()) {
         if (it.got) continue;
         const d = Math.hypot(it.x - me.x, it.z - me.z);
