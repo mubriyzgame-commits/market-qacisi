@@ -15,7 +15,7 @@ const GAME_SECONDS = 600;
 const COUNTDOWN = Number(process.env.COUNTDOWN) || 10;
 const RELEASE_SECONDS = Number(process.env.RELEASE_SECONDS) || 10; // dostu azad etmək üçün türmənin qarşısında dayanma müddəti
 const CATCH_RANGE = 3.6;
-const PICK_RANGE = 4.5;
+const PICK_RANGE = 6.0;
 const NEED = ITEMS.length; // 30
 
 const app = express();
