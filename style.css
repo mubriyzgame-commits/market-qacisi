@@ -169,14 +169,18 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 #mobile-controls { display: none; }
 @media (pointer: coarse), (max-width: 760px) {
   #mobile-controls { display: block; position: fixed; inset: 0; z-index: 8; pointer-events: none; }
-  .mobile-pad { position: absolute; left: 16px; bottom: 28px; width: 150px; height: 150px; pointer-events: auto; }
+  .mobile-joystick { position: absolute; left: 18px; bottom: 24px; width: 164px; height: 164px; border-radius: 50%; pointer-events: auto; touch-action: none; background: radial-gradient(circle, rgba(35,44,65,.88) 0%, rgba(15,20,34,.82) 65%, rgba(5,8,16,.9) 100%); border: 2px solid rgba(255,255,255,.22); box-shadow: inset 0 0 0 8px rgba(255,255,255,.035), 0 8px 24px rgba(0,0,0,.35); }
+  .joystick-ring { position: absolute; inset: 24px; border: 1px dashed rgba(255,255,255,.16); border-radius: 50%; pointer-events: none; }
+  .joystick-knob { position: absolute; left: 50%; top: 50%; width: 62px; height: 62px; margin: -31px 0 0 -31px; border-radius: 50%; border: 2px solid rgba(255,255,255,.55); background: linear-gradient(145deg, #ffb45e, #ff7a1a 65%, #d84c00); box-shadow: 0 4px 14px rgba(0,0,0,.4), inset 0 2px 5px rgba(255,255,255,.28); pointer-events: none; transition: box-shadow .12s; }
+  .mobile-joystick.active .joystick-knob { box-shadow: 0 0 22px rgba(255,122,26,.55), inset 0 2px 5px rgba(255,255,255,.3); }
+  .joystick-label { position: absolute; color: rgba(255,255,255,.52); font: 800 11px system-ui,sans-serif; pointer-events: none; }
+  .joystick-label.top { top: 10px; left: 50%; transform: translateX(-50%); }
+  .joystick-label.bottom { bottom: 10px; left: 50%; transform: translateX(-50%); }
+  .joystick-label.left { left: 10px; top: 50%; transform: translateY(-50%); }
+  .joystick-label.right { right: 10px; top: 50%; transform: translateY(-50%); }
   .mobile-btn { border: 1px solid rgba(255,255,255,.28); background: rgba(12,16,28,.72); color: #fff; border-radius: 15px; font: 800 16px system-ui,sans-serif; min-width: 54px; min-height: 48px; padding: 10px; touch-action: none; user-select: none; -webkit-user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
   .mobile-btn.pressed, .mobile-btn:active { background: rgba(255,122,26,.9); border-color: #ffb06f; transform: scale(.96); }
-  .mobile-pad .mobile-btn { position: absolute; width: 48px; height: 48px; min-width: 48px; min-height: 48px; padding: 0; font-size: 22px; }
-  .mobile-pad .up { top: 0; left: 51px; }
-  .mobile-pad .left { top: 51px; left: 0; }
-  .mobile-pad .down { top: 51px; left: 51px; }
-  .mobile-pad .right { top: 51px; left: 102px; }
+
   .mobile-actions { position: absolute; right: 14px; bottom: 26px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: auto; }
   .mobile-actions .mobile-btn { min-width: 86px; min-height: 44px; font-size: 13px; }
   .mobile-actions .action { background: rgba(255,122,26,.86); color: #1a0d00; min-width: 112px; }
