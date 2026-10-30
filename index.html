@@ -156,11 +156,13 @@
     <div id="hud-mic"></div>
     <div id="hud-keys">WASD hərəkət · Shift qaç · Space tullan · E götür/tut · M mikrofon · Tab siyahı</div>
     <div id="mobile-controls" aria-label="Telefon idarəetməsi">
-      <div class="mobile-pad">
-        <button class="mobile-btn up" data-key="KeyW" aria-label="İrəli">▲</button>
-        <button class="mobile-btn left" data-key="KeyA" aria-label="Sola">◀</button>
-        <button class="mobile-btn down" data-key="KeyS" aria-label="Geri">▼</button>
-        <button class="mobile-btn right" data-key="KeyD" aria-label="Sağa">▶</button>
+      <div id="mobile-joystick" class="mobile-joystick" role="application" aria-label="Hərəkət joysticki">
+        <div class="joystick-ring"></div>
+        <div id="joystick-knob" class="joystick-knob"></div>
+        <span class="joystick-label top">W</span>
+        <span class="joystick-label left">A</span>
+        <span class="joystick-label bottom">S</span>
+        <span class="joystick-label right">D</span>
       </div>
       <div class="mobile-actions">
         <button class="mobile-btn action" id="mobile-action">🖐 Götür / Tut</button>
