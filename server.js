@@ -3,7 +3,7 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
-import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, makeItemSlots } from './public/map.js';
+import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, makeItemSlots } from './map.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -20,7 +20,7 @@ const NEED = ITEMS.length; // 30
 
 const app = express();
 app.use('/three', express.static(path.join(__dirname, 'node_modules/three/build')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 app.get('/health', (_req, res) => res.send('ok'));
 
 const server = http.createServer(app);
