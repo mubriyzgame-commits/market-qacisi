@@ -938,7 +938,10 @@ addEventListener('keydown', (e) => {
   if (!inGame) return;
   if (['Space', 'ArrowUp', 'ArrowDown', 'Tab'].includes(e.code)) e.preventDefault();
   if (e.repeat) return;
-  if (e.code === 'KeyE') doAction();
+  if (e.code === 'KeyE' || e.key.toLowerCase() === 'e') {
+    e.preventDefault();
+    doAction();
+  }
   if (e.code === 'KeyM') toggleMute();
   if (e.code === 'Tab') { showList = !showList; $('#hud-list').classList.toggle('hidden', !showList); }
 });
@@ -947,8 +950,22 @@ addEventListener('blur', () => { for (const k of Object.keys(keys)) keys[k] = fa
 
 function doAction() {
   if (!inGame || gamePhase !== 'play' || me.jailed) return;
-  if (me.team === 'friends' && nearItem) send({ t: 'pickup', id: nearItem.id });
-  else if (me.team === 'police' && nearFriend && performance.now() > catchCd) {
+
+  if (me.team === 'friends') {
+    // Düymə basılan anda ən yaxın ərzağı yenidən hesabla; köhnə nearItem dəyərinə güvənmə.
+    let target = null;
+    let best = 6.0;
+    for (const it of itemsMap.values()) {
+      if (it.got) continue;
+      const d = Math.hypot(it.x - me.x, it.z - me.z);
+      if (d < best) { best = d; target = it; }
+    }
+    if (target) {
+      send({ t: 'pickup', id: target.id });
+    } else {
+      toast('Ərzağa yaxınlaş və E bas');
+    }
+  } else if (nearFriend && performance.now() > catchCd) {
     catchCd = performance.now() + 800;
     send({ t: 'catch', id: nearFriend.id });
   }
