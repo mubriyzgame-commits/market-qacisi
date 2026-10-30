@@ -161,3 +161,40 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #hud-list { width: 210px; } #hud-items { columns: 1; font-size: 11px; }
   #minimap { display: none; }
 }
+
+
+/* Telefon idarəetməsi */
+#mobile-controls { display: none; }
+@media (pointer: coarse), (max-width: 760px) {
+  #mobile-controls { display: block; position: fixed; inset: 0; z-index: 8; pointer-events: none; }
+  .mobile-pad { position: absolute; left: 16px; bottom: 28px; width: 150px; height: 150px; pointer-events: auto; }
+  .mobile-btn { border: 1px solid rgba(255,255,255,.28); background: rgba(12,16,28,.72); color: #fff; border-radius: 15px; font: 800 16px system-ui,sans-serif; min-width: 54px; min-height: 48px; padding: 10px; touch-action: none; user-select: none; -webkit-user-select: none; backdrop-filter: blur(5px); box-shadow: 0 4px 14px rgba(0,0,0,.22); }
+  .mobile-btn.pressed, .mobile-btn:active { background: rgba(255,122,26,.9); border-color: #ffb06f; transform: scale(.96); }
+  .mobile-pad .mobile-btn { position: absolute; width: 48px; height: 48px; min-width: 48px; min-height: 48px; padding: 0; font-size: 22px; }
+  .mobile-pad .up { top: 0; left: 51px; }
+  .mobile-pad .left { top: 51px; left: 0; }
+  .mobile-pad .down { top: 51px; left: 51px; }
+  .mobile-pad .right { top: 51px; left: 102px; }
+  .mobile-actions { position: absolute; right: 14px; bottom: 26px; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: auto; }
+  .mobile-actions .mobile-btn { min-width: 86px; min-height: 44px; font-size: 13px; }
+  .mobile-actions .action { background: rgba(255,122,26,.86); color: #1a0d00; min-width: 112px; }
+  #mobile-look-hint { position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); font-size: 10px; color: rgba(255,255,255,.6); white-space: nowrap; pointer-events: none; }
+  #hud-keys { display: none; }
+  #hud-list { max-height: 30vh; overflow: auto; width: 165px; padding: 7px; }
+  #hud-list h3 { font-size: 11px; }
+  #hud-items { columns: 1; font-size: 10px; }
+  #hud-players { top: 82px; right: 8px; min-width: 120px; max-width: 140px; font-size: 10px; padding: 6px; }
+  #hud-top { top: 6px; }
+  #hud-timer { font-size: 25px; }
+  #hud-role { font-size: 10px; }
+  #hud-mic { bottom: auto; top: 48px; left: 8px; font-size: 11px; }
+  #hud-prompt { bottom: 185px; font-size: 13px; padding: 7px 12px; max-width: 72vw; }
+  #hud-release { bottom: 170px; width: min(280px, 75vw); font-size: 11px; }
+  #hud-stamina { bottom: 10px; width: 120px; }
+  #crosshair { width: 4px; height: 4px; }
+}
+@media (max-width: 760px) and (orientation: portrait) {
+  #hud-banner { top: 30%; font-size: 20px; max-width: 90vw; }
+  #hud-banner small { font-size: 12px; }
+  #hud-flash { font-size: 34px; }
+}
