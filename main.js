@@ -966,7 +966,7 @@ function doAction() {
     if (target) {
       send({ t: 'pickup', id: target.id });
     } else {
-      toast('Ərzağa yaxınlaş və E bas');
+      toast('E — Götür');
     }
   } else if (nearFriend && performance.now() > catchCd) {
     catchCd = performance.now() + 800;
