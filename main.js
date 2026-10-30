@@ -99,7 +99,15 @@ function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj))
 function connect() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   ws = new WebSocket(`${proto}://${location.host}/ws`);
+  const connectTimer = setTimeout(() => {
+    if (!wsOpen) {
+      $('#loading').classList.add('hidden');
+      $('#conn-state').textContent = 'yenidən qoşulur';
+      toast('Serverə qoşulmaq alınmadı. Yenidən yoxlanılır…', true);
+    }
+  }, 10000);
   ws.onopen = () => {
+    clearTimeout(connectTimer);
     wsOpen = true;
     $('#conn-state').textContent = 'qoşuldu';
     $('#loading').classList.add('hidden');
