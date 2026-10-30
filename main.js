@@ -1018,7 +1018,7 @@ function updateGame(dt) {
   nearItem = null; nearFriend = null;
   if (gamePhase === 'play' && !me.jailed) {
     if (me.team === 'friends') {
-      let best = 4.5;
+      let best = 6.0;
       for (const it of itemsMap.values()) {
         if (it.got) continue;
         const d = Math.hypot(it.x - me.x, it.z - me.z);
