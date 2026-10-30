@@ -888,7 +888,8 @@ fullscreenBtn?.addEventListener('click', async () => {
       return;
     }
 
-    if (screen.orientation?.lock) {
+    // Yalnız telefon/planşetdə üfüqi rejimi istə; kompüterə toxunma.
+    if (touchMode && screen.orientation?.lock) {
       try { await screen.orientation.lock('landscape'); } catch (_) {}
     }
   } catch (err) {
