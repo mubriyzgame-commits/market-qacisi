@@ -892,16 +892,40 @@ function stopLook(e) { if (e.pointerId === lookPointer) lookPointer = null; }
 document.addEventListener('pointerup', stopLook);
 document.addEventListener('pointercancel', stopLook);
 
-// Telefon düymələri klaviatura düymələri kimi işləyir.
-document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
-  const key = button.dataset.key;
-  const down = (e) => { e.preventDefault(); keys[key] = true; button.classList.add('pressed'); };
-  const up = (e) => { e.preventDefault(); keys[key] = false; button.classList.remove('pressed'); };
-  button.addEventListener('pointerdown', down);
-  button.addEventListener('pointerup', up);
-  button.addEventListener('pointercancel', up);
-  button.addEventListener('contextmenu', (e) => e.preventDefault());
+// Telefon üçün sürüşdürülən virtual joystick.
+const joystick = $('#mobile-joystick');
+const joystickKnob = $('#joystick-knob');
+let joystickPointer = null;
+function resetJoystick() {
+  for (const k of ['KeyW', 'KeyA', 'KeyS', 'KeyD']) keys[k] = false;
+  joystickKnob.style.transform = 'translate(0, 0)';
+  joystick?.classList.remove('active');
+  joystickPointer = null;
+}
+function moveJoystick(e) {
+  if (!joystick || joystickPointer !== e.pointerId) return;
+  const r = joystick.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  let dx = e.clientX - cx, dy = e.clientY - cy;
+  const max = r.width * 0.29, len = Math.hypot(dx, dy);
+  if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+  joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+  const nx = dx / max, ny = dy / max, dead = 0.28;
+  keys.KeyW = ny < -dead; keys.KeyS = ny > dead;
+  keys.KeyA = nx < -dead; keys.KeyD = nx > dead;
+}
+joystick?.addEventListener('pointerdown', (e) => {
+  if (!inGame || !touchMode) return;
+  e.preventDefault();
+  joystickPointer = e.pointerId;
+  joystick.classList.add('active');
+  joystick.setPointerCapture(e.pointerId);
+  moveJoystick(e);
 });
+joystick?.addEventListener('pointermove', moveJoystick);
+joystick?.addEventListener('pointerup', resetJoystick);
+joystick?.addEventListener('pointercancel', resetJoystick);
+joystick?.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#mobile-action').addEventListener('pointerdown', (e) => { e.preventDefault(); doAction(); });
 $('#mobile-list').addEventListener('pointerdown', (e) => {
   e.preventDefault();
