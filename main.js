@@ -852,13 +852,25 @@ $('#btn-resume').addEventListener('click', tryLock);
 $('#pause').addEventListener('click', (e) => { if (e.target.id === 'pause') tryLock(); });
 $('#btn-quit').addEventListener('click', leaveRoom);
 
+// Tam ekran düyməsi
+const fullscreenBtn = document.querySelector('#btn-fullscreen');
+fullscreenBtn?.addEventListener('click', async () => {
+  try {
+    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+    else await document.exitFullscreen();
+  } catch (err) { console.warn('Tam ekran açıla bilmədi:', err); }
+});
+document.addEventListener('fullscreenchange', () => {
+  if (fullscreenBtn) fullscreenBtn.textContent = document.fullscreenElement ? '⤢ Pəncərə' : '⛶ Tam ekran';
+});
+
 document.addEventListener('mousemove', (e) => {
   if (!inGame || !isLocked() || touchMode) return;
   me.yaw -= e.movementX * 0.0022;
   me.pitch = clamp(me.pitch - e.movementY * 0.0022, -1.45, 1.45);
 });
 document.addEventListener('mousedown', (e) => {
-  if (inGame && isLocked() && !touchMode && e.button === 0) doAction();
+  if (inGame && !touchMode && e.button === 0) { e.preventDefault(); doAction(); }
 });
 
 // Telefon: ekranda barmaqla sürüşdürərək kameraya bax.
