@@ -319,3 +319,19 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
     min-height: 38px;
   }
 }
+
+
+/* Joystick-i telefonda daha böyük et */
+@media (pointer: coarse), (max-width: 900px), (max-height: 500px) {
+  .mobile-joystick {
+    width: clamp(132px, 34vw, 170px);
+    height: clamp(132px, 34vw, 170px);
+  }
+  .joystick-ring { inset: 20px; }
+  .joystick-knob {
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+  }
+  .joystick-label { font-size: 11px; }
+}
