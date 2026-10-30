@@ -942,7 +942,7 @@ function moveJoystick(e) {
   keys.KeyA = nx < -dead; keys.KeyD = nx > dead;
 }
 joystick?.addEventListener('pointerdown', (e) => {
-  if (!inGame || !touchMode) return;
+  if (!inGame) return;
   e.preventDefault();
   joystickPointer = e.pointerId;
   joystick.classList.add('active');
@@ -952,12 +952,37 @@ joystick?.addEventListener('pointerdown', (e) => {
 joystick?.addEventListener('pointermove', moveJoystick);
 joystick?.addEventListener('pointerup', resetJoystick);
 joystick?.addEventListener('pointercancel', resetJoystick);
+joystick?.addEventListener('lostpointercapture', resetJoystick);
 joystick?.addEventListener('contextmenu', (e) => e.preventDefault());
 $('#mobile-action').addEventListener('pointerdown', (e) => { e.preventDefault(); doAction(); });
 $('#mobile-list').addEventListener('pointerdown', (e) => {
   e.preventDefault();
   showList = !showList;
   $('#hud-list').classList.toggle('hidden', !showList);
+});
+
+// Qaç və tullan düymələri: basılı saxlayanda aktiv, buraxanda sönür.
+const mobileKeyPointers = new Map();
+$('#mobile-controls [data-key]').forEach((button) => {
+  const key = button.dataset.key;
+  button.addEventListener('pointerdown', (e) => {
+    if (!inGame) return;
+    e.preventDefault();
+    mobileKeyPointers.set(e.pointerId, key);
+    keys[key] = true;
+    button.classList.add('pressed');
+    try { button.setPointerCapture(e.pointerId); } catch (_) {}
+  });
+  const releaseKey = (e) => {
+    const heldKey = mobileKeyPointers.get(e.pointerId);
+    if (!heldKey) return;
+    mobileKeyPointers.delete(e.pointerId);
+    if (![...mobileKeyPointers.values()].includes(heldKey)) keys[heldKey] = false;
+    if (![...mobileKeyPointers.values()].includes(heldKey)) button.classList.remove('pressed');
+  };
+  button.addEventListener('pointerup', releaseKey);
+  button.addEventListener('pointercancel', releaseKey);
+  button.addEventListener('lostpointercapture', releaseKey);
 });
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
