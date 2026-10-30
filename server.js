@@ -15,7 +15,7 @@ const GAME_SECONDS = 600;
 const COUNTDOWN = Number(process.env.COUNTDOWN) || 10;
 const RELEASE_SECONDS = Number(process.env.RELEASE_SECONDS) || 10; // dostu azad etmək üçün türmənin qarşısında dayanma müddəti
 const CATCH_RANGE = 3.6;
-const PICK_RANGE = 3.6;
+const PICK_RANGE = 4.5;
 const NEED = ITEMS.length; // 30
 
 const app = express();
@@ -290,8 +290,7 @@ function handle(p, m) {
       if (!room || room.phase !== 'lobby') return;
       const team = m.team === 'police' ? 'police' : 'friends';
       if (p.team === team) return;
-      const cap = team === 'police' ? MAX_POLICE : MAX_FRIENDS;
-      if (teamCount(room, team) >= cap) return send(p.ws, { t: 'error', msg: 'Bu komandada yer yoxdur' });
+      // Oyunçular istədikləri komandanı seçə bilərlər; komanda limiti yoxdur.
       p.team = team;
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
