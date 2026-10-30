@@ -998,7 +998,17 @@ addEventListener('keydown', (e) => {
   if (e.code === 'Tab') { showList = !showList; $('#hud-list').classList.toggle('hidden', !showList); }
 });
 addEventListener('keyup', (e) => { keys[e.code] = false; });
-addEventListener('blur', () => { for (const k of Object.keys(keys)) keys[k] = false; });
+function releaseAllControls() {
+  for (const k of Object.keys(keys)) keys[k] = false;
+  mobileKeyPointers.clear();
+  $('#mobile-controls [data-key]').forEach((button) => button.classList.remove('pressed'));
+  if (joystickPointer !== null) resetJoystick();
+  lookPointer = null;
+}
+addEventListener('blur', releaseAllControls);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) releaseAllControls();
+});
 
 function doAction() {
   if (!inGame || gamePhase !== 'play' || me.jailed) return;
