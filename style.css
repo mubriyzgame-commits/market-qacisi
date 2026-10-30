@@ -278,3 +278,44 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #hud-prompt { bottom: 82px; }
   #hud-release { bottom: 72px; }
 }
+
+
+/* Telefon idarələri: təhlükəsiz ekran kənarları və rahat toxunma */
+@media (pointer: coarse), (max-width: 900px), (max-height: 500px) {
+  #mobile-controls {
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-joystick {
+    left: max(10px, env(safe-area-inset-left, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions {
+    right: max(8px, env(safe-area-inset-right, 0px));
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions .mobile-btn {
+    min-width: 74px;
+    min-height: 42px;
+  }
+  .mobile-actions .action {
+    min-width: 96px;
+    min-height: 46px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-joystick {
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions {
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions .mobile-btn {
+    min-width: 70px;
+    min-height: 36px;
+  }
+  .mobile-actions .action {
+    min-width: 88px;
+    min-height: 38px;
+  }
+}
