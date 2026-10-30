@@ -902,7 +902,7 @@ document.addEventListener('mousedown', (e) => {
 let lookPointer = null, lookX = 0, lookY = 0;
 canvas.style.touchAction = 'none';
 document.addEventListener('pointerdown', (e) => {
-  if (!touchMode || !inGame || e.pointerType !== 'touch') return;
+  if (!touchMode || !inGame) return;
   // İdarəetmə düymələrinə toxunanda kamera dönməsin.
   if (e.target.closest('#mobile-controls, button, input, .panel')) return;
   lookPointer = e.pointerId;
