@@ -836,11 +836,13 @@ function drawMinimap() {
 /* =====================================================================
    Giriş (klaviatura / siçan)
    ===================================================================== */
+const touchMode = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 function tryLock() {
+  if (touchMode) { updatePause(); return; }
   const p = canvas.requestPointerLock?.();
   if (p && p.catch) p.catch(() => {});
 }
-function isLocked() { return document.pointerLockElement === canvas; }
+function isLocked() { return document.pointerLockElement === canvas || (touchMode && inGame); }
 function updatePause() {
   const show = inGame && !isLocked();
   $('#pause').classList.toggle('hidden', !show);
@@ -851,12 +853,48 @@ $('#pause').addEventListener('click', (e) => { if (e.target.id === 'pause') tryL
 $('#btn-quit').addEventListener('click', leaveRoom);
 
 document.addEventListener('mousemove', (e) => {
-  if (!inGame || !isLocked()) return;
+  if (!inGame || !isLocked() || touchMode) return;
   me.yaw -= e.movementX * 0.0022;
   me.pitch = clamp(me.pitch - e.movementY * 0.0022, -1.45, 1.45);
 });
 document.addEventListener('mousedown', (e) => {
-  if (inGame && isLocked() && e.button === 0) doAction();
+  if (inGame && isLocked() && !touchMode && e.button === 0) doAction();
+});
+
+// Telefon: ekranda barmaqla sürüşdürərək kameraya bax.
+let lookPointer = null, lookX = 0, lookY = 0;
+canvas.style.touchAction = 'none';
+canvas.addEventListener('pointerdown', (e) => {
+  if (!touchMode || !inGame || e.pointerType !== 'touch') return;
+  lookPointer = e.pointerId;
+  lookX = e.clientX; lookY = e.clientY;
+});
+document.addEventListener('pointermove', (e) => {
+  if (!touchMode || !inGame || e.pointerId !== lookPointer) return;
+  const dx = e.clientX - lookX, dy = e.clientY - lookY;
+  lookX = e.clientX; lookY = e.clientY;
+  me.yaw -= dx * 0.006;
+  me.pitch = clamp(me.pitch - dy * 0.006, -1.35, 1.35);
+});
+function stopLook(e) { if (e.pointerId === lookPointer) lookPointer = null; }
+document.addEventListener('pointerup', stopLook);
+document.addEventListener('pointercancel', stopLook);
+
+// Telefon düymələri klaviatura düymələri kimi işləyir.
+document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
+  const key = button.dataset.key;
+  const down = (e) => { e.preventDefault(); keys[key] = true; button.classList.add('pressed'); };
+  const up = (e) => { e.preventDefault(); keys[key] = false; button.classList.remove('pressed'); };
+  button.addEventListener('pointerdown', down);
+  button.addEventListener('pointerup', up);
+  button.addEventListener('pointercancel', up);
+  button.addEventListener('contextmenu', (e) => e.preventDefault());
+});
+$('#mobile-action').addEventListener('pointerdown', (e) => { e.preventDefault(); doAction(); });
+$('#mobile-list').addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  showList = !showList;
+  $('#hud-list').classList.toggle('hidden', !showList);
 });
 addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
