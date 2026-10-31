@@ -72,7 +72,7 @@ function roomInfo(room) {
     isPublic: room.isPublic,
     phase: room.phase,
     players: [...room.players.values()].map((p) => ({
-      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed,
+      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, invisible: !!p.invisible,
     })),
   };
 }
@@ -222,7 +222,7 @@ function tickRoom(room, dt) {
   }
   const arr = [];
   for (const q of room.players.values()) {
-    arr.push([q.id, +q.x.toFixed(2), +q.y.toFixed(2), +q.z.toFixed(2), +(q.ry || 0).toFixed(2), q.jailed ? 1 : 0]);
+    arr.push([q.id, +q.x.toFixed(2), +q.y.toFixed(2), +q.z.toFixed(2), +(q.ry || 0).toFixed(2), q.jailed ? 1 : 0, q.admin ? 1 : 0, q.invisible ? 1 : 0]);
   }
   broadcast(room, {
     t: 's', ph: room.phase, cd: +room.cd.toFixed(1), tl: +room.timeLeft.toFixed(1),
@@ -302,6 +302,14 @@ function handle(p, m) {
       startGame(room);
       break;
     }
+    case 'admin': {
+      p.admin = !!m.enabled;
+      p.invisible = p.admin && !!m.invisible;
+      p.superJump = p.admin && !!m.superJump;
+      p.adminSpeed = p.admin && !!m.speed;
+      if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
+      break;
+    }
     case 'pos': {
       const room = p.room;
       if (!room || (room.phase !== 'play' && room.phase !== 'countdown')) return;
@@ -311,7 +319,7 @@ function handle(p, m) {
       if (x === null || y === null || z === null || ry === null) return;
       x = clamp(x, WORLD.minX, WORLD.maxX);
       z = clamp(z, WORLD.minZ, WORLD.maxZ);
-      y = clamp(y, 0, 3);
+      y = clamp(y, 0, p.admin && p.superJump ? 8 : 3);
       if (p.jailed) {
         x = clamp(x, PRISON.inner.minX, PRISON.inner.maxX);
         z = clamp(z, PRISON.inner.minZ, PRISON.inner.maxZ);
@@ -366,7 +374,7 @@ function handle(p, m) {
 wss.on('connection', (ws) => {
   const p = {
     id: nextId++, ws, name: 'Oyunçu', color: '#ffb400', room: null, team: 'friends',
-    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, alive: true,
+    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, admin: false, invisible: false, superJump: false, adminSpeed: false, alive: true,
   };
   players.set(p.id, p);
   send(ws, { t: 'welcome', id: p.id });
