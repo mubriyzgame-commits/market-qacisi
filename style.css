@@ -346,3 +346,16 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .admin-option { display:block; width:100%; margin-top:10px; padding:13px; text-align:left; color:#eef2ff; background:#202a3c; border:1px solid #38445b; border-radius:9px; font:700 15px inherit; cursor:pointer; }
 .admin-option.enabled { background:#245c48; border-color:#38d996; }
 .admin-note { margin-top:14px; text-align:center; }
+
+.admin-scare { margin-top: 15px; padding-top: 12px; border-top: 1px solid #ffffff20; }
+.admin-scare label { display:block; color:#ffd166; font-size:13px; font-weight:800; margin-bottom:7px; }
+#admin-target { width:100%; padding:11px; border-radius:8px; border:1px solid #38445b; color:#eef2ff; background:#202a3c; font:inherit; }
+#admin-target option { background:#111827; color:#eef2ff; }
+.admin-option.scare-option { text-align:center; background:#741b2b; border-color:#ff4d5e; color:#fff; }
+.admin-option.scare-option:hover { background:#b91c35; }
+#jumpscare-overlay { position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center; flex-direction:column; gap:12px; overflow:hidden; background:#090000; color:#ff172f; text-align:center; pointer-events:none; }
+#jumpscare-overlay.active { display:flex; animation: scare-flash .12s steps(2,end) infinite; }
+.scare-face { font-size:clamp(150px, 35vw, 360px); line-height:.9; font-family:system-ui,sans-serif; font-weight:1000; text-shadow:0 0 22px #ff001e, 0 0 70px #ff001e; animation: scare-face-pop .32s cubic-bezier(.1,1.7,.4,1) both; }
+.scare-title { font-size:clamp(28px, 8vw, 80px); font-weight:1000; letter-spacing:.12em; text-shadow:0 0 24px #ff001e; }
+@keyframes scare-flash { 0%,100% { background:#090000; } 50% { background:#3a0008; } }
+@keyframes scare-face-pop { from { transform:scale(.05) rotate(-18deg); opacity:0; } to { transform:scale(1) rotate(0); opacity:1; } }
