@@ -56,9 +56,11 @@ export const SPAWNS = {
 export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
 
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
-export function getColliders() {
+export function getColliders(includeShelves = true) {
   const c = [];
-  for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
+  if (includeShelves) {
+    for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
+  }
   for (const o of [...COUNTERS, ...TABLES]) c.push([o.x - o.w / 2, o.x + o.w / 2, o.z - o.d / 2, o.z + o.d / 2]);
   for (const p of PILLARS) c.push([p.x - p.s / 2, p.x + p.s / 2, p.z - p.s / 2, p.z + p.s / 2]);
   c.push([WORLD.minX, WORLD.maxX, FRIDGE_WALL.z - FRIDGE_WALL.d / 2, FRIDGE_WALL.z + FRIDGE_WALL.d / 2]);
