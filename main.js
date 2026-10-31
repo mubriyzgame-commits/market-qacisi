@@ -391,7 +391,7 @@ function buildWorld() {
   inkTexture.colorSpace = THREE.SRGBColorSpace;
   const inkPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(2.64, 0.78),
-    new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, depthTest: true, depthWrite: false })
+    new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.DoubleSide, depthTest: false, depthWrite: false })
   );
   inkPlane.position.set(signX, signY, signZ - 0.139);
   world.add(inkPlane);
