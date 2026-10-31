@@ -585,6 +585,7 @@ updateChip();
 function onRoomUpdate() {
   if (!room) return;
   renderLobby();
+  if (adminMode) updateAdminPanel();
   syncPeers();
   if (inGame) { syncAvatars(); renderHudPlayers(); }
 }
