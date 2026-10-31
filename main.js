@@ -116,6 +116,58 @@ adminPanel.innerHTML = `
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
+
+// Ayrı səs paneli — bütün oyunçular üçün, yalnız bu brauzerdə səsi idarə edir.
+const soundPanel = document.createElement('div');
+soundPanel.id = 'sound-panel';
+soundPanel.innerHTML = `
+  <button id="sound-panel-toggle" type="button">🔊 Səs idarəsi</button>
+  <div id="sound-panel-card" class="hidden">
+    <div class="sound-panel-head"><strong>🔇 Səs idarəsi</strong><button id="sound-panel-close" type="button">✕</button></div>
+    <p>Bu seçimlər yalnız səndə səsi dəyişir.</p>
+    <button id="sound-mute-all" class="admin-option" type="button">🔇 Hamını susdur: OFF</button>
+    <label for="sound-mute-target">Oyunçu seç</label>
+    <select id="sound-mute-target"><option value="">Oyunçu seç...</option></select>
+    <button id="sound-mute-player" class="admin-option" type="button">🔇 Bu oyunçunu susdur</button>
+  </div>`;
+document.body.appendChild(soundPanel);
+function updateSoundPanel() {
+  const target = $('#sound-mute-target');
+  if (!target) return;
+  const selected = target.value;
+  target.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
+    .filter((p) => p.id !== myId)
+    .map((p) => `<option value="${p.id}">${esc(p.name)}${rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
+  if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
+  $('#sound-mute-all').textContent = `🔇 Hamını susdur: ${rtc.muteAll ? 'ON' : 'OFF'}`;
+  $('#sound-mute-all').classList.toggle('enabled', rtc.muteAll);
+  const id = Number(target.value);
+  $('#sound-mute-player').textContent = id && rtc.mutedPlayers.has(id) ? '🔊 Bu oyunçunun səsini aç' : '🔇 Bu oyunçunu susdur';
+}
+$('#sound-panel-toggle').addEventListener('click', () => $('#sound-panel-card').classList.toggle('hidden'));
+$('#sound-panel-close').addEventListener('click', () => $('#sound-panel-card').classList.add('hidden'));
+$('#sound-mute-all').addEventListener('click', () => {
+  rtc.muteAll = !rtc.muteAll;
+  updateSoundPanel();
+  updateAdminPanel();
+  updateSoundPanel();
+  updateVoiceVolumes();
+  toast(rtc.muteAll ? 'Hamının səsi yalnız səndə susduruldu' : 'Hamının səsi yenidən açıldı');
+});
+$('#sound-mute-player').addEventListener('click', () => {
+  const target = Number($('#sound-mute-target').value);
+  if (!target) return toast('Əvvəl oyunçu seç', true);
+  if (rtc.mutedPlayers.has(target)) {
+    rtc.mutedPlayers.delete(target);
+    toast('Oyunçunun səsi yalnız səndə açıldı');
+  } else {
+    rtc.mutedPlayers.add(target);
+    toast('Oyunçu yalnız səndə susduruldu');
+  }
+  updateSoundPanel();
+  updateAdminPanel();
+  updateVoiceVolumes();
+});
 function updateAdminPanel() {
   $('#admin-hide').textContent = `👻 Görünməzlik: ${adminHidden ? 'ON' : 'OFF'}`;
   $('#admin-jump').textContent = `🦘 Super jump: ${adminSuperJump ? 'ON' : 'OFF'}`;
@@ -623,6 +675,7 @@ updateChip();
 function onRoomUpdate() {
   if (!room) return;
   renderLobby();
+  updateSoundPanel();
   if (adminMode) updateAdminPanel();
   syncPeers();
   if (inGame) { syncAvatars(); renderHudPlayers(); }
