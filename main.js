@@ -397,8 +397,8 @@ function buildWorld() {
     new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   );
   // Yazı taxtanın ön səthinə yerləşdirilir; güzgü effekti və divarın arxasından görünmə bağlanır.
-  inkPlane.position.set(signX, signY, signZ - 0.065);
-  inkPlane.rotation.y = Math.PI;
+  inkPlane.position.set(signX, signY, signZ - 0.072);
+  inkPlane.rotation.y = 0;
   inkPlane.renderOrder = 1;
   world.add(inkPlane);
   // Azad etmə zonası
