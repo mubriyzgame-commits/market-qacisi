@@ -1065,10 +1065,20 @@ document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
 addEventListener('keydown', (e) => {
   if (e.ctrlKey && (e.code === 'Digit0' || e.code === 'Numpad0')) {
     e.preventDefault();
-    if (!canUseAdmin()) { toast('Admin panelə yalnız adında 00_ olanlar girə bilər.', true); return; }
+    if (!canUseAdmin()) return;
     adminMode = !adminMode;
-    if (adminMode) { adminPanel.classList.remove('hidden'); updateAdminPanel(); toast('Admin panel açıldı'); }
-    else { adminPanel.classList.add('hidden'); adminHidden = false; adminSuperJump = false; adminSpeed = false; sendAdminState(); toast('Admin panel bağlandı'); }
+    if (adminMode) {
+      adminPanel.classList.remove('hidden');
+      updateAdminPanel();
+      toast('Admin xüsusiyyətləri aktiv oldu');
+    } else {
+      adminPanel.classList.add('hidden');
+      adminHidden = false;
+      adminSuperJump = false;
+      adminSpeed = false;
+      sendAdminState();
+      toast('Admin xüsusiyyətləri söndü');
+    }
     return;
   }
   if (e.target.tagName === 'INPUT') return;
