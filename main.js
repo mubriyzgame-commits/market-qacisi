@@ -397,8 +397,9 @@ function buildWorld() {
     new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   );
   // Yazı taxtanın ön səthinə yerləşdirilir; güzgü effekti və divarın arxasından görünmə bağlanır.
-  inkPlane.position.set(signX, signY, signZ - 0.072);
-  inkPlane.rotation.y = 0;
+  // Lövhənin oyunçuya baxan daxili (-Z) səthinə yapışdır.
+  inkPlane.position.set(signX, signY, signZ - 0.14);
+  inkPlane.rotation.y = Math.PI;
   inkPlane.renderOrder = 1;
   world.add(inkPlane);
   // Azad etmə zonası
@@ -407,7 +408,7 @@ function buildWorld() {
   zoneRing.rotation.x = -Math.PI / 2; zoneRing.position.set(z.x, 0.04, z.z); world.add(zoneRing);
   zoneDisc = new THREE.Mesh(new THREE.CircleGeometry(z.r - 0.18, 48), new THREE.MeshBasicMaterial({ color: 0x38d996, transparent: true, opacity: 0.18, side: THREE.DoubleSide }));
   zoneDisc.rotation.x = -Math.PI / 2; zoneDisc.position.set(z.x, 0.035, z.z); world.add(zoneDisc);
-  const zl = textSprite('DOSTU AZAD ET · 10 san', { color: '#8dffc4', height: 0.45, font: 40 });
+  const zl = textSprite('DOSTU AZAD ET · 5 san', { color: '#8dffc4', height: 0.45, font: 40 });
   zl.position.set(z.x, 2.2, z.z); world.add(zl);
 }
 buildWorld();
