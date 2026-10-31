@@ -365,9 +365,14 @@ function buildWorld() {
   const jl = new THREE.PointLight(0xff4d5e, 30, 14, 2); jl.position.set(cx, 3, cz); world.add(jl);
   const sign = textSprite('TÜRMƏ', { color: '#ff6b78', height: 0.9, depthTest: true });
   sign.position.set(pb.minX - 0.4, 4.0, cz); world.add(sign);
-  // Türmənin iç küncündə əlavə yazı
-  const cornerSign = textSprite('ƏSGƏRXAN GÖT', { color: '#ffe08a', bg: 'rgba(20,10,10,0.8)', height: 0.55, depthTest: false });
-  cornerSign.position.set(pb.maxX - 1.0, 2.4, pb.maxZ - 1.0); world.add(cornerSign);
+  // Türmənin iç küncündə divardan asılmış lövhə
+  const signX = pb.maxX - 2.0, signY = 2.25, signZ = pb.maxZ - 0.38;
+  box(2.9, 1.0, 0.16, 0x252936, signX, signY, signZ); // tünd çərçivə
+  box(2.72, 0.82, 0.06, 0x8a5a33, signX, signY, signZ - 0.105); // taxta lövhə
+  box(0.08, 0.24, 0.08, 0x9aa3b5, signX - 0.95, signY + 0.61, signZ + 0.02); // asılqan
+  box(0.08, 0.24, 0.08, 0x9aa3b5, signX + 0.95, signY + 0.61, signZ + 0.02);
+  const cornerSign = textSprite('ƏSGƏRXAN GÖT', { color: '#ffe08a', bg: null, font: 38, height: 0.42, depthTest: false });
+  cornerSign.position.set(signX, signY, signZ - 0.15); world.add(cornerSign);
   // Azad etmə zonası
   const z = PRISON.zone;
   zoneRing = new THREE.Mesh(new THREE.RingGeometry(z.r - 0.18, z.r, 48), new THREE.MeshBasicMaterial({ color: 0x38d996, side: THREE.DoubleSide, transparent: true, opacity: 0.95 }));
