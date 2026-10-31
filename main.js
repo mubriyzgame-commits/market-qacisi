@@ -391,9 +391,12 @@ function buildWorld() {
   inkTexture.colorSpace = THREE.SRGBColorSpace;
   const inkPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(2.64, 0.78),
-    new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.DoubleSide, depthTest: false, depthWrite: false })
+    new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
   );
-  inkPlane.position.set(signX, signY, signZ - 0.139);
+  // Yazı taxtanın ön səthinə yerləşdirilir; güzgü effekti və divarın arxasından görünmə bağlanır.
+  inkPlane.position.set(signX, signY, signZ - 0.074);
+  inkPlane.rotation.y = Math.PI;
+  inkPlane.renderOrder = 1;
   world.add(inkPlane);
   // Azad etmə zonası
   const z = PRISON.zone;
