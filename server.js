@@ -314,6 +314,14 @@ function handle(p, m) {
       if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
       break;
     }
+    case 'jumpscare': {
+      const room = p.room;
+      if (!p.adminEligible || !p.admin || !room) return;
+      const target = room.players.get(Number(m.target));
+      if (!target || target.id === p.id) return send(p.ws, { t: 'error', msg: 'Oyunçu seçimi yanlışdır' });
+      send(target.ws, { t: 'jumpscare' });
+      break;
+    }
     case 'pos': {
       const room = p.room;
       if (!room || (room.phase !== 'play' && room.phase !== 'countdown')) return;
