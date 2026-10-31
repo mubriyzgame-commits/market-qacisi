@@ -391,3 +391,9 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 /* Jumpscare should not hide the game world or other players */
 #jumpscare-overlay { background: transparent !important; }
 #jumpscare-overlay.active { animation: none !important; }
+
+/* Ensure the jumpscare target selector remains clickable above the panel */
+#admin-panel, #admin-panel .admin-card { pointer-events:auto; }
+#admin-target, #admin-jumpscare { position:relative; z-index:2; pointer-events:auto; }
+#admin-panel { z-index:1000; }
+#jumpscare-overlay { pointer-events:none !important; z-index:90 !important; }
