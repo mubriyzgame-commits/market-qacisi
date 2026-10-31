@@ -107,6 +107,12 @@ adminPanel.innerHTML = `
       <select id="admin-target"><option value="">Oyunçu seç...</option></select>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
     </div>
+    <div class="admin-scare admin-mutes">
+      <label>🔇 Səs idarəsi (yalnız sənin üçün)</label>
+      <button id="admin-mute-all" class="admin-option" type="button">🔇 Hamını susdur: OFF</button>
+      <select id="admin-mute-target"><option value="">Oyunçu seç...</option></select>
+      <button id="admin-mute-player" class="admin-option" type="button">🔇 Bu oyunçunu susdur</button>
+    </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
@@ -125,6 +131,24 @@ function updateAdminPanel() {
       .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
     if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
   }
+  const muteTarget = $('#admin-mute-target');
+  if (muteTarget) {
+    const muteSelected = muteTarget.value;
+    muteTarget.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
+      .filter((p) => p.id !== myId)
+      .map((p) => `<option value="${p.id}">${esc(p.name)}${rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
+    if ((room?.players || []).some((p) => String(p.id) === muteSelected && p.id !== myId)) muteTarget.value = muteSelected;
+  }
+  const allBtn = $('#admin-mute-all');
+  if (allBtn) {
+    allBtn.textContent = `🔇 Hamını susdur: ${rtc.muteAll ? 'ON' : 'OFF'}`;
+    allBtn.classList.toggle('enabled', rtc.muteAll);
+  }
+  const playerBtn = $('#admin-mute-player');
+  if (playerBtn) {
+    const id = Number(muteTarget?.value);
+    playerBtn.textContent = id && rtc.mutedPlayers.has(id) ? '🔊 Bu oyunçunun səsini aç' : '🔇 Bu oyunçunu susdur';
+  }
 }
 function sendAdminState() {
   send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
@@ -139,6 +163,20 @@ $('#admin-jumpscare').addEventListener('click', () => {
   if (!target) return toast('Əvvəl oyunçu seç', true);
   send({ t: 'jumpscare', target });
   toast('Jumpscare göndərildi!');
+});
+$('#admin-mute-all').addEventListener('click', toggleMuteAll);
+$('#admin-mute-player').addEventListener('click', () => {
+  const target = Number($('#admin-mute-target').value);
+  if (!target) return toast('Əvvəl oyunçu seç', true);
+  if (rtc.mutedPlayers.has(target)) {
+    rtc.mutedPlayers.delete(target);
+    toast('Oyunçunun səsi yalnız səndə açıldı');
+  } else {
+    rtc.mutedPlayers.add(target);
+    toast('Oyunçu yalnız səndə susduruldu');
+  }
+  updateAdminPanel();
+  updateVoiceVolumes();
 });
 
 /* =====================================================================
@@ -644,7 +682,7 @@ function resetToMenu() {
 /* =====================================================================
    Səs çat (WebRTC)
    ===================================================================== */
-const rtc = { stream: null, tried: false, peers: new Map(), audios: new Map(), muted: false, analyser: null, speakingNow: false };
+const rtc = { stream: null, tried: false, peers: new Map(), audios: new Map(), muted: false, mutedPlayers: new Set(), muteAll: false, analyser: null, speakingNow: false };
 const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
 async function ensureMic() {
@@ -777,8 +815,14 @@ function updateVoiceVolumes() {
         vol = d < 8 ? 1 : d > 38 ? 0 : 1 - (d - 8) / 30;
       }
     }
-    a.volume = clamp(vol, 0, 1);
+    a.volume = rtc.muteAll || rtc.mutedPlayers.has(id) ? 0 : clamp(vol, 0, 1);
   }
+}
+function toggleMuteAll() {
+  rtc.muteAll = !rtc.muteAll;
+  updateAdminPanel();
+  updateVoiceVolumes();
+  toast(rtc.muteAll ? 'Hamının səsi yalnız səndə susduruldu' : 'Hamının səsi yenidən açıldı');
 }
 
 /* =====================================================================
