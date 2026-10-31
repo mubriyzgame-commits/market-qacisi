@@ -376,7 +376,8 @@ function buildWorld() {
 }
 buildWorld();
 const COLLIDERS = getColliders();
-const COLLIDERS_NO_SHELVES = getColliders(false);
+const COLLIDERS_NO_TABLES = getColliders(true, false);
+const COLLIDERS_NO_SHELVES = getColliders(false, false);
 
 /* ---------------- Ərzaqlar ---------------- */
 const itemGroup = new THREE.Group(); scene.add(itemGroup);
@@ -1168,8 +1169,11 @@ function updateGame(dt) {
   me.vy -= 20 * dt; me.y += me.vy * dt;
   if (me.y < 0) { me.y = 0; me.vy = 0; }
   const pos = { x: me.x, z: me.z };
-  // Super jump zamanı rəflərin görünməz toqquşma baryerini keçməyə icazə ver.
-  resolveCollisions(pos, PLAYER_R, me.y > SHELF.h ? COLLIDERS_NO_SHELVES : colliders);
+  // Super jump zamanı əvvəl meyvə masalarının, sonra hündür rəflərin baryerini keçməyə icazə ver.
+  const jumpColliders = me.y > SHELF.h
+    ? COLLIDERS_NO_SHELVES
+    : me.y > 0.9 ? COLLIDERS_NO_TABLES : colliders;
+  resolveCollisions(pos, PLAYER_R, jumpColliders);
   if (me.jailed) {
     pos.x = clamp(pos.x, PRISON.inner.minX, PRISON.inner.maxX);
     pos.z = clamp(pos.z, PRISON.inner.minZ, PRISON.inner.maxZ);
