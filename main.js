@@ -389,9 +389,7 @@ function buildWorld() {
   ink.restore();
   const inkTexture = new THREE.CanvasTexture(inkCanvas);
   inkTexture.colorSpace = THREE.SRGBColorSpace;
-  // Lövhənin iç tərəfindən oxunaqlı qalsın.
-  inkTexture.repeat.x = -1;
-  inkTexture.offset.x = 1;
+  // Plane içəriyə çevrildiyi üçün teksturanı ayrıca güzgüləmək lazım deyil.
   const inkPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(2.64, 0.78),
     new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, side: THREE.FrontSide, depthTest: true, depthWrite: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
