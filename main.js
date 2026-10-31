@@ -365,14 +365,36 @@ function buildWorld() {
   const jl = new THREE.PointLight(0xff4d5e, 30, 14, 2); jl.position.set(cx, 3, cz); world.add(jl);
   const sign = textSprite('TÜRMƏ', { color: '#ff6b78', height: 0.9, depthTest: true });
   sign.position.set(pb.minX - 0.4, 4.0, cz); world.add(sign);
-  // Türmənin iç küncündə divardan asılmış lövhə
+  // Türmənin iç küncündə: yazı lövhənin öz taxtasına qələmlə yazılmış kimi
   const signX = pb.maxX - 2.0, signY = 2.25, signZ = pb.maxZ - 0.38;
   box(2.9, 1.0, 0.16, 0x252936, signX, signY, signZ); // tünd çərçivə
   box(2.72, 0.82, 0.06, 0x8a5a33, signX, signY, signZ - 0.105); // taxta lövhə
   box(0.08, 0.24, 0.08, 0x9aa3b5, signX - 0.95, signY + 0.61, signZ + 0.02); // asılqan
   box(0.08, 0.24, 0.08, 0x9aa3b5, signX + 0.95, signY + 0.61, signZ + 0.02);
-  const cornerSign = textSprite('ƏSGƏRXAN GÖT', { color: '#ffe08a', bg: null, font: 38, height: 0.42, depthTest: false });
-  cornerSign.position.set(signX, signY, signZ - 0.15); world.add(cornerSign);
+
+  // Şəffaf tekstura: yalnız əl yazısı görünür, ayrıca lövhə və ya etiket yoxdur.
+  const inkCanvas = document.createElement('canvas');
+  inkCanvas.width = 768; inkCanvas.height = 240;
+  const ink = inkCanvas.getContext('2d');
+  ink.save();
+  ink.translate(384, 120);
+  ink.rotate(-0.025);
+  ink.font = 'italic 58px "Comic Sans MS", "Segoe Print", cursive';
+  ink.textAlign = 'center'; ink.textBaseline = 'middle';
+  ink.lineJoin = 'round'; ink.lineCap = 'round';
+  ink.strokeStyle = 'rgba(48,25,12,0.45)'; ink.lineWidth = 1.8;
+  ink.strokeText('Əsgərxan göt', 0, 0);
+  ink.fillStyle = '#29170d';
+  ink.fillText('Əsgərxan göt', 0, 0);
+  ink.restore();
+  const inkTexture = new THREE.CanvasTexture(inkCanvas);
+  inkTexture.colorSpace = THREE.SRGBColorSpace;
+  const inkPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.64, 0.78),
+    new THREE.MeshBasicMaterial({ map: inkTexture, transparent: true, depthTest: true, depthWrite: false })
+  );
+  inkPlane.position.set(signX, signY, signZ - 0.139);
+  world.add(inkPlane);
   // Azad etmə zonası
   const z = PRISON.zone;
   zoneRing = new THREE.Mesh(new THREE.RingGeometry(z.r - 0.18, z.r, 48), new THREE.MeshBasicMaterial({ color: 0x38d996, side: THREE.DoubleSide, transparent: true, opacity: 0.95 }));
