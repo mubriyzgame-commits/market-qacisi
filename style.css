@@ -359,3 +359,6 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .scare-title { font-size:clamp(28px, 8vw, 80px); font-weight:1000; letter-spacing:.12em; text-shadow:0 0 24px #ff001e; }
 @keyframes scare-flash { 0%,100% { background:#090000; } 50% { background:#3a0008; } }
 @keyframes scare-face-pop { from { transform:scale(.05) rotate(-18deg); opacity:0; } to { transform:scale(1) rotate(0); opacity:1; } }
+
+.admin-mutes select { display:block; width:100%; margin-top:10px; padding:11px; border-radius:8px; border:1px solid #38445b; color:#eef2ff; background:#202a3c; font:inherit; }
+.admin-mutes select option { background:#111827; color:#eef2ff; }
