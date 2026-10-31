@@ -102,6 +102,11 @@ adminPanel.innerHTML = `
     <button id="admin-hide" class="admin-option" type="button">👻 Görünməzlik: OFF</button>
     <button id="admin-jump" class="admin-option" type="button">🦘 Super jump: OFF</button>
     <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
+    <div class="admin-scare">
+      <label for="admin-target">😈 Jumpscare üçün oyunçu</label>
+      <select id="admin-target"><option value="">Oyunçu seç...</option></select>
+      <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
+    </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
@@ -112,6 +117,14 @@ function updateAdminPanel() {
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
+  const target = $('#admin-target');
+  if (target) {
+    const selected = target.value;
+    target.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
+      .filter((p) => p.id !== myId)
+      .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
+    if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
+  }
 }
 function sendAdminState() {
   send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
@@ -121,6 +134,12 @@ $('#admin-close').addEventListener('click', () => adminPanel.classList.add('hidd
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
 $('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
+$('#admin-jumpscare').addEventListener('click', () => {
+  const target = Number($('#admin-target').value);
+  if (!target) return toast('Əvvəl oyunçu seç', true);
+  send({ t: 'jumpscare', target });
+  toast('Jumpscare göndərildi!');
+});
 
 /* =====================================================================
    Şəbəkə
@@ -178,6 +197,7 @@ function onMsg(m) {
     case 'end': onEnd(m); break;
     case 'rtc': onRtc(m); break;
     case 'speak': if (m.on) speaking.add(m.id); else speaking.delete(m.id); updateSpeakingUI(); break;
+    case 'jumpscare': showJumpscare(); break;
     default: break;
   }
 }
@@ -869,6 +889,33 @@ function applyState(m) {
 /* =====================================================================
    HUD
    ===================================================================== */
+const jumpscareOverlay = document.createElement('div');
+jumpscareOverlay.id = 'jumpscare-overlay';
+jumpscareOverlay.innerHTML = '<div class="scare-face">☠</div><div class="scare-title">GOTCHA!</div>';
+document.body.appendChild(jumpscareOverlay);
+let jumpscareTimer = null;
+function showJumpscare() {
+  jumpscareOverlay.classList.remove('hidden');
+  jumpscareOverlay.classList.add('active');
+  const c = ac();
+  if (c) {
+    const t = c.currentTime;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(180, t);
+    o.frequency.exponentialRampToValueAtTime(950, t + 0.18);
+    o.frequency.exponentialRampToValueAtTime(120, t + 0.75);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.35, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.8);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + 0.85);
+  }
+  clearTimeout(jumpscareTimer);
+  jumpscareTimer = setTimeout(() => {
+    jumpscareOverlay.classList.remove('active');
+    jumpscareOverlay.classList.add('hidden');
+  }, 1800);
+}
 let flashT = null;
 function flash(text, color = '#fff') {
   const el = $('#hud-flash');
