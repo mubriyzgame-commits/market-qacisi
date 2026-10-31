@@ -397,3 +397,35 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 #admin-target, #admin-jumpscare { position:relative; z-index:2; pointer-events:auto; }
 #admin-panel { z-index:1000; }
 #jumpscare-overlay { pointer-events:none !important; z-index:90 !important; }
+
+
+/* Mobil lobbi: komandalar aşağı-yuxarı sürüşdürülə bilsin */
+@media (max-width: 600px) {
+  #scr-lobby {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    align-items: stretch;
+  }
+  .teams {
+    flex: none;
+    grid-template-columns: 1fr;
+    overflow: visible;
+    min-height: auto;
+  }
+  .team {
+    min-height: 190px;
+  }
+  .plist {
+    max-height: 180px;
+    overflow-y: auto;
+    touch-action: pan-y;
+  }
+  .lobby-foot {
+    padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  }
+}
