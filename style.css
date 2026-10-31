@@ -381,3 +381,9 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #sound-panel-toggle { padding: 8px 10px; font-size: 12px; border-radius: 10px; }
   #sound-panel-card { bottom: 42px; max-height: 45vh; overflow-y: auto; }
 }
+
+/* On desktop, keep the sound control floating above the game map */
+@media (pointer: fine) and (min-width: 901px) and (min-height: 501px) {
+  #sound-panel { right: 22px; bottom: auto; top: 88px; z-index: 120; }
+  #sound-panel-card { bottom: auto; top: 48px; }
+}
