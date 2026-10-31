@@ -362,3 +362,15 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 
 .admin-mutes select { display:block; width:100%; margin-top:10px; padding:11px; border-radius:8px; border:1px solid #38445b; color:#eef2ff; background:#202a3c; font:inherit; }
 .admin-mutes select option { background:#111827; color:#eef2ff; }
+
+/* Public sound controls panel for every player */
+#sound-panel { position:fixed; right:18px; bottom:18px; z-index:120; font-family:inherit; }
+#sound-panel-toggle { padding:12px 16px; border:1px solid #64748b; border-radius:12px; background:#111827ee; color:#f8fafc; font:700 14px inherit; cursor:pointer; box-shadow:0 8px 28px #0007; }
+#sound-panel-card { position:absolute; right:0; bottom:54px; width:min(300px, calc(100vw - 36px)); padding:16px; border:1px solid #ffffff30; border-radius:14px; background:#111827; color:#eef2ff; box-shadow:0 20px 60px #000a; }
+#sound-panel-card.hidden { display:none !important; }
+.sound-panel-head { display:flex; align-items:center; justify-content:space-between; color:#ffd166; }
+.sound-panel-head button { border:0; padding:6px 9px; border-radius:7px; background:#ffffff18; color:#fff; cursor:pointer; }
+#sound-panel-card p { margin:8px 0 12px; color:#98a2bd; font-size:12px; }
+#sound-panel-card label { display:block; margin-top:13px; color:#ffd166; font-size:13px; font-weight:800; }
+#sound-mute-target { display:block; width:100%; margin-top:7px; padding:11px; border:1px solid #38445b; border-radius:8px; background:#202a3c; color:#eef2ff; font:inherit; }
+#sound-mute-target option { background:#111827; color:#eef2ff; }
