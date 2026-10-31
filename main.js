@@ -365,6 +365,9 @@ function buildWorld() {
   const jl = new THREE.PointLight(0xff4d5e, 30, 14, 2); jl.position.set(cx, 3, cz); world.add(jl);
   const sign = textSprite('TÜRMƏ', { color: '#ff6b78', height: 0.9, depthTest: true });
   sign.position.set(pb.minX - 0.4, 4.0, cz); world.add(sign);
+  // Türmənin iç küncündə əlavə yazı
+  const cornerSign = textSprite('ƏSGƏRXAN GÖT', { color: '#ffe08a', bg: 'rgba(20,10,10,0.8)', height: 0.55, depthTest: false });
+  cornerSign.position.set(pb.maxX - 1.0, 2.4, pb.maxZ - 1.0); world.add(cornerSign);
   // Azad etmə zonası
   const z = PRISON.zone;
   zoneRing = new THREE.Mesh(new THREE.RingGeometry(z.r - 0.18, z.r, 48), new THREE.MeshBasicMaterial({ color: 0x38d996, side: THREE.DoubleSide, transparent: true, opacity: 0.95 }));
