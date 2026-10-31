@@ -1290,7 +1290,7 @@ function updateHudFrame(dt) {
     rl.style.display = 'block';
     $('#hud-release-fill').style.width = `${clamp(relProg / 5, 0, 1) * 100}%`;
     $('#hud-release-text').textContent = me.jailed ? `Dostların səni azad edir… ${relProg.toFixed(1)} / 5 san`
-      : me.team === 'police' ? `Dostlar türməni açır! ${relProg.toFixed(1)} / 10 san` : `Dost azad edilir… ${relProg.toFixed(1)} / 10 san`;
+      : me.team === 'police' ? `Dostlar türməni açır! ${relProg.toFixed(1)} / 5 san` : `Dost azad edilir… ${relProg.toFixed(1)} / 5 san`;
   } else rl.style.display = 'none';
   // Dözümlülük
   const sf = $('#hud-stamina-fill');
