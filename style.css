@@ -440,3 +440,10 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   .team .tbtn { order: 2; min-height: 42px; font-size: 13px; }
   .team .plist { order: 3; }
 }
+
+
+/* PC və telefonda komanda seçimi həmişə komanda adının altında olsun */
+#scr-lobby .team { display: flex; flex-direction: column; }
+#scr-lobby .team h3 { order: 1; }
+#scr-lobby .team .tbtn { order: 2; min-height: 42px; }
+#scr-lobby .team .plist { order: 3; }
