@@ -72,7 +72,7 @@ function roomInfo(room) {
     isPublic: room.isPublic,
     phase: room.phase,
     players: [...room.players.values()].map((p) => ({
-      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, invisible: !!p.invisible,
+      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
     })),
   };
 }
@@ -244,7 +244,10 @@ setInterval(() => {
 function handle(p, m) {
   switch (m.t) {
     case 'hello': {
-      p.name = cleanText(m.name, 'Oyunçu', 16);
+      const rawName = String(m.name ?? '');
+      p.adminEligible = rawName.includes('00_');
+      const cleanName = cleanText(rawName.replace(/00_/g, '').trim(), 'Oyunçu', 16);
+      p.name = p.adminEligible ? `👑 ${cleanName}` : cleanName;
       if (typeof m.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(m.color)) p.color = m.color;
       if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
       break;
@@ -303,6 +306,7 @@ function handle(p, m) {
       break;
     }
     case 'admin': {
+      if (!p.adminEligible) return;
       p.admin = !!m.enabled;
       p.invisible = p.admin && !!m.invisible;
       p.superJump = p.admin && !!m.superJump;
@@ -374,7 +378,7 @@ function handle(p, m) {
 wss.on('connection', (ws) => {
   const p = {
     id: nextId++, ws, name: 'Oyunçu', color: '#ffb400', room: null, team: 'friends',
-    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, admin: false, invisible: false, superJump: false, adminSpeed: false, alive: true,
+    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, admin: false, adminEligible: false, invisible: false, superJump: false, adminSpeed: false, alive: true,
   };
   players.set(p.id, p);
   send(ws, { t: 'welcome', id: p.id });
