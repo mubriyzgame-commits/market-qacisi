@@ -91,6 +91,7 @@ let lastPosSent = 0;
 let nearItem = null, nearFriend = null;
 
 /* Admin paneli — Ctrl+0 */
+const canUseAdmin = () => profile.name.includes('00_');
 const adminPanel = document.createElement('div');
 adminPanel.id = 'admin-panel';
 adminPanel.className = 'hidden';
@@ -417,7 +418,7 @@ function makeAvatar(p) {
     const badge = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), L(0xffd23f)); badge.rotation.x = Math.PI / 2; badge.position.set(0.12, 1.05, -0.28); g.add(badge);
   }
   const mate = p.team === me.team;
-  const tag = textSprite(p.name + (p.admin ? ' 👑 ADMIN' : ''), { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
+  const tag = textSprite(p.name + (p.adminEligible ? '  ADMIN' : ''), { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
   tag.position.y = 2.2; g.add(tag);
   g.visible = false;
   return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag };
@@ -533,7 +534,7 @@ function onRoomUpdate() {
 function playerCard(p) {
   const me_ = p.id === myId;
   return `<div class="pcard ${speaking.has(p.id) ? 'speaking' : ''}" data-id="${p.id}"><span class="pd" style="background:${esc(p.color)}"></span>` +
-    `<span>${esc(p.name)}</span>${p.id === room.hostId ? '<span title="Server sahibi">👑</span>' : ''}${me_ ? '<span class="me">(sən)</span>' : ''}<span class="sp">🎤</span></div>`;
+    `<span>${esc(p.name)}${p.adminEligible ? ' <span style="color:#ffd23f">ADMIN</span>' : ''}</span>${p.id === room.hostId ? '<span title="Server sahibi">👑</span>' : ''}${me_ ? '<span class="me">(sən)</span>' : ''}<span class="sp">🎤</span></div>`;
 }
 function renderLobby() {
   $('#lobby-name').textContent = room.name;
@@ -1064,6 +1065,7 @@ document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
 addEventListener('keydown', (e) => {
   if (e.ctrlKey && (e.code === 'Digit0' || e.code === 'Numpad0')) {
     e.preventDefault();
+    if (!canUseAdmin()) { toast('Admin panelə yalnız adında 00_ olanlar girə bilər.', true); return; }
     adminMode = !adminMode;
     if (adminMode) { adminPanel.classList.remove('hidden'); updateAdminPanel(); toast('Admin panel açıldı'); }
     else { adminPanel.classList.add('hidden'); adminHidden = false; adminSuperJump = false; adminSpeed = false; sendAdminState(); toast('Admin panel bağlandı'); }
