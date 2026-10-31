@@ -429,3 +429,14 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
     padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
   }
 }
+
+
+/* Telefonda komanda seçimi yuxarıda görünsün */
+@media (max-width: 600px) {
+  #scr-lobby { gap: 8px; }
+  .teams { gap: 8px; }
+  .team { gap: 7px; }
+  .team h3 { order: 1; }
+  .team .tbtn { order: 2; min-height: 42px; font-size: 13px; }
+  .team .plist { order: 3; }
+}
