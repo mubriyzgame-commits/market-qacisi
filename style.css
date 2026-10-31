@@ -374,3 +374,10 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 #sound-panel-card label { display:block; margin-top:13px; color:#ffd166; font-size:13px; font-weight:800; }
 #sound-mute-target { display:block; width:100%; margin-top:7px; padding:11px; border:1px solid #38445b; border-radius:8px; background:#202a3c; color:#eef2ff; font:inherit; }
 #sound-mute-target option { background:#111827; color:#eef2ff; }
+
+/* Keep the sound panel away from the phone jump/action buttons */
+@media (pointer: coarse), (max-width: 900px), (max-height: 500px) {
+  #sound-panel { right: 12px; bottom: 225px; z-index: 7; }
+  #sound-panel-toggle { padding: 8px 10px; font-size: 12px; border-radius: 10px; }
+  #sound-panel-card { bottom: 42px; max-height: 45vh; overflow-y: auto; }
+}
