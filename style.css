@@ -387,3 +387,7 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #sound-panel { right: 22px; bottom: auto; top: 88px; z-index: 120; }
   #sound-panel-card { bottom: auto; top: 48px; }
 }
+
+/* Jumpscare should not hide the game world or other players */
+#jumpscare-overlay { background: transparent !important; }
+#jumpscare-overlay.active { animation: none !important; }
