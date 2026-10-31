@@ -85,9 +85,41 @@ const itemsMap = new Map();  // id -> { id,n,x,y,z, group, mesh, label, glow, go
 const speaking = new Set();
 const keys = {};
 let showList = true;
+let adminMode = false, adminHidden = false, adminSuperJump = false, adminSpeed = false;
 let catchCd = 0;
 let lastPosSent = 0;
 let nearItem = null, nearFriend = null;
+
+/* Admin paneli — Ctrl+0 */
+const adminPanel = document.createElement('div');
+adminPanel.id = 'admin-panel';
+adminPanel.className = 'hidden';
+adminPanel.innerHTML = `
+  <div class="admin-card">
+    <div class="admin-head"><strong>👑 ADMIN PANEL</strong><button id="admin-close" type="button">✕</button></div>
+    <p>Güc seçimlərini buradan dəyiş.</p>
+    <button id="admin-hide" class="admin-option" type="button">👻 Görünməzlik: OFF</button>
+    <button id="admin-jump" class="admin-option" type="button">🦘 Super jump: OFF</button>
+    <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
+    <div class="admin-note">Panel: Ctrl + 0</div>
+  </div>`;
+document.body.appendChild(adminPanel);
+function updateAdminPanel() {
+  $('#admin-hide').textContent = `👻 Görünməzlik: ${adminHidden ? 'ON' : 'OFF'}`;
+  $('#admin-jump').textContent = `🦘 Super jump: ${adminSuperJump ? 'ON' : 'OFF'}`;
+  $('#admin-speed').textContent = `⚡ Super sürət: ${adminSpeed ? 'ON' : 'OFF'}`;
+  $('#admin-hide').classList.toggle('enabled', adminHidden);
+  $('#admin-jump').classList.toggle('enabled', adminSuperJump);
+  $('#admin-speed').classList.toggle('enabled', adminSpeed);
+}
+function sendAdminState() {
+  send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
+  updateAdminPanel();
+}
+$('#admin-close').addEventListener('click', () => adminPanel.classList.add('hidden'));
+$('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
+$('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
+$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
 
 /* =====================================================================
    Şəbəkə
@@ -385,7 +417,7 @@ function makeAvatar(p) {
     const badge = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.02, 8), L(0xffd23f)); badge.rotation.x = Math.PI / 2; badge.position.set(0.12, 1.05, -0.28); g.add(badge);
   }
   const mate = p.team === me.team;
-  const tag = textSprite(p.name, { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
+  const tag = textSprite(p.name + (p.admin ? ' 👑 ADMIN' : ''), { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
   tag.position.y = 2.2; g.add(tag);
   g.visible = false;
   return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag };
@@ -401,8 +433,15 @@ function syncAvatars() {
     if (!ids.has(id) || id === myId) { scene.remove(r.av.group); remotes.delete(id); }
   }
   for (const p of room.players) {
-    if (p.id === myId || remotes.has(p.id)) continue;
+    if (p.id === myId) continue;
+    if (remotes.has(p.id)) {
+      const existing = remotes.get(p.id).av;
+      existing.group.visible = !p.invisible;
+      existing.tag.visible = !p.invisible;
+      continue;
+    }
     const av = makeAvatar(p);
+    av.group.visible = !p.invisible;
     scene.add(av.group);
     const sp = spawnInfo.get(p.id) || { x: 0, z: 0, ry: 0 };
     remotes.set(p.id, { av, x: sp.x, y: 0, z: sp.z, ry: sp.ry, tx: sp.x, ty: 0, tz: sp.z, try: sp.ry, j: 0, has: false });
@@ -777,11 +816,13 @@ function onFreed(m) {
 function applyState(m) {
   if (!inGame) return;
   gamePhase = m.ph; timeLeft = m.tl; cdLeft = m.cd; relProg = m.rp; relActive = !!m.ra; collected = m.c;
-  for (const [id, x, y, z, ry, j] of m.p) {
+  for (const [id, x, y, z, ry, j, admin, invisible] of m.p) {
     if (id === myId) continue;
     const r = remotes.get(id); if (!r) continue;
     r.tx = x; r.ty = y; r.tz = z; r.try = ry;
-    if (!r.has) { r.x = x; r.y = y; r.z = z; r.ry = ry; r.has = true; r.av.group.visible = true; }
+    r.av.group.visible = !invisible;
+    r.av.tag.visible = !invisible;
+    if (!r.has) { r.x = x; r.y = y; r.z = z; r.ry = ry; r.has = true; }
     if (r.j !== j) { r.j = j; setAvatarJailed(r.av, j); }
   }
   updateHudCount();
@@ -1021,6 +1062,13 @@ document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => {
   button.addEventListener('lostpointercapture', releaseKey);
 });
 addEventListener('keydown', (e) => {
+  if (e.ctrlKey && (e.code === 'Digit0' || e.code === 'Numpad0')) {
+    e.preventDefault();
+    adminMode = !adminMode;
+    if (adminMode) { adminPanel.classList.remove('hidden'); updateAdminPanel(); toast('Admin panel açıldı'); }
+    else { adminPanel.classList.add('hidden'); adminHidden = false; adminSuperJump = false; adminSpeed = false; sendAdminState(); toast('Admin panel bağlandı'); }
+    return;
+  }
   if (e.target.tagName === 'INPUT') return;
   keys[e.code] = true;
   if (!inGame) return;
@@ -1037,7 +1085,7 @@ addEventListener('keyup', (e) => { keys[e.code] = false; });
 function releaseAllControls() {
   for (const k of Object.keys(keys)) keys[k] = false;
   mobileKeyPointers.clear();
-  $('#mobile-controls [data-key]').forEach((button) => button.classList.remove('pressed'));
+  document.querySelectorAll('#mobile-controls [data-key]').forEach((button) => button.classList.remove('pressed'));
   if (joystickPointer !== null) resetJoystick();
   lookPointer = null;
 }
@@ -1088,7 +1136,7 @@ function updateGame(dt) {
       me.moving = true;
     }
     const police = me.team === 'police';
-    let speed = police ? 4.7 : 4.5;
+    let speed = adminMode && adminSpeed ? 12 : (police ? 4.7 : 4.5);
     const wantSprint = (keys.ShiftLeft || keys.ShiftRight) && me.moving && !me.jailed && !me.exhausted;
     if (wantSprint && me.stamina > 0) {
       speed = police ? 6.8 : 7.0;
@@ -1100,7 +1148,7 @@ function updateGame(dt) {
     }
     if (me.jailed) speed = 3;
     me.x += mx * speed * dt; me.z += mz * speed * dt;
-    if (keys.Space && me.y <= 0.001 && !me.jailed) me.vy = 6;
+    if (keys.Space && me.y <= 0.001 && !me.jailed) me.vy = adminMode && adminSuperJump ? 11 : 6;
     me.bob += dt * (wantSprint ? 13 : 9) * (me.moving ? 1 : 0);
   }
   // Cazibə
