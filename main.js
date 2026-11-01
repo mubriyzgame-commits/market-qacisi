@@ -138,7 +138,7 @@ function updateSoundPanel() {
   target.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
     .filter((p) => p.id !== myId)
     .map((p) => `<option value="${p.id}">${esc(p.name)}${rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
-  if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
+  if ((room?.players || []).some((p) => String(p.id) === selected && String(p.id) !== String(myId))) target.value = selected;
   $('#sound-mute-all').textContent = `🔇 Hamını susdur: ${rtc.muteAll ? 'ON' : 'OFF'}`;
   $('#sound-mute-all').classList.toggle('enabled', rtc.muteAll);
   const id = Number(target.value);
@@ -179,7 +179,7 @@ function updateAdminPanel() {
   if (target) {
     const selected = target.value;
     target.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
-      .filter((p) => p.id !== myId)
+      .filter((p) => String(p.id) !== String(myId))
       .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
     if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
   }
@@ -676,7 +676,7 @@ function onRoomUpdate() {
   if (!room) return;
   renderLobby();
   updateSoundPanel();
-  if (adminMode) updateAdminPanel();
+  updateAdminPanel();
   syncPeers();
   if (inGame) { syncAvatars(); renderHudPlayers(); }
 }
