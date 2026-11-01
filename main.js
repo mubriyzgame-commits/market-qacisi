@@ -1251,7 +1251,7 @@ addEventListener('keydown', (e) => {
     adminMode = !adminMode;
     if (adminMode) {
       adminPanel.classList.remove('hidden');
-      updateAdminPanel();
+      sendAdminState();
       toast('Admin xüsusiyyətləri aktiv oldu');
     } else {
       adminPanel.classList.add('hidden');
