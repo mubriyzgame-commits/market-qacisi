@@ -206,6 +206,17 @@ function sendAdminState() {
   send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
   updateAdminPanel();
 }
+// Siyahını seçimə basılan anda da yenilə — otaqdakı oyunçular dərhal görünsün.
+$('#admin-target').addEventListener('pointerdown', () => {
+  const target = $('#admin-target');
+  const selected = target.value;
+  const others = (room?.players || []).filter((p) => String(p.id) !== String(myId));
+  target.innerHTML = '<option value="">Oyunçu seç...</option>' +
+    (others.length
+      ? others.map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('')
+      : '<option value="" disabled>Başqa oyunçu yoxdur</option>');
+  if (others.some((p) => String(p.id) === selected)) target.value = selected;
+});
 $('#admin-close').addEventListener('click', () => adminPanel.classList.add('hidden'));
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
