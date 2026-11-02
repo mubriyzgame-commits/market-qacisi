@@ -209,7 +209,7 @@ function tickRoom(room, dt) {
     if (!room.activeEvent && now >= room.nextEventAt) {
       const events = ['lights', 'speed', 'fog'];
       room.activeEvent = events[Math.floor(Math.random() * events.length)];
-      const duration = room.activeEvent === 'speed' ? 10000 : 12000;
+      const duration = room.activeEvent === 'speed' ? 12000 : 60000;
       room.eventEndsAt = now + duration;
       broadcast(room, { t: 'event', name: room.activeEvent, active: true, duration: duration / 1000 });
     }
@@ -343,7 +343,7 @@ function handle(p, m) {
       if (!['lights', 'speed', 'fog'].includes(m.name)) return;
       if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
       room.activeEvent = m.name;
-      const duration = m.name === 'speed' ? 10000 : 12000;
+      const duration = m.name === 'speed' ? 12000 : 60000;
       room.eventEndsAt = Date.now() + duration;
       room.nextEventAt = room.eventEndsAt + 60000;
       broadcast(room, { t: 'event', name: m.name, active: true, duration: duration / 1000 });
