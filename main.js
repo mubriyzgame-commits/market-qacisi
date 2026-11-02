@@ -171,6 +171,18 @@ function updateAdminPanel() {
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
 
+  // Select-ləri yalnız oyunçu siyahısı dəyişəndə qur: açıq dropdown-u hər frame bağlama.
+  const target = $('#admin-target');
+  if (!target) return;
+  const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
+  const key = players.map((p) => `${p.id}:${p.name}:${p.team}`).join('|');
+  if (key !== adminPlayerOptionsKey) {
+    const selected = target.value;
+    target.innerHTML = '<option value="">Oyunçu seç...</option>' + players
+      .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
+    if (players.some((p) => String(p.id) === selected)) target.value = selected;
+    adminPlayerOptionsKey = key;
+  }
 }
 function sendAdminState() {
   send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
@@ -184,8 +196,16 @@ $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; s
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
 $('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
 $('#admin-jumpscare').addEventListener('click', () => {
-  const target = Number($('#admin-target').value);
-  if (!target) return toast('Əvvəl oyunçu seç', true);
+  if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
+  if (!adminMode) return toast('Əvvəl Ctrl + 0 ilə admini aktiv et', true);
+  const targetValue = $('#admin-target').value;
+  if (!targetValue) return toast('Siyahıdan oyunçu seç', true);
+  const target = Number(targetValue);
+  if (!room?.players.some((p) => Number(p.id) === target)) {
+    adminPlayerOptionsKey = '';
+    updateAdminPanel();
+    return toast('Oyunçu artıq serverdə deyil. Siyahı yeniləndi', true);
+  }
   send({ t: 'jumpscare', target });
   toast('Jumpscare göndərildi!');
 });
