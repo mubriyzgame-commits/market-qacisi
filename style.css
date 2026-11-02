@@ -560,3 +560,44 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   -webkit-appearance: menulist;
 }
 #admin-panel .admin-card { position: relative; z-index: 1001; pointer-events: auto !important; }
+
+
+/* Jumpscare üçün həmişə görünən oyunçu seçimi */
+.admin-target-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 8px 0 10px;
+  padding: 3px;
+}
+.admin-target-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #38445b;
+  border-radius: 8px;
+  background: #202a3c;
+  color: #eef2ff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-target-player small { color: #aab5cc; }
+.admin-target-player.selected {
+  border-color: #ffd166;
+  background: #59451e;
+  box-shadow: 0 0 0 1px #ffd16655;
+}
+.admin-target-empty {
+  padding: 12px;
+  border: 1px dashed #38445b;
+  border-radius: 8px;
+  color: #aab5cc;
+  font-size: 13px;
+  text-align: center;
+}
