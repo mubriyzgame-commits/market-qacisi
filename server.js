@@ -200,12 +200,15 @@ function tickRoom(room, dt) {
   } else if (room.phase === 'play') {
     room.timeLeft -= dt;
     const now = Date.now();
+    let eventExpired = false;
     for (const [eventName, endsAt] of Object.entries(room.activeEvents || {})) {
       if (now >= endsAt) {
         broadcast(room, { t: 'event', name: eventName, active: false });
         delete room.activeEvents[eventName];
+        eventExpired = true;
       }
     }
+    if (eventExpired && Object.keys(room.activeEvents || {}).length === 0) room.nextEventAt = now + 60000;
     if (Object.keys(room.activeEvents || {}).length === 0 && now >= room.nextEventAt) {
       const eventName = ['lights', 'speed', 'fog'][Math.floor(Math.random() * 3)];
       const duration = eventName === 'speed' ? 12000 : 60000;
