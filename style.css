@@ -542,3 +542,21 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   .mobile-actions .mobile-btn { min-height: 36px !important; font-size: 10px !important; }
   .mobile-actions .action { min-height: 38px !important; }
 }
+
+
+/* Admin player selectors: ensure native dropdowns remain clickable */
+#admin-panel select, #admin-panel .admin-mutes select {
+  position: relative;
+  z-index: 1002;
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  color: #eef2ff;
+  background-color: #202a3c;
+  cursor: pointer;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  appearance: auto;
+  -webkit-appearance: menulist;
+}
+#admin-panel .admin-card { position: relative; z-index: 1001; pointer-events: auto !important; }
