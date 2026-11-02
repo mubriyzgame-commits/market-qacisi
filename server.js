@@ -143,7 +143,7 @@ function startGame(room) {
   room.rp = 0;
   room.ra = false;
   room.lastTick = Date.now();
-  room.nextEventAt = Date.now() + 25000 + Math.random() * 15000;
+  room.nextEventAt = Date.now() + 120000;
   room.activeEvent = null;
   room.eventEndsAt = 0;
   broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
@@ -204,7 +204,7 @@ function tickRoom(room, dt) {
     if (room.activeEvent && now >= room.eventEndsAt) {
       broadcast(room, { t: 'event', name: room.activeEvent, active: false });
       room.activeEvent = null;
-      room.nextEventAt = now + 25000 + Math.random() * 15000;
+      room.nextEventAt = now + 120000;
     }
     if (!room.activeEvent && now >= room.nextEventAt) {
       const events = ['lights', 'speed', 'fog'];
@@ -327,6 +327,24 @@ function handle(p, m) {
       p.superJump = p.admin && !!m.superJump;
       p.adminSpeed = p.admin && !!m.speed;
       if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
+      break;
+    }
+    case 'controlEvent': {
+      const room = p.room;
+      if (!p.adminEligible || !p.admin || !room || room.phase !== 'play') return;
+      if (m.name === 'stop') {
+        if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
+        room.activeEvent = null;
+        room.eventEndsAt = 0;
+        room.nextEventAt = Date.now() + 120000;
+        return;
+      }
+      if (!['lights', 'speed', 'fog'].includes(m.name)) return;
+      if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
+      room.activeEvent = m.name;
+      room.eventEndsAt = Date.now() + 12000;
+      room.nextEventAt = room.eventEndsAt + 120000;
+      broadcast(room, { t: 'event', name: m.name, active: true, duration: 12 });
       break;
     }
     case 'jumpscare': {
