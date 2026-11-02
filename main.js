@@ -539,8 +539,10 @@ function spawnItem(d) {
   glow.scale.set(1.5, 1.5, 1); g.add(glow);
   const label = textSprite(name, { font: 58, height: 0.32 });
   label.position.y = 0.55; label.visible = false; g.add(label);
+  const locationArrow = textSprite('⬇', { color: '#ffdf45', bg: 'rgba(10,15,25,.78)', font: 90, depthTest: false, height: 0.7 });
+  locationArrow.position.y = 4.2; locationArrow.visible = false; g.add(locationArrow);
   itemGroup.add(g);
-  itemsMap.set(d.id, { ...d, group: g, mesh, label, glow, got: false, baseY: d.y, ph: Math.random() * 6 });
+  itemsMap.set(d.id, { ...d, group: g, mesh, label, glow, locationArrow, got: false, baseY: d.y, ph: Math.random() * 6 });
 }
 function clearItems() {
   for (const it of itemsMap.values()) itemGroup.remove(it.group);
@@ -568,10 +570,8 @@ function makeAvatar(p) {
   const mate = p.team === me.team;
   const tag = textSprite(p.name + (p.adminEligible ? '  ADMIN' : ''), { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
   tag.position.y = 2.2; g.add(tag);
-  const lastThreeArrow = textSprite('⬇', { color: '#ffdf45', bg: 'rgba(10,15,25,.78)', font: 86, depthTest: false, height: 0.62 });
-  lastThreeArrow.position.y = 4.2; lastThreeArrow.visible = false; g.add(lastThreeArrow);
   g.visible = false;
-  return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag, lastThreeArrow };
+  return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag };
 }
 function setAvatarJailed(av, j) {
   if (av.j === j) return; av.j = j;
@@ -983,15 +983,6 @@ function applyState(m) {
     r.av.tag.visible = !invisible;
     if (!r.has) { r.x = x; r.y = y; r.z = z; r.ry = ry; r.has = true; }
     if (r.j !== j) { r.j = j; setAvatarJailed(r.av, j); }
-  }
-  const remaining = room ? room.players.filter((p) => {
-    const jailed = p.id === myId ? me.jailed : remotes.get(p.id)?.j === 1;
-    return !jailed;
-  }) : [];
-  const showLastThree = gamePhase === 'play' && remaining.length > 0 && remaining.length <= 3;
-  for (const [id, r] of remotes) {
-    const player = room?.players.find((p) => p.id === id);
-    r.av.lastThreeArrow.visible = !!(showLastThree && player && !player.invisible && r.j !== 1);
   }
   updateHudCount();
 }
@@ -1488,6 +1479,11 @@ function frame(now) {
       const d = Math.hypot(it.x - me.x, it.z - me.z);
       it.label.visible = d < 9;
     } else it.label.visible = false;
+    const remainingItems = [...itemsMap.values()].filter((item) => !item.got);
+    it.locationArrow.visible = inGame && me.team === 'friends' && gamePhase === 'play'
+      && remainingItems.length > 0 && remainingItems.length <= 3 && !it.got;
+    it.locationArrow.position.y = 4.2 + Math.sin(tt * 3 + it.ph) * 0.18;
+    it.locationArrow.quaternion.copy(camera.quaternion);
   }
   if (zoneRing) {
     const pulse = 0.55 + Math.sin(tt * 3) * 0.25;
