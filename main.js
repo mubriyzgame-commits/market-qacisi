@@ -992,7 +992,7 @@ function applyState(m) {
    ===================================================================== */
 const jumpscareOverlay = document.createElement('div');
 jumpscareOverlay.id = 'jumpscare-overlay';
-jumpscareOverlay.innerHTML = '<div class="scare-face">☠</div><div class="scare-title">GOTCHA!</div>';
+jumpscareOverlay.innerHTML = '<img class="jumpscare-image" src="/jumpscare.webp" alt="Jumpscare" /><div class="scare-title">GOTCHA!</div>';
 document.body.appendChild(jumpscareOverlay);
 let jumpscareTimer = null;
 function showJumpscare() {
