@@ -601,3 +601,9 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   font-size: 13px;
   text-align: center;
 }
+
+
+/* Random event banner */
+#random-event-hud { position:fixed; z-index:80; top:76px; left:50%; transform:translateX(-50%) translateY(-8px); padding:10px 18px; border:1px solid #ffd16688; border-radius:12px; background:#111827eF; color:#fff; font:900 16px system-ui,sans-serif; letter-spacing:.04em; box-shadow:0 8px 28px #0008; opacity:0; pointer-events:none; transition:opacity .2s,transform .2s; white-space:nowrap; }
+#random-event-hud.active { opacity:1; transform:translateX(-50%) translateY(0); }
+@media(max-width:600px){#random-event-hud{top:58px;max-width:90vw;font-size:12px;padding:8px 11px}}
