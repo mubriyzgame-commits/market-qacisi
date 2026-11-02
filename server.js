@@ -143,6 +143,9 @@ function startGame(room) {
   room.rp = 0;
   room.ra = false;
   room.lastTick = Date.now();
+  room.nextEventAt = Date.now() + 25000 + Math.random() * 15000;
+  room.activeEvent = null;
+  room.eventEndsAt = 0;
   broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
   broadcast(room, { t: 'room', room: roomInfo(room) });
 }
@@ -197,6 +200,18 @@ function tickRoom(room, dt) {
     }
   } else if (room.phase === 'play') {
     room.timeLeft -= dt;
+    const now = Date.now();
+    if (room.activeEvent && now >= room.eventEndsAt) {
+      broadcast(room, { t: 'event', name: room.activeEvent, active: false });
+      room.activeEvent = null;
+      room.nextEventAt = now + 25000 + Math.random() * 15000;
+    }
+    if (!room.activeEvent && now >= room.nextEventAt) {
+      const events = ['lights', 'speed', 'fog'];
+      room.activeEvent = events[Math.floor(Math.random() * events.length)];
+      room.eventEndsAt = now + 12000;
+      broadcast(room, { t: 'event', name: room.activeEvent, active: true, duration: 12 });
+    }
     // Azad etmə məntiqi: azad dost türmənin qarşısındakı zonada dayanmalıdır
     const jailedCount = [...room.players.values()].filter((p) => p.jailed).length;
     const z = PRISON.zone;
