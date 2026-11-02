@@ -168,6 +168,7 @@ $('#sound-mute-player').addEventListener('click', () => {
   updateAdminPanel();
   updateVoiceVolumes();
 });
+let adminPlayerOptionsKey = '';
 function updateAdminPanel() {
   $('#admin-hide').textContent = `👻 Görünməzlik: ${adminHidden ? 'ON' : 'OFF'}`;
   $('#admin-jump').textContent = `🦘 Super jump: ${adminSuperJump ? 'ON' : 'OFF'}`;
@@ -175,21 +176,18 @@ function updateAdminPanel() {
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
-  const target = $('#admin-target');
-  if (target) {
-    const selected = target.value;
-    target.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
-      .filter((p) => String(p.id) !== String(myId))
-      .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
-    if ((room?.players || []).some((p) => String(p.id) === selected && p.id !== myId)) target.value = selected;
-  }
-  const muteTarget = $('#admin-mute-target');
-  if (muteTarget) {
-    const muteSelected = muteTarget.value;
-    muteTarget.innerHTML = '<option value="">Oyunçu seç...</option>' + (room?.players || [])
-      .filter((p) => p.id !== myId)
-      .map((p) => `<option value="${p.id}">${esc(p.name)}${rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
-    if ((room?.players || []).some((p) => String(p.id) === muteSelected && p.id !== myId)) muteTarget.value = muteSelected;
+  const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
+  const optionsKey = players.map((p) => `${p.id}:${p.name}:${p.team}:${rtc.mutedPlayers.has(p.id) ? 1 : 0}`).join('|');
+  if (optionsKey !== adminPlayerOptionsKey) {
+    const selected = $('#admin-target')?.value || '';
+    const muteSelected = $('#admin-mute-target')?.value || '';
+    const makeOptions = (includeTeam, mute) => '<option value="">Oyunçu seç...</option>' + players
+      .map((p) => `<option value="${p.id}">${esc(p.name)}${includeTeam ? ` (${p.team === 'police' ? 'Polis' : 'Dost'})` : ''}${mute && rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
+    $('#admin-target').innerHTML = makeOptions(true, false);
+    $('#admin-mute-target').innerHTML = makeOptions(false, true);
+    if (players.some((p) => String(p.id) === selected)) $('#admin-target').value = selected;
+    if (players.some((p) => String(p.id) === muteSelected)) $('#admin-mute-target').value = muteSelected;
+    adminPlayerOptionsKey = optionsKey;
   }
   const allBtn = $('#admin-mute-all');
   if (allBtn) {
@@ -570,8 +568,10 @@ function makeAvatar(p) {
   const mate = p.team === me.team;
   const tag = textSprite(p.name + (p.adminEligible ? '  ADMIN' : ''), { color: police ? '#9bb8ff' : '#ffe08a', depthTest: !mate, height: 0.28 });
   tag.position.y = 2.2; g.add(tag);
+  const lastThreeArrow = textSprite('⬇', { color: '#ffdf45', bg: 'rgba(10,15,25,.78)', font: 86, depthTest: false, height: 0.62 });
+  lastThreeArrow.position.y = 4.2; lastThreeArrow.visible = false; g.add(lastThreeArrow);
   g.visible = false;
-  return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag };
+  return { group: g, body, bodyMat, police, color: police ? 0x1f3f9e : new THREE.Color(p.color), tag, lastThreeArrow };
 }
 function setAvatarJailed(av, j) {
   if (av.j === j) return; av.j = j;
@@ -983,6 +983,15 @@ function applyState(m) {
     r.av.tag.visible = !invisible;
     if (!r.has) { r.x = x; r.y = y; r.z = z; r.ry = ry; r.has = true; }
     if (r.j !== j) { r.j = j; setAvatarJailed(r.av, j); }
+  }
+  const remaining = room ? room.players.filter((p) => {
+    const jailed = p.id === myId ? me.jailed : remotes.get(p.id)?.j === 1;
+    return !jailed;
+  }) : [];
+  const showLastThree = gamePhase === 'play' && remaining.length > 0 && remaining.length <= 3;
+  for (const [id, r] of remotes) {
+    const player = room?.players.find((p) => p.id === id);
+    r.av.lastThreeArrow.visible = !!(showLastThree && player && !player.invisible && r.j !== 1);
   }
   updateHudCount();
 }
