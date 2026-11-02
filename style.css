@@ -447,3 +447,10 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 #scr-lobby .team h3 { order: 1; }
 #scr-lobby .team .tbtn { order: 2; min-height: 42px; }
 #scr-lobby .team .plist { order: 3; }
+
+/* Jumpscare image: tam ekran, qəfil böyüyən effekt */
+#jumpscare-overlay { background:#000 !important; }
+#jumpscare-overlay.active { animation:none !important; }
+.jumpscare-image { width:100vw; height:100vh; object-fit:cover; display:block; animation: scare-image-pop .22s cubic-bezier(.1,1.7,.4,1) both; }
+#jumpscare-overlay .scare-title { position:absolute; left:0; right:0; bottom:5vh; color:#fff; text-shadow:0 0 18px #ff001e, 0 0 40px #ff001e; font-size:clamp(24px,6vw,64px); }
+@keyframes scare-image-pop { from { transform:scale(.25); opacity:.2; } to { transform:scale(1); opacity:1; } }
