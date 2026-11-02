@@ -107,12 +107,6 @@ adminPanel.innerHTML = `
       <select id="admin-target"><option value="">Oyunçu seç...</option></select>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
     </div>
-    <div class="admin-scare admin-mutes">
-      <label>🔇 Səs idarəsi (yalnız sənin üçün)</label>
-      <button id="admin-mute-all" class="admin-option" type="button">🔇 Hamını susdur: OFF</button>
-      <select id="admin-mute-target"><option value="">Oyunçu seç...</option></select>
-      <button id="admin-mute-player" class="admin-option" type="button">🔇 Bu oyunçunu susdur</button>
-    </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
@@ -176,29 +170,7 @@ function updateAdminPanel() {
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
-  const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
-  const optionsKey = players.map((p) => `${p.id}:${p.name}:${p.team}:${rtc.mutedPlayers.has(p.id) ? 1 : 0}`).join('|');
-  if (optionsKey !== adminPlayerOptionsKey) {
-    const selected = $('#admin-target')?.value || '';
-    const muteSelected = $('#admin-mute-target')?.value || '';
-    const makeOptions = (includeTeam, mute) => '<option value="">Oyunçu seç...</option>' + players
-      .map((p) => `<option value="${p.id}">${esc(p.name)}${includeTeam ? ` (${p.team === 'police' ? 'Polis' : 'Dost'})` : ''}${mute && rtc.mutedPlayers.has(p.id) ? ' — SUSDURULUB' : ''}</option>`).join('');
-    $('#admin-target').innerHTML = makeOptions(true, false);
-    $('#admin-mute-target').innerHTML = makeOptions(false, true);
-    if (players.some((p) => String(p.id) === selected)) $('#admin-target').value = selected;
-    if (players.some((p) => String(p.id) === muteSelected)) $('#admin-mute-target').value = muteSelected;
-    adminPlayerOptionsKey = optionsKey;
-  }
-  const allBtn = $('#admin-mute-all');
-  if (allBtn) {
-    allBtn.textContent = `🔇 Hamını susdur: ${rtc.muteAll ? 'ON' : 'OFF'}`;
-    allBtn.classList.toggle('enabled', rtc.muteAll);
-  }
-  const playerBtn = $('#admin-mute-player');
-  if (playerBtn) {
-    const id = Number(muteTarget?.value);
-    playerBtn.textContent = id && rtc.mutedPlayers.has(id) ? '🔊 Bu oyunçunun səsini aç' : '🔇 Bu oyunçunu susdur';
-  }
+
 }
 function sendAdminState() {
   send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
@@ -216,20 +188,6 @@ $('#admin-jumpscare').addEventListener('click', () => {
   if (!target) return toast('Əvvəl oyunçu seç', true);
   send({ t: 'jumpscare', target });
   toast('Jumpscare göndərildi!');
-});
-$('#admin-mute-all').addEventListener('click', toggleMuteAll);
-$('#admin-mute-player').addEventListener('click', () => {
-  const target = Number($('#admin-mute-target').value);
-  if (!target) return toast('Əvvəl oyunçu seç', true);
-  if (rtc.mutedPlayers.has(target)) {
-    rtc.mutedPlayers.delete(target);
-    toast('Oyunçunun səsi yalnız səndə açıldı');
-  } else {
-    rtc.mutedPlayers.add(target);
-    toast('Oyunçu yalnız səndə susduruldu');
-  }
-  updateAdminPanel();
-  updateVoiceVolumes();
 });
 
 /* =====================================================================
