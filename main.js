@@ -1311,7 +1311,7 @@ function doAction() {
 const colliders = COLLIDERS;
 function updateGame(dt) {
   const frozen = me.team === 'police' && gamePhase === 'countdown';
-  const active = isLocked() && !frozen && gamePhase !== 'lobby';
+  const active = (isLocked() || adminMode) && !frozen && gamePhase !== 'lobby';
   me.moving = false;
   if (active) {
     const f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
