@@ -103,6 +103,14 @@ adminPanel.innerHTML = `
     <button id="admin-jump" class="admin-option" type="button">🦘 Super jump: OFF</button>
     <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
     <div class="admin-scare">
+      <strong>🎲 Hadisələri idarə et</strong>
+      <p>Avtomatik hadisə hər 2 dəqiqədən bir başlayır.</p>
+      <button class="admin-option" data-event="lights" type="button">💡 İşıqları söndür</button>
+      <button class="admin-option" data-event="speed" type="button">⚡ Sürət bonusu</button>
+      <button class="admin-option" data-event="fog" type="button">🌫️ Duman yarat</button>
+      <button class="admin-option" data-event="stop" type="button">⏹ Hadisəni dayandır</button>
+    </div>
+    <div class="admin-scare">
       <label for="admin-target">😈 Jumpscare üçün oyunçu</label>
       <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
@@ -194,6 +202,14 @@ function sendAdminState() {
 $('#admin-close').addEventListener('click', () => {
   adminPanel.classList.add('hidden');
   if (inGame) tryLock();
+});
+adminPanel.addEventListener('click', (e) => {
+  const button = e.target.closest('[data-event]');
+  if (!button) return;
+  if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
+  if (!adminMode) return toast('Əvvəl admini aktiv et: Ctrl + 0', true);
+  send({ t: 'controlEvent', name: button.dataset.event });
+  toast(button.dataset.event === 'stop' ? 'Hadisə dayandırıldı' : 'Hadisə başladıldı');
 });
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
