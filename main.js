@@ -217,7 +217,10 @@ $('#admin-target').addEventListener('pointerdown', () => {
       : '<option value="" disabled>Başqa oyunçu yoxdur</option>');
   if (others.some((p) => String(p.id) === selected)) target.value = selected;
 });
-$('#admin-close').addEventListener('click', () => adminPanel.classList.add('hidden'));
+$('#admin-close').addEventListener('click', () => {
+  adminPanel.classList.add('hidden');
+  if (inGame) tryLock();
+});
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
 $('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
@@ -1262,10 +1265,13 @@ addEventListener('keydown', (e) => {
     adminMode = !adminMode;
     if (adminMode) {
       adminPanel.classList.remove('hidden');
+      if (document.pointerLockElement) document.exitPointerLock();
+      updatePause();
       sendAdminState();
       toast('Admin xüsusiyyətləri aktiv oldu');
     } else {
       adminPanel.classList.add('hidden');
+      if (inGame) tryLock();
       adminHidden = false;
       adminSuperJump = false;
       adminSpeed = false;
