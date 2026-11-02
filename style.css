@@ -454,3 +454,91 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .jumpscare-image { width:100vw; height:100vh; object-fit:cover; display:block; animation: scare-image-pop .22s cubic-bezier(.1,1.7,.4,1) both; }
 #jumpscare-overlay .scare-title { position:absolute; left:0; right:0; bottom:5vh; color:#fff; text-shadow:0 0 18px #ff001e, 0 0 40px #ff001e; font-size:clamp(24px,6vw,64px); }
 @keyframes scare-image-pop { from { transform:scale(.25); opacity:.2; } to { transform:scale(1); opacity:1; } }
+
+
+/* Telefon UI yenilənməsi: yığcam menyu və rahat oyun idarələri */
+@media (pointer: coarse), (max-width: 900px), (max-height: 500px) {
+  #scr-main .mbtn {
+    width: min(100%, 340px);
+    min-height: 42px;
+    padding: 9px 13px;
+    gap: 9px;
+    font-size: 14px;
+    letter-spacing: .035em;
+    border-left-width: 3px;
+    clip-path: polygon(0 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  }
+  #scr-main .mbtn i { width: 18px; font-size: 15px; }
+  .btn, .mini, .tbtn, .start {
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .mobile-joystick {
+    width: clamp(108px, 25vw, 126px) !important;
+    height: clamp(108px, 25vw, 126px) !important;
+    left: max(12px, env(safe-area-inset-left, 0px));
+    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    border: 1.5px solid rgba(255,255,255,.3);
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,.035), 0 5px 16px #0006;
+  }
+  .joystick-ring { inset: 17px !important; }
+  .joystick-knob {
+    width: 44px !important;
+    height: 44px !important;
+    margin: -22px 0 0 -22px !important;
+  }
+  .joystick-label { font-size: 9px !important; }
+  .mobile-actions {
+    width: 150px;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px !important;
+    right: max(10px, env(safe-area-inset-right, 0px));
+    bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+  }
+  .mobile-actions .mobile-btn {
+    min-width: 0 !important;
+    width: 100%;
+    min-height: 42px !important;
+    padding: 6px 4px !important;
+    border-radius: 12px;
+    font-size: 11px !important;
+    line-height: 1.15;
+    background: rgba(15,22,37,.82);
+    border: 1px solid rgba(255,255,255,.22);
+    box-shadow: 0 3px 10px #0005;
+    backdrop-filter: blur(8px);
+  }
+  .mobile-actions .action {
+    grid-column: 1 / -1;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    background: linear-gradient(135deg, #ffad52, #ff7a1a) !important;
+    border-color: #ffc078 !important;
+    color: #211306 !important;
+    font-size: 12px !important;
+  }
+  .mobile-actions .mobile-btn:active,
+  .mobile-actions .mobile-btn.pressed {
+    transform: scale(.95);
+    filter: brightness(1.18);
+  }
+  #mobile-look-hint { display: none; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-joystick {
+    width: 104px !important;
+    height: 104px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions {
+    width: 138px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  }
+  .mobile-actions .mobile-btn { min-height: 36px !important; font-size: 10px !important; }
+  .mobile-actions .action { min-height: 38px !important; }
+}
