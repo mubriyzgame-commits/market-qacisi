@@ -104,7 +104,7 @@ adminPanel.innerHTML = `
     <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
     <div class="admin-scare">
       <label for="admin-target">😈 Jumpscare üçün oyunçu</label>
-      <select id="admin-target"><option value="">Oyunçu seç...</option></select>
+      <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
     </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
@@ -163,6 +163,7 @@ $('#sound-mute-player').addEventListener('click', () => {
   updateVoiceVolumes();
 });
 let adminPlayerOptionsKey = '';
+let selectedAdminTarget = '';
 function updateAdminPanel() {
   $('#admin-hide').textContent = `👻 Görünməzlik: ${adminHidden ? 'ON' : 'OFF'}`;
   $('#admin-jump').textContent = `🦘 Super jump: ${adminSuperJump ? 'ON' : 'OFF'}`;
@@ -171,17 +172,19 @@ function updateAdminPanel() {
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
 
-  // Select-ləri yalnız oyunçu siyahısı dəyişəndə qur: açıq dropdown-u hər frame bağlama.
-  const target = $('#admin-target');
-  if (!target) return;
+  // Native select əvəzinə görünən düymə siyahısı: brauzer dropdown problemi aradan qalxır.
+  const list = $('#admin-target-list');
+  if (!list) return;
   const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
   const key = players.map((p) => `${p.id}:${p.name}:${p.team}`).join('|');
   if (key !== adminPlayerOptionsKey) {
-    const selected = target.value;
-    target.innerHTML = '<option value="">Oyunçu seç...</option>' + players
-      .map((p) => `<option value="${p.id}">${esc(p.name)} (${p.team === 'police' ? 'Polis' : 'Dost'})</option>`).join('');
-    if (players.some((p) => String(p.id) === selected)) target.value = selected;
+    if (!players.some((p) => String(p.id) === selectedAdminTarget)) selectedAdminTarget = '';
+    list.innerHTML = players.length
+      ? players.map((p) => `<button type="button" class="admin-target-player ${String(p.id) === selectedAdminTarget ? 'selected' : ''}" data-player-id="${p.id}">${esc(p.name)} <small>${p.team === 'police' ? 'Polis' : 'Dost'}</small></button>`).join('')
+      : '<div class="admin-target-empty">Başqa oyunçu yoxdur. Otağa oyunçu qoşulsun.</div>';
     adminPlayerOptionsKey = key;
+  } else {
+    list.querySelectorAll('.admin-target-player').forEach((b) => b.classList.toggle('selected', b.dataset.playerId === selectedAdminTarget));
   }
 }
 function sendAdminState() {
@@ -195,14 +198,21 @@ $('#admin-close').addEventListener('click', () => {
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
 $('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
+$('#admin-target-list').addEventListener('click', (e) => {
+  const button = e.target.closest('.admin-target-player');
+  if (!button) return;
+  selectedAdminTarget = button.dataset.playerId;
+  updateAdminPanel();
+});
 $('#admin-jumpscare').addEventListener('click', () => {
   if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
   if (!adminMode) return toast('Əvvəl Ctrl + 0 ilə admini aktiv et', true);
-  const targetValue = $('#admin-target').value;
+  const targetValue = selectedAdminTarget;
   if (!targetValue) return toast('Siyahıdan oyunçu seç', true);
   const target = Number(targetValue);
   if (!room?.players.some((p) => Number(p.id) === target)) {
     adminPlayerOptionsKey = '';
+    selectedAdminTarget = '';
     updateAdminPanel();
     return toast('Oyunçu artıq serverdə deyil. Siyahı yeniləndi', true);
   }
