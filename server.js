@@ -143,7 +143,7 @@ function startGame(room) {
   room.rp = 0;
   room.ra = false;
   room.lastTick = Date.now();
-  room.nextEventAt = Date.now() + 120000;
+  room.nextEventAt = Date.now() + 60000;
   room.activeEvent = null;
   room.eventEndsAt = 0;
   broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
@@ -204,13 +204,14 @@ function tickRoom(room, dt) {
     if (room.activeEvent && now >= room.eventEndsAt) {
       broadcast(room, { t: 'event', name: room.activeEvent, active: false });
       room.activeEvent = null;
-      room.nextEventAt = now + 120000;
+      room.nextEventAt = now + 60000;
     }
     if (!room.activeEvent && now >= room.nextEventAt) {
       const events = ['lights', 'speed', 'fog'];
       room.activeEvent = events[Math.floor(Math.random() * events.length)];
-      room.eventEndsAt = now + 12000;
-      broadcast(room, { t: 'event', name: room.activeEvent, active: true, duration: 12 });
+      const duration = room.activeEvent === 'speed' ? 10000 : 12000;
+      room.eventEndsAt = now + duration;
+      broadcast(room, { t: 'event', name: room.activeEvent, active: true, duration: duration / 1000 });
     }
     // Azad etmə məntiqi: azad dost türmənin qarşısındakı zonada dayanmalıdır
     const jailedCount = [...room.players.values()].filter((p) => p.jailed).length;
@@ -336,15 +337,16 @@ function handle(p, m) {
         if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
         room.activeEvent = null;
         room.eventEndsAt = 0;
-        room.nextEventAt = Date.now() + 120000;
+        room.nextEventAt = Date.now() + 60000;
         return;
       }
       if (!['lights', 'speed', 'fog'].includes(m.name)) return;
       if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
       room.activeEvent = m.name;
-      room.eventEndsAt = Date.now() + 12000;
-      room.nextEventAt = room.eventEndsAt + 120000;
-      broadcast(room, { t: 'event', name: m.name, active: true, duration: 12 });
+      const duration = m.name === 'speed' ? 10000 : 12000;
+      room.eventEndsAt = Date.now() + duration;
+      room.nextEventAt = room.eventEndsAt + 60000;
+      broadcast(room, { t: 'event', name: m.name, active: true, duration: duration / 1000 });
       break;
     }
     case 'jumpscare': {
