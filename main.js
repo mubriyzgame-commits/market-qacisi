@@ -277,6 +277,7 @@ function onMsg(m) {
     case 'rtc': onRtc(m); break;
     case 'speak': if (m.on) speaking.add(m.id); else speaking.delete(m.id); updateSpeakingUI(); break;
     case 'jumpscare': showJumpscare(); break;
+    case 'event': applyRandomEvent(m); break;
     default: break;
   }
 }
@@ -303,11 +304,37 @@ addEventListener('resize', () => {
 });
 
 // İşıqlar
-scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-scene.add(new THREE.HemisphereLight(0xeaf2ff, 0x4a4f66, 1.1));
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.0); scene.add(ambientLight);
+const hemiLight = new THREE.HemisphereLight(0xeaf2ff, 0x4a4f66, 1.1); scene.add(hemiLight);
 const sun = new THREE.DirectionalLight(0xffffff, 0.9);
 sun.position.set(-10, 30, 14);
 scene.add(sun);
+let randomEvent = null;
+let randomEventUntil = 0;
+let eventHudTimer = null;
+function applyRandomEvent(m) {
+  if (!m.active) {
+    randomEvent = null;
+    ambientLight.intensity = 1.0; hemiLight.intensity = 1.1; sun.intensity = 0.9;
+    scene.fog.near = 22; scene.fog.far = 85;
+    $('#random-event-hud')?.classList.remove('active');
+    return;
+  }
+  randomEvent = m.name;
+  randomEventUntil = Date.now() + (m.duration || 12) * 1000;
+  const labels = { lights: '💡 İŞIQLAR SÖNDÜ!', speed: '⚡ SÜRƏT BONUSU!', fog: '🌫️ DUMAN GƏLDİ!' };
+  const el = $('#random-event-hud');
+  if (el) { el.textContent = labels[randomEvent] || '🎲 TƏSADÜFİ HADİSƏ!'; el.classList.add('active'); }
+  if (randomEvent === 'lights') { ambientLight.intensity = 0.12; hemiLight.intensity = 0.18; sun.intensity = 0.08; }
+  if (randomEvent === 'fog') { scene.fog.near = 3; scene.fog.far = 24; }
+  if (randomEvent === 'speed') flash('⚡ SÜRƏT BONUSU!', '#ffe066');
+  clearInterval(eventHudTimer);
+  eventHudTimer = setInterval(() => {
+    const left = Math.max(0, Math.ceil((randomEventUntil - Date.now()) / 1000));
+    if (el && randomEvent) el.textContent = (labels[randomEvent] || 'HADİSƏ') + ' ' + left + 's';
+    if (!left) clearInterval(eventHudTimer);
+  }, 250);
+}
 
 function rr(g, x, y, w, h, r) {
   g.beginPath();
@@ -878,6 +905,7 @@ $('#hud-items').innerHTML = ITEMS.map((it, i) => `<li data-n="${i}"><i style="ba
 function startGame(m) {
   if (!room) return;
   inGame = true;
+  randomEvent = null; applyRandomEvent({ active: false });
   gamePhase = 'countdown';
   collected = 0; needCount = m.need; relProg = 0; relActive = false; cdLeft = m.cd; timeLeft = m.dur; lastCd = 99;
   clearItems(); clearAvatars(); spawnInfo.clear();
@@ -903,6 +931,7 @@ function startGame(m) {
 }
 function endGameLocal() {
   inGame = false;
+  randomEvent = null; applyRandomEvent({ active: false });
   gamePhase = 'lobby';
   clearItems(); clearAvatars();
   document.body.classList.remove('ingame');
@@ -978,6 +1007,9 @@ function applyState(m) {
 /* =====================================================================
    HUD
    ===================================================================== */
+const randomEventHud = document.createElement('div');
+randomEventHud.id = 'random-event-hud';
+document.body.appendChild(randomEventHud);
 const jumpscareOverlay = document.createElement('div');
 jumpscareOverlay.id = 'jumpscare-overlay';
 jumpscareOverlay.innerHTML = '<img class="jumpscare-image" src="/jumpscare.webp" alt="Jumpscare" />';
@@ -1325,6 +1357,7 @@ function updateGame(dt) {
     }
     const police = me.team === 'police';
     let speed = adminMode && adminSpeed ? 12 : (police ? 4.7 : 4.5);
+    if (randomEvent === 'speed') speed *= 1.55;
     const wantSprint = (keys.ShiftLeft || keys.ShiftRight) && me.moving && !me.jailed && !me.exhausted;
     if (wantSprint && me.stamina > 0) {
       speed = police ? 6.8 : 7.0;
