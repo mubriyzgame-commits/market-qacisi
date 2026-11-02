@@ -144,8 +144,7 @@ function startGame(room) {
   room.ra = false;
   room.lastTick = Date.now();
   room.nextEventAt = Date.now() + 60000;
-  room.activeEvent = null;
-  room.eventEndsAt = 0;
+  room.activeEvents = {};
   broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
   broadcast(room, { t: 'room', room: roomInfo(room) });
 }
@@ -201,17 +200,17 @@ function tickRoom(room, dt) {
   } else if (room.phase === 'play') {
     room.timeLeft -= dt;
     const now = Date.now();
-    if (room.activeEvent && now >= room.eventEndsAt) {
-      broadcast(room, { t: 'event', name: room.activeEvent, active: false });
-      room.activeEvent = null;
-      room.nextEventAt = now + 60000;
+    for (const [eventName, endsAt] of Object.entries(room.activeEvents || {})) {
+      if (now >= endsAt) {
+        broadcast(room, { t: 'event', name: eventName, active: false });
+        delete room.activeEvents[eventName];
+      }
     }
-    if (!room.activeEvent && now >= room.nextEventAt) {
-      const events = ['lights', 'speed', 'fog'];
-      room.activeEvent = events[Math.floor(Math.random() * events.length)];
-      const duration = room.activeEvent === 'speed' ? 12000 : 60000;
-      room.eventEndsAt = now + duration;
-      broadcast(room, { t: 'event', name: room.activeEvent, active: true, duration: duration / 1000 });
+    if (Object.keys(room.activeEvents || {}).length === 0 && now >= room.nextEventAt) {
+      const eventName = ['lights', 'speed', 'fog'][Math.floor(Math.random() * 3)];
+      const duration = eventName === 'speed' ? 12000 : 60000;
+      room.activeEvents[eventName] = now + duration;
+      broadcast(room, { t: 'event', name: eventName, active: true, duration: duration / 1000 });
     }
     // Azad etmə məntiqi: azad dost türmənin qarşısındakı zonada dayanmalıdır
     const jailedCount = [...room.players.values()].filter((p) => p.jailed).length;
@@ -281,6 +280,7 @@ function handle(p, m) {
         hostId: p.id,
         players: new Map(),
         phase: 'lobby',
+        activeEvents: {},
         items: new Map(),
         cd: 0, timeLeft: 0, collected: 0, rp: 0, ra: false, lastTick: Date.now(),
       };
@@ -334,18 +334,18 @@ function handle(p, m) {
       const room = p.room;
       if (!p.adminEligible || !p.admin || !room || room.phase !== 'play') return;
       if (m.name === 'stop') {
-        if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
-        room.activeEvent = null;
-        room.eventEndsAt = 0;
+        for (const eventName of Object.keys(room.activeEvents || {})) {
+          broadcast(room, { t: 'event', name: eventName, active: false });
+        }
+        room.activeEvents = {};
         room.nextEventAt = Date.now() + 60000;
         return;
       }
       if (!['lights', 'speed', 'fog'].includes(m.name)) return;
-      if (room.activeEvent) broadcast(room, { t: 'event', name: room.activeEvent, active: false });
-      room.activeEvent = m.name;
+      room.activeEvents ||= {};
+      if (room.activeEvents[m.name]) return;
       const duration = m.name === 'speed' ? 12000 : 60000;
-      room.eventEndsAt = Date.now() + duration;
-      room.nextEventAt = room.eventEndsAt + 60000;
+      room.activeEvents[m.name] = Date.now() + duration;
       broadcast(room, { t: 'event', name: m.name, active: true, duration: duration / 1000 });
       break;
     }
