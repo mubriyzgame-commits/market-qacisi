@@ -104,7 +104,7 @@ adminPanel.innerHTML = `
     <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
     <div class="admin-scare">
       <strong>🎲 Hadisələri idarə et</strong>
-      <p>Avtomatik hadisə hər 2 dəqiqədən bir başlayır.</p>
+      <p>Hadisələr eyni vaxtda qoşula bilər. İşıq və duman 60s, sürət 12s.</p>
       <button class="admin-option" data-event="lights" type="button">💡 İşıqları söndür</button>
       <button class="admin-option" data-event="speed" type="button">⚡ Sürət bonusu</button>
       <button class="admin-option" data-event="fog" type="button">🌫️ Duman yarat</button>
@@ -325,31 +325,43 @@ const hemiLight = new THREE.HemisphereLight(0xeaf2ff, 0x4a4f66, 1.1); scene.add(
 const sun = new THREE.DirectionalLight(0xffffff, 0.9);
 sun.position.set(-10, 30, 14);
 scene.add(sun);
-let randomEvent = null;
-let randomEventUntil = 0;
+const activeRandomEvents = new Set();
+const randomEventEnds = new Map();
 let eventHudTimer = null;
 function applyRandomEvent(m) {
-  if (!m.active) {
-    randomEvent = null;
-    ambientLight.intensity = 1.0; hemiLight.intensity = 1.1; sun.intensity = 0.9;
-    scene.fog.near = 22; scene.fog.far = 85;
-    $('#random-event-hud')?.classList.remove('active');
-    return;
+  if (m.active) {
+    activeRandomEvents.add(m.name);
+    randomEventEnds.set(m.name, Date.now() + (m.duration || 12) * 1000);
+    if (m.name === 'speed') flash('⚡ SÜRƏT BONUSU!', '#ffe066');
+  } else {
+    activeRandomEvents.delete(m.name);
+    randomEventEnds.delete(m.name);
   }
-  randomEvent = m.name;
-  randomEventUntil = Date.now() + (m.duration || 12) * 1000;
+  const hasLights = activeRandomEvents.has('lights');
+  const hasFog = activeRandomEvents.has('fog');
+  ambientLight.intensity = hasLights ? 0.12 : 1.0;
+  hemiLight.intensity = hasLights ? 0.18 : 1.1;
+  sun.intensity = hasLights ? 0.08 : 0.9;
+  scene.fog.near = hasFog ? 3 : 22;
+  scene.fog.far = hasFog ? 24 : 85;
   const labels = { lights: '💡 İŞIQLAR SÖNDÜ!', speed: '⚡ SÜRƏT BONUSU!', fog: '🌫️ DUMAN GƏLDİ!' };
   const el = $('#random-event-hud');
-  if (el) { el.textContent = labels[randomEvent] || '🎲 TƏSADÜFİ HADİSƏ!'; el.classList.add('active'); }
-  if (randomEvent === 'lights') { ambientLight.intensity = 0.12; hemiLight.intensity = 0.18; sun.intensity = 0.08; }
-  if (randomEvent === 'fog') { scene.fog.near = 3; scene.fog.far = 24; }
-  if (randomEvent === 'speed') flash('⚡ SÜRƏT BONUSU!', '#ffe066');
+  if (!activeRandomEvents.size) {
+    el?.classList.remove('active');
+    clearInterval(eventHudTimer);
+    return;
+  }
+  el?.classList.add('active');
   clearInterval(eventHudTimer);
-  eventHudTimer = setInterval(() => {
-    const left = Math.max(0, Math.ceil((randomEventUntil - Date.now()) / 1000));
-    if (el && randomEvent) el.textContent = (labels[randomEvent] || 'HADİSƏ') + ' ' + left + 's';
-    if (!left) clearInterval(eventHudTimer);
-  }, 250);
+  const updateHud = () => {
+    const parts = [...activeRandomEvents].map(name => {
+      const left = Math.max(0, Math.ceil(((randomEventEnds.get(name) || Date.now()) - Date.now()) / 1000));
+      return (labels[name] || 'HADİSƏ') + ' ' + left + 's';
+    });
+    if (el) el.textContent = parts.join(' + ');
+  };
+  updateHud();
+  eventHudTimer = setInterval(updateHud, 250);
 }
 
 function rr(g, x, y, w, h, r) {
@@ -921,7 +933,7 @@ $('#hud-items').innerHTML = ITEMS.map((it, i) => `<li data-n="${i}"><i style="ba
 function startGame(m) {
   if (!room) return;
   inGame = true;
-  randomEvent = null; applyRandomEvent({ active: false });
+  for (const name of [...activeRandomEvents]) applyRandomEvent({ name, active: false });
   gamePhase = 'countdown';
   collected = 0; needCount = m.need; relProg = 0; relActive = false; cdLeft = m.cd; timeLeft = m.dur; lastCd = 99;
   clearItems(); clearAvatars(); spawnInfo.clear();
@@ -1373,7 +1385,7 @@ function updateGame(dt) {
     }
     const police = me.team === 'police';
     let speed = adminMode && adminSpeed ? 12 : (police ? 4.7 : 4.5);
-    if (randomEvent === 'speed') speed *= 1.55;
+    if (activeRandomEvents.has('speed')) speed *= 1.55;
     const wantSprint = (keys.ShiftLeft || keys.ShiftRight) && me.moving && !me.jailed && !me.exhausted;
     if (wantSprint && me.stamina > 0) {
       speed = police ? 6.8 : 7.0;
