@@ -959,7 +959,7 @@ function startGame(m) {
 }
 function endGameLocal() {
   inGame = false;
-  randomEvent = null; applyRandomEvent({ active: false });
+  for (const name of [...activeRandomEvents]) applyRandomEvent({ name, active: false });
   gamePhase = 'lobby';
   clearItems(); clearAvatars();
   document.body.classList.remove('ingame');
