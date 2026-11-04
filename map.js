@@ -59,30 +59,30 @@ export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
   if (mapId === 'school') {
     const boxes = [];
-    // Siniflərarası divarlar və qapı boşluqları
-    for (const x of [-18, 0, 18]) for (const [z,len] of [[-13,16],[11,16]]) {
-      boxes.push([x-0.14,x+0.14,z-len/2,z+len/2]);
+    const rooms = [
+      { x1: -35, x2: -14, cx: -24.5 }, { x1: -14, x2: 6, cx: -4 },
+      { x1: 6, x2: 26, cx: 16 },
+    ];
+    // Dəhlizdən otaqlara giriş boşluğu saxlanılan arakəsmələr
+    for (const x of [-14, 6]) for (const [z1,z2] of [[-22,-2],[2,22]]) {
+      boxes.push([x-0.16,x+0.16,z1,z2]);
     }
-    for (const z of [-13,10]) for (const [x,len] of [[-19,30],[19,30]]) {
-      boxes.push([x-len/2,x+len/2,z-0.14,z+0.14]);
+    for (const room of rooms) for (const z of [-2,2]) {
+      const gap = 1.5;
+      boxes.push([room.x1, room.cx-gap, z-0.16, z+0.16]);
+      boxes.push([room.cx+gap, room.x2, z-0.16, z+0.16]);
     }
-    for (const z of [-19, -8, 4, 15]) for (const x of [-25, -17, -7, 7, 17, 25]) {
-      boxes.push([x - 1.05, x + 1.05, z - 0.625, z + 0.625]);
-    }
-    for (const x of [-31, -13, 13, 31]) for (const z of [-18, 5]) {
-      boxes.push([x - 0.9, x + 0.9, z - 0.275, z + 0.275]);
+    // Partalar və kitab rəfləri
+    for (const room of rooms) for (const cz of [-12,12]) {
+      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
+        const x=room.cx+dx, z=cz+dz;
+        boxes.push([x-1.2,x+1.2,z-0.65,z+0.65]);
+      }
+      const shelfX = room.x1 < -30 ? room.x1+2.0 : room.x1+1.1;
+      boxes.push([shelfX-0.45,shelfX+0.45,cz-1.6,cz+1.6]);
     }
     return boxes;
   }
-  if (mapId === 'factory') return [
-    [-32, -30, -22, 22], [30, 32, -22, 22],
-    [-26, 26, -12.9, -12.55], [-26, 26, -9.45, -9.1],
-    [-26, 26, -0.9, -0.55], [-26, 26, 2.55, 2.9],
-    [-26, 26, 11.1, 11.45], [-26, 26, 14.55, 14.9],
-    [-29.7, -28.3, -11.7, -10.3], [28.3, 29.7, -11.7, -10.3],
-    [-29.7, -28.3, 0.3, 1.7], [28.3, 29.7, 0.3, 1.7],
-    [-29.7, -28.3, 12.3, 13.7], [28.3, 29.7, 12.3, 13.7]
-  ];
   const c = [];
   if (includeShelves) {
     for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
@@ -135,11 +135,6 @@ export function makeItemSlots(mapId = 'market') {
     }
     return slots;
   }
-  if (mapId === 'factory') {
-    const slots = [];
-    for (const z of [-11, 1, 13]) for (let x = -24; x <= 24; x += 3) slots.push({ x, y: 1.36, z });
-    return slots;
-  }
   const slots = [];
   for (const s of SHELVES) {
     const n = Math.floor(s.w / 1.5);
@@ -161,7 +156,6 @@ export function makeItemSlots(mapId = 'market') {
 export const MAPS = [
   { id: 'market', name: '🛒 Market' },
   { id: 'school', name: '🏫 Məktəb' },
-  { id: 'factory', name: '🏭 Oyuncaq fabriki' },
 ];
 export const MAP_ITEMS = {
   market: ITEMS,
