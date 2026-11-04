@@ -435,7 +435,7 @@ function buildWorld() {
       { x1:6, x2:26, cx:16, name:'1C' },
     ];
     // Şaquli arakəsmələr: iki sıradakı sinifləri ayırır
-    for (const x of [-14,6]) for (const [z,len] of [[-12,20],[12,20]]) {
+    for (const x of [-14,6,26]) for (const [z,len] of [[-12,20],[12,20]]) {
       box(0.32,3.9,len,0xd5dce8,x,1.95,z);
       box(0.36,0.16,len,0x7387a5,x,3.98,z);
     }
@@ -465,7 +465,7 @@ function buildWorld() {
           box(0.13,0.78,0.13,0x634832,x+sx*1.0,0.39,z+sz*0.5);
         box(0.7,0.72,0.7,0x526f9d,x,0.42,z+1.35);
       }
-      const shelfX=room.x1+1.1;
+      const shelfX=room.x1 < -30 ? room.x1+2.0 : room.x1+1.1;
       box(0.9,2.1,3.2,0x765238,shelfX,1.05,row);
       for(let y=0.45;y<1.9;y+=0.48) box(0.95,0.08,3.25,0xc49a68,shelfX,y,row);
       for(let i=0;i<5;i++) box(0.22,0.34,0.16,[0x4f83cc,0xd94c4c,0xe0b34d,0x55a7a0,0x5a9b55][i],shelfX+0.08,0.68+i*0.01,row-1.1+i*0.5);
@@ -474,7 +474,8 @@ function buildWorld() {
     box(W,0.08,3.8,0xb8c4d6,0,0.14,0);
     const title=textSprite('MƏKTƏB · KİTABLARI TAP',{color:'#fff1b8',height:0.75});
     title.position.set(0,4.2,-23); world.add(title);
-    // Siniflər üçün işıqlı tavan panelləri
+    // Tavan və siniflər üçün işıqlı panellər
+    box(W,0.18,D,0xdce3ed,0,5.05,0);
     for(const x of [-24.5,-4,16]) for(const z of [-12,12]) {
       box(5.5,0.08,4.5,0xf1e8c9,x,4.85,z);
     }
