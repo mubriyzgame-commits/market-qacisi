@@ -64,9 +64,13 @@ export function getColliders(includeShelves = true, includeTables = true, mapId 
       { x1: 6, x2: 26, cx: 16 },
     ];
     // Görünən yan divarlarla eyni ölçüdə toqquşma sərhədləri
-    for (const x of [-35,-14,6,26]) for (const cz of [-12,12]) {
+    for (const x of [-35,-14,6]) for (const cz of [-12,12]) {
       boxes.push([x-0.16,x+0.16,cz-10,cz+10]);
     }
+    boxes.push([25.84,26.16,-22,-2]);
+    boxes.push([25.84,26.16,2,14]);
+    // Türmənin qərb barmaqlığı məktəblə türməni ayırır
+    boxes.push([25.6,26,14,22]);
     // Otaqların arxa divarları — hər iki sıra tam bağlanır
     for (const room of rooms) for (const z of [-22,22]) {
       boxes.push([room.x1,room.x2,z-0.16,z+0.16]);
