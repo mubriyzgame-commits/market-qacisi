@@ -3,7 +3,7 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
-import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, MAPS, isValidMap, makeItemSlots } from './map.js';
+import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, makeItemSlots } from './map.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -70,8 +70,6 @@ function roomInfo(room) {
     hostId: room.hostId,
     max: room.max,
     isPublic: room.isPublic,
-    map: room.map || 'market',
-    mapName: MAPS.find((m) => m.id === room.map)?.name || '🛒 Market',
     phase: room.phase,
     players: [...room.players.values()].map((p) => ({
       id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
@@ -81,7 +79,7 @@ function roomInfo(room) {
 function listRooms() {
   return [...rooms.values()]
     .filter((r) => r.isPublic)
-    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase, map: r.map || 'market' }));
+    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase }));
 }
 const teamCount = (room, team) => [...room.players.values()].filter((p) => p.team === team).length;
 
@@ -147,7 +145,7 @@ function startGame(room) {
   room.lastTick = Date.now();
   room.nextEventAt = Date.now() + 60000;
   room.activeEvents = {};
-  broadcast(room, { t: 'start', map: room.map || 'market', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
+  broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
   broadcast(room, { t: 'room', room: roomInfo(room) });
 }
 
@@ -282,7 +280,6 @@ function handle(p, m) {
         name: cleanText(m.name, `${p.name} serveri`, 24),
         max: clamp(parseInt(m.max, 10) || 8, 2, MAX_POLICE + MAX_FRIENDS),
         isPublic: m.pub !== false,
-        map: 'market',
         hostId: p.id,
         players: new Map(),
         phase: 'lobby',
@@ -310,14 +307,6 @@ function handle(p, m) {
       leaveRoom(p);
       send(p.ws, { t: 'left' });
       break;
-    case 'map': {
-      const room = p.room;
-      if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
-      if (!isValidMap(m.map)) return send(p.ws, { t: 'error', msg: 'Xəritə seçimi yanlışdır' });
-      room.map = m.map;
-      broadcast(room, { t: 'room', room: roomInfo(room) });
-      break;
-    }
     case 'team': {
       const room = p.room;
       if (!room || room.phase !== 'lobby') return;
