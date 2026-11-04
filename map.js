@@ -54,52 +54,8 @@ export const SPAWNS = {
   police: [[16, 12], [16, 16], [16, 20]],
 };
 export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
-// Məktəb xəritəsində oyunçular dəhlizdə və boş başlanğıc sahəsində doğulur.
-export const SCHOOL_SPAWNS = {
-  friends: [[-32,-18],[-32,-14],[-32,-8],[-32,-4],[-32,0]],
-  police: [[12,0],[16,0],[20,0]],
-};
-
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
-  if (mapId === 'school') {
-    const boxes = [];
-    const rooms = [
-      { x1: -35, x2: -14, cx: -24.5 }, { x1: -14, x2: 6, cx: -4 },
-      { x1: 6, x2: 26, cx: 16 },
-    ];
-    // Görünən yan divarlarla eyni ölçüdə toqquşma sərhədləri
-    for (const x of [-35,-14,6]) for (const cz of [-12,12]) {
-      boxes.push([x-0.16,x+0.16,cz-10,cz+10]);
-    }
-    boxes.push([25.84,26.16,-22,-2]);
-    boxes.push([25.84,26.16,2,14]);
-    // Türmənin qərb barmaqlığı məktəblə türməni ayırır
-    boxes.push([25.6,26,14,22]);
-    // Otaqların arxa divarları — hər iki sıra tam bağlanır
-    for (const room of rooms) for (const z of [-22,22]) {
-      boxes.push([room.x1,room.x2,z-0.16,z+0.16]);
-    }
-    // Dəhlizə açılan qapılar: yalnız qapı boşluqları keçilə bilər
-    for (const room of rooms) for (const z of [-2,2]) {
-      const gap = 1.5;
-      boxes.push([room.x1, room.cx-gap, z-0.16, z+0.16]);
-      boxes.push([room.cx+gap, room.x2, z-0.16, z+0.16]);
-      // Açıq qapı qanadının real toqquşma sərhədi
-      const hingeX=room.cx-gap;
-      boxes.push([hingeX-0.05,hingeX+0.05,z < 0 ? z-1.15 : z-0.05,z < 0 ? z+0.05 : z+1.15]);
-    }
-    // Partalar və kitab rəfləri
-    for (const room of rooms) for (const cz of [-12,12]) {
-      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
-        const x=room.cx+dx, z=cz+dz;
-        boxes.push([x-1.2,x+1.2,z-0.65,z+0.65]);
-      }
-      const shelfX = room.x1 < -30 ? room.x1+2.0 : room.x1+1.1;
-      boxes.push([shelfX-0.45,shelfX+0.45,cz-1.6,cz+1.6]);
-    }
-    return boxes;
-  }
   const c = [];
   if (includeShelves) {
     for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
@@ -145,16 +101,6 @@ export function resolveCollisions(pos, r, boxes) {
 
 // Ərzağların yerləşə biləcəyi rəf yuvaları
 export function makeItemSlots(mapId = 'market') {
-  if (mapId === 'school') {
-    const slots = [];
-    const rooms = [-24.5, -4, 16];
-    for (const cx of rooms) for (const row of [-12, 12]) {
-      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
-        slots.push({ x: cx + dx, y: 0.92, z: row + dz });
-      }
-    }
-    return slots;
-  }
   const slots = [];
   for (const s of SHELVES) {
     const n = Math.floor(s.w / 1.5);
@@ -175,23 +121,8 @@ export function makeItemSlots(mapId = 'market') {
 
 export const MAPS = [
   { id: 'market', name: '🛒 Market' },
-  { id: 'school', name: '🏫 Məktəb' },
 ];
-export const MAP_ITEMS = {
-  market: ITEMS,
-  school: [
-    ['Riyaziyyat kitabı','#4f83cc'],['Azərbaycan dili kitabı','#d94c4c'],['İngilis dili kitabı','#e0b34d'],
-    ['Tarix kitabı','#a66b42'],['Coğrafiya atlası','#55a7a0'],['Biologiya kitabı','#5a9b55'],
-    ['Fizika kitabı','#6e79c9'],['Kimya kitabı','#a66ac2'],['Ədəbiyyat kitabı','#c96c91'],
-    ['Dəftər','#e7eaf0'],['Lüğət','#d88a45'],['Ensiklopediya','#6386a8'],
-    ['Həndəsə kitabı','#4d9cba'],['İnformatika kitabı','#556070'],['Rəsm albomu','#e8a8bc'],
-    ['Musiqi kitabı','#9a79c7'],['Test toplusu','#dbdce2'],['Oxu kitabı','#a1b86a'],
-    ['Şeir kitabı','#ce8fba'],['Nağıl kitabı','#e7a64a'],['Fizika dəftəri','#7aa6d8'],
-    ['Qrammatika kitabı','#c76c5e'],['Xəritə kitabı','#5a9d83'],['Təcrübə dəftəri','#b2a05e'],
-    ['Sözlük','#9a7b5e'],['İş dəftəri','#d0a2d8'],['Məntiq kitabı','#7d91b7'],
-    ['Rəngli atlas','#e17d54'],['Oxu gündəliyi','#73a8a1'],['Kitabça','#d4bd78']
-  ]
-};
+export const MAP_ITEMS = { market: ITEMS };
 export function getMapItems(id = 'market') {
-  return MAP_ITEMS[id] || ITEMS;
+  return ITEMS;
 }
