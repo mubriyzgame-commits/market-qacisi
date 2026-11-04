@@ -430,13 +430,13 @@ function buildWorld() {
   if (activeMap === 'school') {
     // Məktəb: mərkəzi dəhliz və altı ayrı sinif otağı
     box(W,0.18,5,0xb8c4d6,0,0.09,0);
-    for (const x of [-18,0,18]) {
-      box(0.28,3.8,42,0xd6dce8,x,1.9,-1);
-      box(0.32,0.16,42,0x6c83a5,x,3.85,-1);
+    for (const x of [-18,0,18]) for (const [z,len] of [[-13,16],[11,16]]) {
+      box(0.28,3.8,len,0xd6dce8,x,1.9,z);
+      box(0.32,0.16,len,0x6c83a5,x,3.85,z);
     }
-    for (const z of [-13,10]) {
-      box(68,3.8,0.28,0xd6dce8,0,1.9,z);
-      box(68,0.16,0.32,0x6c83a5,0,3.85,z);
+    for (const z of [-13,10]) for (const [x,len] of [[-19,30],[19,30]]) {
+      box(len,3.8,0.28,0xd6dce8,x,1.9,z);
+      box(len,0.16,0.32,0x6c83a5,x,3.85,z);
     }
     for (const x of [-27,-9,9,27]) {
       const board=box(4.8,1.7,0.12,0x276b55,x,2.25,-21);
@@ -648,11 +648,17 @@ const itemGroup = new THREE.Group(); scene.add(itemGroup);
 function spawnItem(d) {
   const [name, color] = activeItems[d.n];
   const g = new THREE.Group(); g.position.set(d.x, d.y, d.z);
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(0.46, 0.46, 0.36),
-    new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.55, roughness: 0.5 }),
-  );
+  let geometry;
+  if (activeMap === 'school') geometry = new THREE.BoxGeometry(0.42, 0.13, 0.3);
+  else if (activeMap === 'factory') {
+    geometry = [new THREE.BoxGeometry(0.38,0.25,0.5), new THREE.SphereGeometry(0.23,16,12), new THREE.ConeGeometry(0.23,0.48,12), new THREE.CylinderGeometry(0.18,0.18,0.38,14)][d.n % 4];
+  } else geometry = new THREE.BoxGeometry(0.46, 0.46, 0.36);
+  const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.55, roughness: 0.5 }));
   g.add(mesh);
+  if (activeMap === 'school') {
+    const pages = new THREE.Mesh(new THREE.BoxGeometry(0.35,0.035,0.26), L(0xf3ead7));
+    pages.position.y = 0.035; g.add(pages);
+  }
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85 }));
   glow.scale.set(1.5, 1.5, 1); g.add(glow);
   const label = textSprite(name, { font: 58, height: 0.32 });
