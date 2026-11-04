@@ -428,61 +428,57 @@ function buildWorld() {
   box(0.6, 5, D, 0x34415e, WORLD.minX - 0.3, 2.5, 0);
   box(0.6, 5, D, 0x34415e, WORLD.maxX + 0.3, 2.5, 0);
   if (activeMap === 'school') {
-    // Məktəb: mərkəzi dəhliz və altı ayrı sinif otağı
-    box(W,0.18,5,0xb8c4d6,0,0.09,0);
-    for (const x of [-18,0,18]) for (const [z,len] of [[-13,16],[11,16]]) {
-      box(0.28,3.8,len,0xd6dce8,x,1.9,z);
-      box(0.32,0.16,len,0x6c83a5,x,3.85,z);
+    // Altı ayrı sinif otağı və ortada geniş dəhliz
+    const rooms = [
+      { x1:-35, x2:-14, cx:-24.5, name:'1A' },
+      { x1:-14, x2:6, cx:-4, name:'1B' },
+      { x1:6, x2:26, cx:16, name:'1C' },
+    ];
+    // Şaquli arakəsmələr: iki sıradakı sinifləri ayırır
+    for (const x of [-14,6]) for (const [z,len] of [[-12,20],[12,20]]) {
+      box(0.32,3.9,len,0xd5dce8,x,1.95,z);
+      box(0.36,0.16,len,0x7387a5,x,3.98,z);
     }
-    for (const z of [-13,10]) for (const [x,len] of [[-19,30],[19,30]]) {
-      box(len,3.8,0.28,0xd6dce8,x,1.9,z);
-      box(len,0.16,0.32,0x6c83a5,x,3.85,z);
+    // Dəhlizin hər iki tərəfində qapı boşluğu olan divarlar
+    for (const room of rooms) for (const z of [-2,2]) {
+      const gap=1.5;
+      const leftLen=(room.cx-gap)-room.x1;
+      const rightLen=room.x2-(room.cx+gap);
+      if(leftLen>0) box(leftLen,3.9,0.32,0xd5dce8,room.x1+leftLen/2,1.95,z);
+      if(rightLen>0) box(rightLen,3.9,0.32,0xd5dce8,room.cx+gap+rightLen/2,1.95,z);
+      // Qapı çərçivələri
+      box(0.16,2.5,0.18,0x8b6849,room.cx-gap,1.25,z);
+      box(0.16,2.5,0.18,0x8b6849,room.cx+gap,1.25,z);
+      box(3.15,0.16,0.2,0x8b6849,room.cx,2.55,z);
     }
-    for (const x of [-27,-9,9,27]) {
-      const board=box(4.8,1.7,0.12,0x276b55,x,2.25,-21);
-      box(5.2,0.12,0.18,0x8b6849,x,3.18,-21);
-      const sign=textSprite('SINIF',{color:'#ffffff',bg:'rgba(24,45,65,.85)',height:0.45});
-      sign.position.set(x,3.65,-20.8); world.add(sign);
+    // Hər sinifdə lövhə, beş parta və kitab şkafı
+    for (const room of rooms) for (const row of [-12,12]) {
+      const backZ = row < 0 ? -21.7 : 21.7;
+      box(5.2,1.8,0.14,0x24634e,room.cx,2.25,backZ);
+      box(5.5,0.13,0.2,0x8b6849,room.cx,3.2,backZ);
+      const label=textSprite('SINIF '+room.name,{color:'#ffffff',bg:'rgba(24,45,65,.9)',height:0.48});
+      label.position.set(room.cx,3.65,row<0?-19.8:19.8); world.add(label);
+      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
+        const x=room.cx+dx, z=row+dz;
+        box(2.4,0.16,1.3,0x9a704c,x,0.82,z);
+        for(const sx of [-1,1]) for(const sz of [-1,1])
+          box(0.13,0.78,0.13,0x634832,x+sx*1.0,0.39,z+sz*0.5);
+        box(0.7,0.72,0.7,0x526f9d,x,0.42,z+1.35);
+      }
+      const shelfX=room.x1+1.1;
+      box(0.9,2.1,3.2,0x765238,shelfX,1.05,row);
+      for(let y=0.45;y<1.9;y+=0.48) box(0.95,0.08,3.25,0xc49a68,shelfX,y,row);
+      for(let i=0;i<5;i++) box(0.22,0.34,0.16,[0x4f83cc,0xd94c4c,0xe0b34d,0x55a7a0,0x5a9b55][i],shelfX+0.08,0.68+i*0.01,row-1.1+i*0.5);
     }
-    for (const z of [-19,-8,4,15]) for (const x of [-25,-17,-7,7,17,25]) {
-      box(2.1,0.18,1.25,0x9a704c,x,0.78,z);
-      box(0.12,0.75,0.12,0x6b4c35,x-0.82,0.38,z-0.42);
-      box(0.12,0.75,0.12,0x6b4c35,x+0.82,0.38,z-0.42);
-      box(0.12,0.75,0.12,0x6b4c35,x-0.82,0.38,z+0.42);
-      box(0.12,0.75,0.12,0x6b4c35,x+0.82,0.38,z+0.42);
-      box(0.55,0.65,0.55,0x526f9d,x,0.42,z+0.92);
-    }
-    for (const x of [-31,-13,13,31]) for (const z of [-18,5]) {
-      box(1.8,2.1,0.55,0x7c573b,x,1.05,z);
-      for(let y=0.55;y<1.9;y+=0.65) box(1.65,0.06,0.48,0xc9a36c,x,y,z+0.04);
-    }
+    // Dəhliz döşəməsi və istiqamət lövhəsi
+    box(W,0.08,3.8,0xb8c4d6,0,0.14,0);
     const title=textSprite('MƏKTƏB · KİTABLARI TAP',{color:'#fff1b8',height:0.75});
-    title.position.set(0,4.1,-23); world.add(title);
-  } else if (activeMap === 'factory') {
-    // Oyuncaq fabriki: üç işlək görünüşlü konveyer xətti
-    box(W,0.18,D,0x59616d,0,0.09,0);
-    for (const z of [-11,1,13]) {
-      box(56,0.7,3.2,0x343d4d,0,0.65,z);
-      box(54,0.12,2.45,0x202832,0,1.06,z);
-      for(let x=-26;x<=26;x+=2) {
-        const roller=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,2.55,12),L(0x8995a6));
-        roller.rotation.z=Math.PI/2; roller.position.set(x,0.92,z); world.add(roller);
-      }
-      box(56,0.18,0.18,0xffb347,0,1.22,z-1.72);
-      box(56,0.18,0.18,0xffb347,0,1.22,z+1.72);
-      for(const x of [-29,29]) {
-        box(1.4,3.4,1.4,0x4b596d,x,1.7,z);
-        box(1.6,0.16,1.6,0xff8b35,x,3.45,z);
-      }
+    title.position.set(0,4.2,-23); world.add(title);
+    // Siniflər üçün işıqlı tavan panelləri
+    for(const x of [-24.5,-4,16]) for(const z of [-12,12]) {
+      box(5.5,0.08,4.5,0xf1e8c9,x,4.85,z);
     }
-    for(const x of [-30,30]) for(const z of [-20,20]) box(1.2,4.2,1.2,0x4c5b70,x,2.1,z);
-    for(const x of [-18,0,18]) {
-      box(5,1.3,4,0x56677c,x,0.65,20);
-      box(5.2,0.16,4.2,0xff8b35,x,1.38,20);
-    }
-    const title=textSprite('OYUNCAQ FABRİKİ',{color:'#fff1b8',height:0.8});
-    title.position.set(0,4.1,-22); world.add(title);
-  } else {
+  }else {
     // Divar zolağı
     box(W, 0.35, 0.1, 0xff7a1a, 0, 1.3, WORLD.maxZ - 0.05);
     box(0.1, 0.35, D, 0xff7a1a, WORLD.minX + 0.05, 1.3, 0);
@@ -628,7 +624,7 @@ let COLLIDERS = getColliders();
 let COLLIDERS_NO_TABLES = getColliders(true, false);
 let COLLIDERS_NO_SHELVES = getColliders(false, false);
 function setActiveMap(id) {
-  const next = MAPS.some((m) => m.id === id) ? id : 'market';
+  const next = id === 'school' ? 'school' : 'market';
   if (next === activeMap && world.children.length) return;
   activeMap = next;
   while (world.children.length) {
@@ -650,9 +646,7 @@ function spawnItem(d) {
   const g = new THREE.Group(); g.position.set(d.x, d.y, d.z);
   let geometry;
   if (activeMap === 'school') geometry = new THREE.BoxGeometry(0.42, 0.13, 0.3);
-  else if (activeMap === 'factory') {
-    geometry = [new THREE.BoxGeometry(0.38,0.25,0.5), new THREE.SphereGeometry(0.23,16,12), new THREE.ConeGeometry(0.23,0.48,12), new THREE.CylinderGeometry(0.18,0.18,0.38,14)][d.n % 4];
-  } else geometry = new THREE.BoxGeometry(0.46, 0.46, 0.36);
+  else geometry = new THREE.BoxGeometry(0.46, 0.46, 0.36);
   const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.55, roughness: 0.5 }));
   g.add(mesh);
   if (activeMap === 'school') {
