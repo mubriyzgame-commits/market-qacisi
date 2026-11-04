@@ -59,6 +59,13 @@ export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
   if (mapId === 'school') {
     const boxes = [];
+    // Siniflərarası divarlar və qapı boşluqları
+    for (const x of [-18, 0, 18]) for (const [z,len] of [[-13,16],[11,16]]) {
+      boxes.push([x-0.14,x+0.14,z-len/2,z+len/2]);
+    }
+    for (const z of [-13,10]) for (const [x,len] of [[-19,30],[19,30]]) {
+      boxes.push([x-len/2,x+len/2,z-0.14,z+0.14]);
+    }
     for (const z of [-19, -8, 4, 15]) for (const x of [-25, -17, -7, 7, 17, 25]) {
       boxes.push([x - 1.05, x + 1.05, z - 0.625, z + 0.625]);
     }
@@ -69,8 +76,12 @@ export function getColliders(includeShelves = true, includeTables = true, mapId 
   }
   if (mapId === 'factory') return [
     [-32, -30, -22, 22], [30, 32, -22, 22],
-    [-26, 26, -17, -15], [-26, 26, -5, -3], [-26, 26, 7, 9],
-    [-26, -24, -22, 22], [24, 26, -22, 22]
+    [-26, 26, -12.9, -12.55], [-26, 26, -9.45, -9.1],
+    [-26, 26, -0.9, -0.55], [-26, 26, 2.55, 2.9],
+    [-26, 26, 11.1, 11.45], [-26, 26, 14.55, 14.9],
+    [-29.7, -28.3, -11.7, -10.3], [28.3, 29.7, -11.7, -10.3],
+    [-29.7, -28.3, 0.3, 1.7], [28.3, 29.7, 0.3, 1.7],
+    [-29.7, -28.3, 12.3, 13.7], [28.3, 29.7, 12.3, 13.7]
   ];
   const c = [];
   if (includeShelves) {
