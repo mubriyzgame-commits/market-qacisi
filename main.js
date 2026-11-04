@@ -414,7 +414,92 @@ function mulberry(a) {
 }
 
 let zoneRing = null, zoneDisc = null;
+let activeMap = 'market';
+function buildZapravkaWorld() {
+  const W = WORLD.maxX - WORLD.minX, D = WORLD.maxZ - WORLD.minZ;
+  const asphalt = new THREE.Mesh(new THREE.PlaneGeometry(W, D), L(0x343b46));
+  asphalt.rotation.x = -Math.PI / 2; world.add(asphalt);
+  // Açıq hava meydançası və yol xətləri
+  box(W, 0.35, 0.5, 0x59616d, 0, 0.16, WORLD.minZ);
+  box(W, 0.35, 0.5, 0x59616d, 0, 0.16, WORLD.maxZ);
+  box(0.5, 0.35, D, 0x59616d, WORLD.minX, 0.16, 0);
+  box(0.5, 0.35, D, 0x59616d, WORLD.maxX, 0.16, 0);
+  for (let z = -20; z <= 20; z += 8) box(0.16, 0.025, 3.2, 0xf4d35e, -1.5, 0.025, z);
+  // Kiçik market/kassa binası
+  box(13, 3.8, 8, 0x26354b, -25, 1.9, 13);
+  box(13.2, 0.22, 8.2, 0xff8b35, -25, 3.85, 13);
+  box(5.5, 2.4, 0.16, 0x70cfff, -25, 2.1, 8.9);
+  const shopSign = textSprite('ZAPravka MARKET', { color:'#fff1b8', bg:'rgba(15,25,40,.85)', height:0.85 });
+  shopSign.position.set(-25, 4.55, 8.7); world.add(shopSign);
+  // Yanacaq doldurma örtüyü və dayaqları
+  box(24, 0.45, 12, 0xd9e1ed, 1, 4.5, 13);
+  box(24.3, 0.16, 12.3, 0xff8b35, 1, 4.78, 13);
+  for (const x of [-10, 12]) for (const z of [8, 18]) box(0.48, 4.4, 0.48, 0x8b9aaf, x, 2.2, z);
+  // Yanacaq nasosları
+  for (const x of [-6, 1, 8]) {
+    box(1.8, 1.8, 1.1, 0xdce5ef, x, 1.0, 13);
+    box(1.35, 0.65, 0.08, 0x182536, x, 1.25, 12.42);
+    box(0.22, 0.55, 0.16, 0x31d6a1, x + 0.42, 0.9, 12.38);
+    const hose = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.045, 8, 16, Math.PI), L(0x202733));
+    hose.rotation.z = Math.PI; hose.position.set(x - 0.55, 1.0, 12.42); world.add(hose);
+    box(0.12, 0.5, 0.12, 0x202733, x - 0.78, 0.82, 12.42);
+  }
+  // Ərzaq rəfləri — oyun əşyalarının mövqeləri ilə eyni koordinatlarda
+  const frame = L(0x52627a), board = L(0xc5cfdd);
+  for (const sh of SHELVES) {
+    const g = new THREE.Group(); g.position.set(sh.x, 0, sh.z);
+    const back = new THREE.Mesh(new THREE.BoxGeometry(sh.w, sh.h, 0.08), frame); back.position.y = sh.h/2; g.add(back);
+    for (const side of [-1,1]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, sh.h, sh.d), frame);
+      post.position.set(side*sh.w/2, sh.h/2, 0); g.add(post);
+    }
+    for (const y of [...SHELF.boards, sh.h]) {
+      const shelf = new THREE.Mesh(new THREE.BoxGeometry(sh.w,0.08,sh.d),board);
+      shelf.position.y=y; g.add(shelf);
+    }
+    world.add(g);
+  }
+  // Parking xətləri və işıq dirəkləri
+  for (let x=-31; x<=25; x+=7) {
+    box(0.12,0.025,5,0xf5f5f5,x,0.03,-12);
+    box(0.12,0.025,5,0xf5f5f5,x+5,0.03,-12);
+  }
+  for (const x of [-32, 32]) {
+    box(0.18,5,0.18,0x66758a,x,2.5,-20);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.3,12,8),new THREE.MeshBasicMaterial({color:0xfff0b0}));
+    lamp.position.set(x,5,-20); world.add(lamp);
+  }
+  // Türmə və azad etmə zonası
+  const pb=PRISON.box, cx=(pb.minX+pb.maxX)/2, cz=(pb.minZ+pb.maxZ)/2;
+  box(pb.maxX-pb.minX,0.08,pb.maxZ-pb.minZ,0x4b5563,cx,0.06,cz);
+  for(let x=pb.minX;x<=pb.maxX;x+=0.45) box(0.055,2.8,0.055,0x222936,x,1.4,pb.minZ);
+  box(pb.maxX-pb.minX,2.8,0.12,0x657184,cx,1.4,pb.maxZ);
+  box(0.12,2.8,pb.maxZ-pb.minZ,0x657184,pb.maxX,1.4,cz);
+  const jailSign=textSprite('TÜRMƏ',{color:'#ff7b87',height:0.65}); jailSign.position.set(cx,3.4,pb.minZ); world.add(jailSign);
+  const z=PRISON.zone;
+  zoneRing=new THREE.Mesh(new THREE.RingGeometry(z.r-0.18,z.r,48),new THREE.MeshBasicMaterial({color:0x38d996,side:THREE.DoubleSide}));
+  zoneRing.rotation.x=-Math.PI/2; zoneRing.position.set(z.x,0.04,z.z); world.add(zoneRing);
+  zoneDisc=new THREE.Mesh(new THREE.CircleGeometry(z.r-0.18,48),new THREE.MeshBasicMaterial({color:0x38d996,transparent:true,opacity:0.18,side:THREE.DoubleSide}));
+  zoneDisc.rotation.x=-Math.PI/2; zoneDisc.position.set(z.x,0.035,z.z); world.add(zoneDisc);
+  const zl=textSprite('DOSTU AZAD ET · 5 san',{color:'#8dffc4',height:0.45,font:40});
+  zl.position.set(z.x,2.2,z.z); world.add(zl);
+}
+function addMegaFuelArea() {
+  // Marketin yanındakı əlavə yanacaq sahəsi
+  box(25,0.35,11,0x343b46,0,0.18,12);
+  box(25,0.45,11,0xd9e1ed,0,4.35,12);
+  box(25.3,0.15,11.3,0xff8b35,0,4.62,12);
+  for(const x of [-10,10]) for(const z of [8,16]) box(0.45,4.2,0.45,0x8b9aaf,x,2.1,z);
+  for(const x of [-6,0,6]) {
+    box(1.7,1.8,1.05,0xe4eaf2,x,1,12);
+    box(1.25,0.62,0.08,0x182536,x,1.25,11.43);
+    box(0.18,0.5,0.16,0x31d6a1,x+0.4,0.9,11.4);
+  }
+  const sign=textSprite('YANACAQ DOLDURMA',{color:'#fff1b8',height:0.65});
+  sign.position.set(0,4.95,6.5); world.add(sign);
+}
 function buildWorld() {
+  if (activeMap === 'zapravka') { buildZapravkaWorld(); return; }
   const W = WORLD.maxX - WORLD.minX, D = WORLD.maxZ - WORLD.minZ;
   // Döşəmə
   const ft = checkerTexture('#cfd6e4', '#b3bccf'); ft.repeat.set(W / 4, D / 4);
@@ -562,6 +647,18 @@ function buildWorld() {
   zoneDisc.rotation.x = -Math.PI / 2; zoneDisc.position.set(z.x, 0.035, z.z); world.add(zoneDisc);
   const zl = textSprite('DOSTU AZAD ET · 5 san', { color: '#8dffc4', height: 0.45, font: 40 });
   zl.position.set(z.x, 2.2, z.z); world.add(zl);
+  if (activeMap === 'mega') addMegaFuelArea();
+}
+function setActiveMap(id) {
+  const next = ['market','zapravka','mega'].includes(id) ? id : 'market';
+  if (next === activeMap && world.children.length) return;
+  activeMap = next;
+  while (world.children.length) {
+    const child = world.children[0]; world.remove(child);
+    child.traverse?.((o) => { if (o.geometry) o.geometry.dispose(); });
+  }
+  zoneRing = null; zoneDisc = null;
+  buildWorld();
 }
 buildWorld();
 const COLLIDERS = getColliders();
@@ -940,6 +1037,7 @@ $('#hud-items').innerHTML = ITEMS.map((it, i) => `<li data-n="${i}"><i style="ba
 
 function startGame(m) {
   if (!room) return;
+  setActiveMap(m.map || room.map || 'market');
   inGame = true;
   for (const name of [...activeRandomEvents]) applyRandomEvent({ name, active: false });
   gamePhase = 'countdown';
