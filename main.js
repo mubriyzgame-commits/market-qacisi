@@ -427,83 +427,7 @@ function buildWorld() {
   box(W + 1.2, 5, 0.6, 0x34415e, 0, 2.5, WORLD.maxZ + 0.3);
   box(0.6, 5, D, 0x34415e, WORLD.minX - 0.3, 2.5, 0);
   box(0.6, 5, D, 0x34415e, WORLD.maxX + 0.3, 2.5, 0);
-  if (activeMap === 'school') {
-    // Altı ayrı sinif otağı və ortada geniş dəhliz
-    const rooms = [
-      { x1:-35, x2:-14, cx:-24.5, name:'1A' },
-      { x1:-14, x2:6, cx:-4, name:'1B' },
-      { x1:6, x2:26, cx:16, name:'1C' },
-    ];
-    // Siniflərin yan arakəsmələri — hər otaq ayrıca bağlanır
-    for (const x of [-35,-14,6]) for (const z of [-12,12]) {
-      box(0.32,3.9,20,0xd5dce8,x,1.95,z);
-      box(0.36,0.12,20,0x7387a5,x,3.96,z);
-    }
-    // Məktəblə türmə arasındakı divar türmənin barmaqlığına qədər davam edir
-    box(0.32,3.9,20,0xd5dce8,26,1.95,-12);
-    box(0.36,0.12,20,0x7387a5,26,3.96,-12);
-    box(0.32,3.9,12,0xd5dce8,26,1.95,8);
-    box(0.36,0.12,12,0x7387a5,26,3.96,8);
-    // Hər sinfin arxa divarı: otaqların arxası açıq qalmasın
-    for (const room of rooms) for (const z of [-22,22]) {
-      const width=room.x2-room.x1;
-      box(width,3.9,0.32,0xd5dce8,(room.x1+room.x2)/2,1.95,z);
-      box(width+0.08,0.12,0.36,0x7387a5,(room.x1+room.x2)/2,3.96,z);
-    }
-    // Dəhlizin hər iki tərəfində qapı boşluğu olan divarlar
-    for (const room of rooms) for (const z of [-2,2]) {
-      const gap=1.5;
-      const leftLen=(room.cx-gap)-room.x1;
-      const rightLen=room.x2-(room.cx+gap);
-      if(leftLen>0) box(leftLen,3.9,0.32,0xd5dce8,room.x1+leftLen/2,1.95,z);
-      if(rightLen>0) box(rightLen,3.9,0.32,0xd5dce8,room.cx+gap+rightLen/2,1.95,z);
-      // Sadə, düz qapı çərçivəsi — üst hissə yan dirəklərlə eyni xəttdə
-      box(0.14,2.42,0.18,0x8b6849,room.cx-gap,1.21,z);
-      box(0.14,2.42,0.18,0x8b6849,room.cx+gap,1.21,z);
-      box(3.0,0.14,0.2,0x8b6849,room.cx,2.43,z);
-      // Qapı üstündə nazik açıq rəngli haşiyə
-      box(3.0,0.045,0.22,0xc49a68,room.cx,2.51,z);
-      // Qapı qanadı açıq vəziyyətdədir; keçidin ortasını bağlamır
-      const door = new THREE.Group();
-      door.position.set(room.cx-gap,0,z);
-      door.rotation.y = z < 0 ? Math.PI/2 : -Math.PI/2;
-      const leaf = new THREE.Mesh(new THREE.BoxGeometry(1.15,2.25,0.09),L(0x9a704c));
-      leaf.position.set(0.575,1.125,0);
-      door.add(leaf);
-      const handle = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),L(0xd9b56f));
-      handle.position.set(0.98,1.08,0.07);
-      door.add(handle);
-      world.add(door);
-    }
-    // Hər sinifdə lövhə, beş parta və kitab şkafı
-    for (const room of rooms) for (const row of [-12,12]) {
-      const backZ = row < 0 ? -21.7 : 21.7;
-      box(5.2,1.8,0.14,0x24634e,room.cx,2.25,backZ);
-      box(5.5,0.13,0.2,0x8b6849,room.cx,3.2,backZ);
-      const label=textSprite('SINIF '+room.name,{color:'#ffffff',bg:'rgba(24,45,65,.9)',height:0.48});
-      label.position.set(room.cx,3.65,row<0?-19.8:19.8); world.add(label);
-      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
-        const x=room.cx+dx, z=row+dz;
-        box(2.4,0.16,1.3,0x9a704c,x,0.82,z);
-        for(const sx of [-1,1]) for(const sz of [-1,1])
-          box(0.13,0.78,0.13,0x634832,x+sx*1.0,0.39,z+sz*0.5);
-        box(0.7,0.72,0.7,0x526f9d,x,0.42,z+1.35);
-      }
-      const shelfX=room.x1 < -30 ? room.x1+2.0 : room.x1+1.1;
-      box(0.9,2.1,3.2,0x765238,shelfX,1.05,row);
-      for(let y=0.45;y<1.9;y+=0.48) box(0.95,0.08,3.25,0xc49a68,shelfX,y,row);
-      for(let i=0;i<5;i++) box(0.22,0.34,0.16,[0x4f83cc,0xd94c4c,0xe0b34d,0x55a7a0,0x5a9b55][i],shelfX+0.08,0.68+i*0.01,row-1.1+i*0.5);
-    }
-    // Dəhliz döşəməsi və istiqamət lövhəsi
-    box(W,0.08,3.8,0xb8c4d6,0,0.14,0);
-    const title=textSprite('MƏKTƏB · KİTABLARI TAP',{color:'#fff1b8',height:0.75});
-    title.position.set(0,4.2,0); world.add(title);
-    // Tavan və siniflər üçün işıqlı panellər
-    box(W,0.18,D,0xdce3ed,0,5.05,0);
-    for(const x of [-24.5,-4,16]) for(const z of [-12,12]) {
-      box(5.5,0.08,4.5,0xf1e8c9,x,4.85,z);
-    }
-  }else {
+  {
     // Divar zolağı
     box(W, 0.35, 0.1, 0xff7a1a, 0, 1.3, WORLD.maxZ - 0.05);
     box(0.1, 0.35, D, 0xff7a1a, WORLD.minX + 0.05, 1.3, 0);
@@ -649,7 +573,7 @@ let COLLIDERS = getColliders();
 let COLLIDERS_NO_TABLES = getColliders(true, false);
 let COLLIDERS_NO_SHELVES = getColliders(false, false);
 function setActiveMap(id) {
-  const next = id === 'school' ? 'school' : 'market';
+  const next = 'market';
   if (next === activeMap && world.children.length) return;
   activeMap = next;
   while (world.children.length) {
@@ -669,15 +593,9 @@ const itemGroup = new THREE.Group(); scene.add(itemGroup);
 function spawnItem(d) {
   const [name, color] = activeItems[d.n];
   const g = new THREE.Group(); g.position.set(d.x, d.y, d.z);
-  let geometry;
-  if (activeMap === 'school') geometry = new THREE.BoxGeometry(0.42, 0.13, 0.3);
-  else geometry = new THREE.BoxGeometry(0.46, 0.46, 0.36);
+  const geometry = new THREE.BoxGeometry(0.46, 0.46, 0.36);
   const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.55, roughness: 0.5 }));
   g.add(mesh);
-  if (activeMap === 'school') {
-    const pages = new THREE.Mesh(new THREE.BoxGeometry(0.35,0.035,0.26), L(0xf3ead7));
-    pages.position.y = 0.035; g.add(pages);
-  }
   const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.85 }));
   glow.scale.set(1.5, 1.5, 1); g.add(glow);
   const label = textSprite(name, { font: 58, height: 0.32 });
