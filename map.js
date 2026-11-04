@@ -80,6 +80,9 @@ export function getColliders(includeShelves = true, includeTables = true, mapId 
       const gap = 1.5;
       boxes.push([room.x1, room.cx-gap, z-0.16, z+0.16]);
       boxes.push([room.cx+gap, room.x2, z-0.16, z+0.16]);
+      // Açıq qapı qanadının real toqquşma sərhədi
+      const hingeX=room.cx-gap;
+      boxes.push([hingeX-0.05,hingeX+0.05,z < 0 ? z-1.15 : z-0.05,z < 0 ? z+0.05 : z+1.15]);
     }
     // Partalar və kitab rəfləri
     for (const room of rooms) for (const cz of [-12,12]) {
