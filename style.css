@@ -609,3 +609,12 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 @media(max-width:600px){#random-event-hud{top:58px;max-width:90vw;font-size:12px;padding:8px 11px}}
 
 .admin-scare [data-event] { margin-top:6px; }
+
+
+/* Lobby map picker */
+.lobby-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border:1px solid #ffffff20;border-radius:13px;background:#111827aa}
+.lobby-map label{font-size:12px;font-weight:900;letter-spacing:.08em;color:#ffd166}
+.lobby-map select{min-width:190px;padding:10px 12px;border:1px solid #46536d;border-radius:9px;background:#202a3c;color:#fff;font:700 14px inherit}
+.lobby-map select:disabled{opacity:.8}
+.lobby-map small{color:#9aa8c2;font-size:11px}
+@media(max-width:600px){.lobby-map{gap:7px;padding:9px}.lobby-map select{width:100%;min-width:0}.lobby-map small{width:100%}}
