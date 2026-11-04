@@ -118,13 +118,3 @@ export function makeItemSlots() {
   return slots;
 }
 
-
-// Xəritə kataloqu — lobbi və server üçün ortaq ID-lər.
-export const MAPS = [
-  { id: 'market', name: '🛒 Market' },
-  { id: 'zapravka', name: '⛽ Zapravka' },
-  { id: 'mega', name: '🏪⛽ Mega Market' },
-];
-export function isValidMap(id) {
-  return MAPS.some((map) => map.id === id);
-}
