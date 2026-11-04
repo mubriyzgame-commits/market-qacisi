@@ -463,6 +463,17 @@ function buildWorld() {
       box(3.0,0.14,0.2,0x8b6849,room.cx,2.43,z);
       // Qapı üstündə nazik açıq rəngli haşiyə
       box(3.0,0.045,0.22,0xc49a68,room.cx,2.51,z);
+      // Qapı qanadı açıq vəziyyətdədir; keçidin ortasını bağlamır
+      const door = new THREE.Group();
+      door.position.set(room.cx-gap,z < 0 ? 0 : 0,z);
+      door.rotation.y = z < 0 ? Math.PI/2 : -Math.PI/2;
+      const leaf = new THREE.Mesh(new THREE.BoxGeometry(1.15,2.25,0.09),L(0x9a704c));
+      leaf.position.set(0.575,1.125,0);
+      door.add(leaf);
+      const handle = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,8),L(0xd9b56f));
+      handle.position.set(0.98,1.08,0.07);
+      door.add(handle);
+      world.add(door);
     }
     // Hər sinifdə lövhə, beş parta və kitab şkafı
     for (const room of rooms) for (const row of [-12,12]) {
