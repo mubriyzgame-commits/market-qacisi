@@ -137,7 +137,7 @@ export function makeItemSlots(mapId = 'market') {
   }
   if (mapId === 'factory') {
     const slots = [];
-    for (const z of [-11, 1, 13]) for (let x = -24; x <= 24; x += 3) slots.push({ x, y: 1.05, z });
+    for (const z of [-11, 1, 13]) for (let x = -24; x <= 24; x += 3) slots.push({ x, y: 1.36, z });
     return slots;
   }
   const slots = [];
