@@ -54,6 +54,11 @@ export const SPAWNS = {
   police: [[16, 12], [16, 16], [16, 20]],
 };
 export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
+// Məktəb xəritəsində oyunçular dəhlizdə və boş başlanğıc sahəsində doğulur.
+export const SCHOOL_SPAWNS = {
+  friends: [[-32,-18],[-32,-14],[-32,-8],[-32,-4],[-32,0]],
+  police: [[12,0],[16,0],[20,0]],
+};
 
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
