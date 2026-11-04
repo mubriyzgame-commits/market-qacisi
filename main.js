@@ -435,10 +435,15 @@ function buildWorld() {
       { x1:6, x2:26, cx:16, name:'1C' },
     ];
     // Siniflərin yan arakəsmələri — hər otaq ayrıca bağlanır
-    for (const x of [-35,-14,6,26]) for (const z of [-12,12]) {
+    for (const x of [-35,-14,6]) for (const z of [-12,12]) {
       box(0.32,3.9,20,0xd5dce8,x,1.95,z);
       box(0.36,0.12,20,0x7387a5,x,3.96,z);
     }
+    // Məktəblə türmə arasındakı divar türmənin barmaqlığına qədər davam edir
+    box(0.32,3.9,20,0xd5dce8,26,1.95,-12);
+    box(0.36,0.12,20,0x7387a5,26,3.96,-12);
+    box(0.32,3.9,12,0xd5dce8,26,1.95,8);
+    box(0.36,0.12,12,0x7387a5,26,3.96,8);
     // Hər sinfin arxa divarı: otaqların arxası açıq qalmasın
     for (const room of rooms) for (const z of [-22,22]) {
       const width=room.x2-room.x1;
@@ -481,7 +486,7 @@ function buildWorld() {
     // Dəhliz döşəməsi və istiqamət lövhəsi
     box(W,0.08,3.8,0xb8c4d6,0,0.14,0);
     const title=textSprite('MƏKTƏB · KİTABLARI TAP',{color:'#fff1b8',height:0.75});
-    title.position.set(0,4.2,-23); world.add(title);
+    title.position.set(0,4.2,0); world.add(title);
     // Tavan və siniflər üçün işıqlı panellər
     box(W,0.18,D,0xdce3ed,0,5.05,0);
     for(const x of [-24.5,-4,16]) for(const z of [-12,12]) {
