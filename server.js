@@ -3,7 +3,7 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
-import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, MAPS, getMapItems, makeItemSlots } from './map.js';
+import { ITEMS, PRISON, SPAWNS, SCHOOL_SPAWNS, SPAWN_YAW, WORLD, MAPS, getMapItems, makeItemSlots } from './map.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -130,8 +130,9 @@ function startGame(room) {
   // Başlanğıc nöqtələri
   let fi = 0, pi = 0;
   const out = [];
+  const spawnSet = room.map === 'school' ? SCHOOL_SPAWNS : SPAWNS;
   for (const p of room.players.values()) {
-    const sp = p.team === 'police' ? SPAWNS.police[pi++ % SPAWNS.police.length] : SPAWNS.friends[fi++ % SPAWNS.friends.length];
+    const sp = p.team === 'police' ? spawnSet.police[pi++ % spawnSet.police.length] : spawnSet.friends[fi++ % spawnSet.friends.length];
     p.x = sp[0]; p.z = sp[1]; p.y = 0;
     p.ry = SPAWN_YAW[p.team];
     p.jailed = false; p.picks = 0; p.catches = 0; p.catchCd = 0;
