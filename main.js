@@ -465,7 +465,7 @@ function buildWorld() {
       box(3.0,0.045,0.22,0xc49a68,room.cx,2.51,z);
       // Qapı qanadı açıq vəziyyətdədir; keçidin ortasını bağlamır
       const door = new THREE.Group();
-      door.position.set(room.cx-gap,z < 0 ? 0 : 0,z);
+      door.position.set(room.cx-gap,0,z);
       door.rotation.y = z < 0 ? Math.PI/2 : -Math.PI/2;
       const leaf = new THREE.Mesh(new THREE.BoxGeometry(1.15,2.25,0.09),L(0x9a704c));
       leaf.position.set(0.575,1.125,0);
