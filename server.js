@@ -81,7 +81,7 @@ function roomInfo(room) {
 function listRooms() {
   return [...rooms.values()]
     .filter((r) => r.isPublic)
-    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase }));
+    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase, map: r.map || 'market' }));
 }
 const teamCount = (room, team) => [...room.players.values()].filter((p) => p.team === team).length;
 
