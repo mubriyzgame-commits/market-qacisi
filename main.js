@@ -443,7 +443,7 @@ function buildWorld() {
     for (const room of rooms) for (const z of [-22,22]) {
       const width=room.x2-room.x1;
       box(width,3.9,0.32,0xd5dce8,(room.x1+room.x2)/2,1.95,z);
-      box(width+0.08,0.12,0x7387a5,(room.x1+room.x2)/2,3.96,z);
+      box(width+0.08,0.12,0.36,0x7387a5,(room.x1+room.x2)/2,3.96,z);
     }
     // Dəhlizin hər iki tərəfində qapı boşluğu olan divarlar
     for (const room of rooms) for (const z of [-2,2]) {
