@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {
-  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON,
+  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON, MAPS, getMapItems,
   getColliders, resolveCollisions,
 } from './map.js';
 
@@ -414,6 +414,8 @@ function mulberry(a) {
 }
 
 let zoneRing = null, zoneDisc = null;
+let activeMap = 'market';
+let activeItems = ITEMS;
 function buildWorld() {
   const W = WORLD.maxX - WORLD.minX, D = WORLD.maxZ - WORLD.minZ;
   // Döşəmə
@@ -425,82 +427,140 @@ function buildWorld() {
   box(W + 1.2, 5, 0.6, 0x34415e, 0, 2.5, WORLD.maxZ + 0.3);
   box(0.6, 5, D, 0x34415e, WORLD.minX - 0.3, 2.5, 0);
   box(0.6, 5, D, 0x34415e, WORLD.maxX + 0.3, 2.5, 0);
-  // Divar zolağı
-  box(W, 0.35, 0.1, 0xff7a1a, 0, 1.3, WORLD.maxZ - 0.05);
-  box(0.1, 0.35, D, 0xff7a1a, WORLD.minX + 0.05, 1.3, 0);
-  box(0.1, 0.35, D, 0xff7a1a, WORLD.maxX - 0.05, 1.3, 0);
-  // Tavan (yalnız aşağıdan görünür)
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), L(0x222a3d));
-  ceil.rotation.x = Math.PI / 2; ceil.position.y = 4.6; world.add(ceil);
-  // Tavan işıq panelləri
-  const pg = new THREE.BoxGeometry(2.6, 0.06, 0.7);
-  const pm = new THREE.MeshBasicMaterial({ color: 0xf5fbff });
-  const pxs = [-28, -14, 0, 14, 28], pzs = [-20, -10, 0, 10, 20];
-  const panels = new THREE.InstancedMesh(pg, pm, pxs.length * pzs.length);
-  const dum = new THREE.Object3D(); let pi = 0;
-  for (const x of pxs) for (const z of pzs) { dum.position.set(x, 4.55, z); dum.updateMatrix(); panels.setMatrixAt(pi++, dum.matrix); }
-  world.add(panels);
-
-  // Giriş işarəsi
-  const entry = textSprite('GİRİŞ', { color: '#7dffb0', bg: 'rgba(0,0,0,.6)', height: 0.7 });
-  entry.position.set(WORLD.minX + 1, 3.6, 0); world.add(entry);
-
-  // Rəflər
-  const frameMat = L(0x3c4a6b), boardMat = L(0xb9c3d9);
-  const rnd = mulberry(1234);
-  const prod = [];
-  const palette = ['#e63946', '#f1c453', '#2a9d8f', '#457b9d', '#f4a261', '#9aa5bd', '#f5f5f5', '#9b5de5', '#06d6a0', '#ef476f', '#ff9f1c'];
-  for (const s of SHELVES) {
-    const g = new THREE.Group(); g.position.set(s.x, 0, s.z);
-    const div = new THREE.Mesh(new THREE.BoxGeometry(s.w, s.h, 0.06), frameMat); div.position.y = s.h / 2; g.add(div);
-    for (const ex of [-1, 1]) {
-      const up = new THREE.Mesh(new THREE.BoxGeometry(0.08, s.h, s.d), frameMat); up.position.set(ex * s.w / 2, s.h / 2, 0); g.add(up);
+  if (activeMap === 'school') {
+    // Məktəb: mərkəzi dəhliz və altı ayrı sinif otağı
+    box(W,0.18,5,0xb8c4d6,0,0.09,0);
+    for (const x of [-18,0,18]) {
+      box(0.28,3.8,42,0xd6dce8,x,1.9,-1);
+      box(0.32,0.16,42,0x6c83a5,x,3.85,-1);
     }
-    for (const by of [...SHELF.boards, s.h]) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(s.w, 0.06, s.d), boardMat); b.position.y = by; g.add(b);
+    for (const z of [-13,10]) {
+      box(68,3.8,0.28,0xd6dce8,0,1.9,z);
+      box(68,0.16,0.32,0x6c83a5,0,3.85,z);
     }
-    world.add(g);
-    for (const side of [-1, 1]) for (const by of SHELF.boards) {
-      for (let x = -s.w / 2 + 0.35; x < s.w / 2 - 0.3; x += 0.42) {
-        const h = 0.22 + rnd() * 0.25;
-        prod.push({ x: s.x + x, y: by + 0.03 + h / 2, z: s.z + side * (0.28 + rnd() * 0.22), w: 0.3 + rnd() * 0.08, h, d: 0.28, c: palette[Math.floor(rnd() * palette.length)] });
+    for (const x of [-27,-9,9,27]) {
+      const board=box(4.8,1.7,0.12,0x276b55,x,2.25,-21);
+      box(5.2,0.12,0.18,0x8b6849,x,3.18,-21);
+      const sign=textSprite('SINIF',{color:'#ffffff',bg:'rgba(24,45,65,.85)',height:0.45});
+      sign.position.set(x,3.65,-20.8); world.add(sign);
+    }
+    for (const z of [-19,-8,4,15]) for (const x of [-25,-17,-7,7,17,25]) {
+      box(2.1,0.18,1.25,0x9a704c,x,0.78,z);
+      box(0.12,0.75,0.12,0x6b4c35,x-0.82,0.38,z-0.42);
+      box(0.12,0.75,0.12,0x6b4c35,x+0.82,0.38,z-0.42);
+      box(0.12,0.75,0.12,0x6b4c35,x-0.82,0.38,z+0.42);
+      box(0.12,0.75,0.12,0x6b4c35,x+0.82,0.38,z+0.42);
+      box(0.55,0.65,0.55,0x526f9d,x,0.42,z+0.92);
+    }
+    for (const x of [-31,-13,13,31]) for (const z of [-18,5]) {
+      box(1.8,2.1,0.55,0x7c573b,x,1.05,z);
+      for(let y=0.55;y<1.9;y+=0.65) box(1.65,0.06,0.48,0xc9a36c,x,y,z+0.04);
+    }
+    const title=textSprite('MƏKTƏB · KİTABLARI TAP',{color:'#fff1b8',height:0.75});
+    title.position.set(0,4.1,-23); world.add(title);
+  } else if (activeMap === 'factory') {
+    // Oyuncaq fabriki: üç işlək görünüşlü konveyer xətti
+    box(W,0.18,D,0x59616d,0,0.09,0);
+    for (const z of [-11,1,13]) {
+      box(56,0.7,3.2,0x343d4d,0,0.65,z);
+      box(54,0.12,2.45,0x202832,0,1.06,z);
+      for(let x=-26;x<=26;x+=2) {
+        const roller=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,2.55,12),L(0x8995a6));
+        roller.rotation.z=Math.PI/2; roller.position.set(x,0.92,z); world.add(roller);
+      }
+      box(56,0.18,0.18,0xffb347,0,1.22,z-1.72);
+      box(56,0.18,0.18,0xffb347,0,1.22,z+1.72);
+      for(const x of [-29,29]) {
+        box(1.4,3.4,1.4,0x4b596d,x,1.7,z);
+        box(1.6,0.16,1.6,0xff8b35,x,3.45,z);
       }
     }
-  }
-  const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff }), prod.length);
-  const col = new THREE.Color();
-  prod.forEach((p, i) => {
-    dum.position.set(p.x, p.y, p.z); dum.scale.set(p.w, p.h, p.d); dum.rotation.set(0, 0, 0); dum.updateMatrix();
-    inst.setMatrixAt(i, dum.matrix); inst.setColorAt(i, col.set(p.c));
-  });
-  inst.instanceMatrix.needsUpdate = true; inst.instanceColor.needsUpdate = true;
-  world.add(inst);
-
-  // Kassalar
-  for (const c of COUNTERS) {
-    box(c.w, c.h, c.d, 0x6b7a99, c.x, c.h / 2, c.z);
-    box(c.w, 0.06, c.d + 0.1, 0xff7a1a, c.x, c.h + 0.03, c.z);
-    box(0.5, 0.45, 0.4, 0x222222, c.x + 1.4, c.h + 0.3, c.z);
-  }
-  // Meyvə masaları
-  const fruit = ['#e63946', '#ffb703', '#8ac926', '#ff8c00'];
-  TABLES.forEach((t, ti) => {
-    box(t.w, t.h, t.d, 0x8a5a33, t.x, t.h / 2, t.z);
-    for (let i = 0; i < 9; i++) {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), L(fruit[(i + ti) % fruit.length]));
-      m.position.set(t.x - t.w / 2 + 0.5 + i * (t.w - 1) / 8, t.h + 0.18, t.z + (i % 2 ? 0.4 : -0.4)); world.add(m);
+    for(const x of [-30,30]) for(const z of [-20,20]) box(1.2,4.2,1.2,0x4c5b70,x,2.1,z);
+    for(const x of [-18,0,18]) {
+      box(5,1.3,4,0x56677c,x,0.65,20);
+      box(5.2,0.16,4.2,0xff8b35,x,1.38,20);
     }
-  });
-  // Sütunlar
-  for (const p of PILLARS) box(p.s, 4.6, p.s, 0x56627f, p.x, 2.3, p.z);
-  // Soyuducu divar
-  box(W, FRIDGE_WALL.h, FRIDGE_WALL.d, 0x2c3650, 0, FRIDGE_WALL.h / 2, FRIDGE_WALL.z);
-  const glass = new THREE.MeshBasicMaterial({ color: 0x7fd6ff, transparent: true, opacity: 0.55 });
-  for (let x = -32; x <= 32; x += 4) {
-    const gm = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.9, 0.05), glass);
-    gm.position.set(x, 1.2, FRIDGE_WALL.z + FRIDGE_WALL.d / 2 + 0.03); world.add(gm);
+    const title=textSprite('OYUNCAQ FABRİKİ',{color:'#fff1b8',height:0.8});
+    title.position.set(0,4.1,-22); world.add(title);
+  } else {
+    // Divar zolağı
+    box(W, 0.35, 0.1, 0xff7a1a, 0, 1.3, WORLD.maxZ - 0.05);
+    box(0.1, 0.35, D, 0xff7a1a, WORLD.minX + 0.05, 1.3, 0);
+    box(0.1, 0.35, D, 0xff7a1a, WORLD.maxX - 0.05, 1.3, 0);
+    // Tavan (yalnız aşağıdan görünür)
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W, D), L(0x222a3d));
+    ceil.rotation.x = Math.PI / 2; ceil.position.y = 4.6; world.add(ceil);
+    // Tavan işıq panelləri
+    const pg = new THREE.BoxGeometry(2.6, 0.06, 0.7);
+    const pm = new THREE.MeshBasicMaterial({ color: 0xf5fbff });
+    const pxs = [-28, -14, 0, 14, 28], pzs = [-20, -10, 0, 10, 20];
+    const panels = new THREE.InstancedMesh(pg, pm, pxs.length * pzs.length);
+    const dum = new THREE.Object3D(); let pi = 0;
+    for (const x of pxs) for (const z of pzs) { dum.position.set(x, 4.55, z); dum.updateMatrix(); panels.setMatrixAt(pi++, dum.matrix); }
+    world.add(panels);
+  
+    // Giriş işarəsi
+    const entry = textSprite('GİRİŞ', { color: '#7dffb0', bg: 'rgba(0,0,0,.6)', height: 0.7 });
+    entry.position.set(WORLD.minX + 1, 3.6, 0); world.add(entry);
+  
+    // Rəflər
+    const frameMat = L(0x3c4a6b), boardMat = L(0xb9c3d9);
+    const rnd = mulberry(1234);
+    const prod = [];
+    const palette = ['#e63946', '#f1c453', '#2a9d8f', '#457b9d', '#f4a261', '#9aa5bd', '#f5f5f5', '#9b5de5', '#06d6a0', '#ef476f', '#ff9f1c'];
+    for (const s of SHELVES) {
+      const g = new THREE.Group(); g.position.set(s.x, 0, s.z);
+      const div = new THREE.Mesh(new THREE.BoxGeometry(s.w, s.h, 0.06), frameMat); div.position.y = s.h / 2; g.add(div);
+      for (const ex of [-1, 1]) {
+        const up = new THREE.Mesh(new THREE.BoxGeometry(0.08, s.h, s.d), frameMat); up.position.set(ex * s.w / 2, s.h / 2, 0); g.add(up);
+      }
+      for (const by of [...SHELF.boards, s.h]) {
+        const b = new THREE.Mesh(new THREE.BoxGeometry(s.w, 0.06, s.d), boardMat); b.position.y = by; g.add(b);
+      }
+      world.add(g);
+      for (const side of [-1, 1]) for (const by of SHELF.boards) {
+        for (let x = -s.w / 2 + 0.35; x < s.w / 2 - 0.3; x += 0.42) {
+          const h = 0.22 + rnd() * 0.25;
+          prod.push({ x: s.x + x, y: by + 0.03 + h / 2, z: s.z + side * (0.28 + rnd() * 0.22), w: 0.3 + rnd() * 0.08, h, d: 0.28, c: palette[Math.floor(rnd() * palette.length)] });
+        }
+      }
+    }
+    const inst = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff }), prod.length);
+    const col = new THREE.Color();
+    prod.forEach((p, i) => {
+      dum.position.set(p.x, p.y, p.z); dum.scale.set(p.w, p.h, p.d); dum.rotation.set(0, 0, 0); dum.updateMatrix();
+      inst.setMatrixAt(i, dum.matrix); inst.setColorAt(i, col.set(p.c));
+    });
+    inst.instanceMatrix.needsUpdate = true; inst.instanceColor.needsUpdate = true;
+    world.add(inst);
+  
+    // Kassalar
+    for (const c of COUNTERS) {
+      box(c.w, c.h, c.d, 0x6b7a99, c.x, c.h / 2, c.z);
+      box(c.w, 0.06, c.d + 0.1, 0xff7a1a, c.x, c.h + 0.03, c.z);
+      box(0.5, 0.45, 0.4, 0x222222, c.x + 1.4, c.h + 0.3, c.z);
+    }
+    // Meyvə masaları
+    const fruit = ['#e63946', '#ffb703', '#8ac926', '#ff8c00'];
+    TABLES.forEach((t, ti) => {
+      box(t.w, t.h, t.d, 0x8a5a33, t.x, t.h / 2, t.z);
+      for (let i = 0; i < 9; i++) {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), L(fruit[(i + ti) % fruit.length]));
+        m.position.set(t.x - t.w / 2 + 0.5 + i * (t.w - 1) / 8, t.h + 0.18, t.z + (i % 2 ? 0.4 : -0.4)); world.add(m);
+      }
+    });
+    // Sütunlar
+    for (const p of PILLARS) box(p.s, 4.6, p.s, 0x56627f, p.x, 2.3, p.z);
+    // Soyuducu divar
+    box(W, FRIDGE_WALL.h, FRIDGE_WALL.d, 0x2c3650, 0, FRIDGE_WALL.h / 2, FRIDGE_WALL.z);
+    const glass = new THREE.MeshBasicMaterial({ color: 0x7fd6ff, transparent: true, opacity: 0.55 });
+    for (let x = -32; x <= 32; x += 4) {
+      const gm = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.9, 0.05), glass);
+      gm.position.set(x, 1.2, FRIDGE_WALL.z + FRIDGE_WALL.d / 2 + 0.03); world.add(gm);
+    }
+  
+  
   }
-
   // Türmə
   const pb = PRISON.box, cx = (pb.minX + pb.maxX) / 2, cz = (pb.minZ + pb.maxZ) / 2;
   const pw = pb.maxX - pb.minX, pd = pb.maxZ - pb.minZ;
@@ -564,14 +624,29 @@ function buildWorld() {
   zl.position.set(z.x, 2.2, z.z); world.add(zl);
 }
 buildWorld();
-const COLLIDERS = getColliders();
-const COLLIDERS_NO_TABLES = getColliders(true, false);
-const COLLIDERS_NO_SHELVES = getColliders(false, false);
+let COLLIDERS = getColliders();
+let COLLIDERS_NO_TABLES = getColliders(true, false);
+let COLLIDERS_NO_SHELVES = getColliders(false, false);
+function setActiveMap(id) {
+  const next = MAPS.some((m) => m.id === id) ? id : 'market';
+  if (next === activeMap && world.children.length) return;
+  activeMap = next;
+  while (world.children.length) {
+    const child = world.children[0]; world.remove(child);
+    child.traverse?.((o) => { if (o.geometry) o.geometry.dispose(); });
+  }
+  zoneRing = null; zoneDisc = null;
+  buildWorld();
+  COLLIDERS = getColliders(true, true, activeMap);
+  COLLIDERS_NO_TABLES = getColliders(true, false, activeMap);
+  COLLIDERS_NO_SHELVES = getColliders(false, false, activeMap);
+}
+
 
 /* ---------------- Ərzaqlar ---------------- */
 const itemGroup = new THREE.Group(); scene.add(itemGroup);
 function spawnItem(d) {
-  const [name, color] = ITEMS[d.n];
+  const [name, color] = activeItems[d.n];
   const g = new THREE.Group(); g.position.set(d.x, d.y, d.z);
   const mesh = new THREE.Mesh(
     new THREE.BoxGeometry(0.46, 0.46, 0.36),
@@ -928,10 +1003,13 @@ function toggleMuteAll() {
    Oyunun başlaması / bitməsi
    ===================================================================== */
 // HUD siyahısını bir dəfə qur
-$('#hud-items').innerHTML = ITEMS.map((it, i) => `<li data-n="${i}"><i style="background:${it[1]}"></i>${esc(it[0])}</li>`).join('');
+$('#hud-items').innerHTML = activeItems.map((it, i) => `<li data-n="${i}"><i style="background:${it[1]}"></i>${esc(it[0])}</li>`).join('');
 
 function startGame(m) {
   if (!room) return;
+  setActiveMap(m.map || room.map || 'market');
+  activeItems = m.catalog || getMapItems(activeMap);
+  $('#hud-items').innerHTML = activeItems.map((it, i) => `<li data-n="${i}"><i style="background:${it[1]}"></i>${esc(it[0])}</li>`).join('');
   inGame = true;
   for (const name of [...activeRandomEvents]) applyRandomEvent({ name, active: false });
   gamePhase = 'countdown';
@@ -993,7 +1071,7 @@ function onGot(m) {
   $(`#hud-items li[data-n="${m.n}"]`)?.classList.add('done');
   collected = m.c; updateHudCount();
   if (m.by === myId) sfx.pick(); else sfx.soft();
-  toast(`${m.name}: ${ITEMS[m.n][0]} götürdü (${m.c}/${needCount})`);
+  toast(`${m.name}: ${activeItems[m.n][0]} götürdü (${m.c}/${needCount})`);
 }
 function onCaught(m) {
   const r = remotes.get(m.id);
@@ -1483,7 +1561,7 @@ function updateHudFrame(dt) {
   } else banner.innerHTML = '';
   // Çağırış
   const pr = $('#hud-prompt');
-  if (nearItem) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(ITEMS[nearItem.n][0])} götür`; }
+  if (nearItem) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(activeItems[nearItem.n][0])} götür`; }
   else if (nearFriend) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(nearFriend.name)} tut`; }
   else pr.style.display = 'none';
   // Azad etmə barı
