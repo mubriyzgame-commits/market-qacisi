@@ -434,10 +434,16 @@ function buildWorld() {
       { x1:-14, x2:6, cx:-4, name:'1B' },
       { x1:6, x2:26, cx:16, name:'1C' },
     ];
-    // Şaquli arakəsmələr: iki sıradakı sinifləri ayırır
-    for (const x of [-14,6,26]) for (const [z,len] of [[-12,20],[12,20]]) {
-      box(0.32,3.9,len,0xd5dce8,x,1.95,z);
-      box(0.36,0.16,len,0x7387a5,x,3.98,z);
+    // Siniflərin yan arakəsmələri — hər otaq ayrıca bağlanır
+    for (const x of [-35,-14,6,26]) for (const z of [-12,12]) {
+      box(0.32,3.9,20,0xd5dce8,x,1.95,z);
+      box(0.36,0.12,20,0x7387a5,x,3.96,z);
+    }
+    // Hər sinfin arxa divarı: otaqların arxası açıq qalmasın
+    for (const room of rooms) for (const z of [-22,22]) {
+      const width=room.x2-room.x1;
+      box(width,3.9,0.32,0xd5dce8,(room.x1+room.x2)/2,1.95,z);
+      box(width+0.08,0.12,0x7387a5,(room.x1+room.x2)/2,3.96,z);
     }
     // Dəhlizin hər iki tərəfində qapı boşluğu olan divarlar
     for (const room of rooms) for (const z of [-2,2]) {
@@ -446,10 +452,12 @@ function buildWorld() {
       const rightLen=room.x2-(room.cx+gap);
       if(leftLen>0) box(leftLen,3.9,0.32,0xd5dce8,room.x1+leftLen/2,1.95,z);
       if(rightLen>0) box(rightLen,3.9,0.32,0xd5dce8,room.cx+gap+rightLen/2,1.95,z);
-      // Qapı çərçivələri
-      box(0.16,2.5,0.18,0x8b6849,room.cx-gap,1.25,z);
-      box(0.16,2.5,0.18,0x8b6849,room.cx+gap,1.25,z);
-      box(3.15,0.16,0.2,0x8b6849,room.cx,2.55,z);
+      // Sadə, düz qapı çərçivəsi — üst hissə yan dirəklərlə eyni xəttdə
+      box(0.14,2.42,0.18,0x8b6849,room.cx-gap,1.21,z);
+      box(0.14,2.42,0.18,0x8b6849,room.cx+gap,1.21,z);
+      box(3.0,0.14,0.2,0x8b6849,room.cx,2.43,z);
+      // Qapı üstündə nazik açıq rəngli haşiyə
+      box(3.0,0.045,0.22,0xc49a68,room.cx,2.51,z);
     }
     // Hər sinifdə lövhə, beş parta və kitab şkafı
     for (const room of rooms) for (const row of [-12,12]) {
