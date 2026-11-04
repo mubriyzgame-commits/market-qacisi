@@ -3,7 +3,7 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
-import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, makeItemSlots } from './map.js';
+import { ITEMS, PRISON, SPAWNS, SPAWN_YAW, WORLD, MAPS, getMapItems, makeItemSlots } from './map.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
@@ -16,7 +16,7 @@ const COUNTDOWN = Number(process.env.COUNTDOWN) || 10;
 const RELEASE_SECONDS = Number(process.env.RELEASE_SECONDS) || 5; // dostu azad etmək üçün türmənin qarşısında dayanma müddəti
 const CATCH_RANGE = 3.6;
 const PICK_RANGE = 1.6;
-const NEED = ITEMS.length; // 30
+const NEED = ITEMS.length; // 30 ərzaq
 
 const app = express();
 app.use('/three', express.static(path.join(__dirname, 'node_modules/three/build')));
@@ -70,6 +70,7 @@ function roomInfo(room) {
     hostId: room.hostId,
     max: room.max,
     isPublic: room.isPublic,
+    map: room.map || 'market',
     phase: room.phase,
     players: [...room.players.values()].map((p) => ({
       id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
@@ -79,7 +80,7 @@ function roomInfo(room) {
 function listRooms() {
   return [...rooms.values()]
     .filter((r) => r.isPublic)
-    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase }));
+    .map((r) => ({ code: r.code, name: r.name, count: r.players.size, max: r.max, phase: r.phase, map: r.map || 'market' }));
 }
 const teamCount = (room, team) => [...room.players.values()].filter((p) => p.team === team).length;
 
@@ -110,13 +111,15 @@ function leaveRoom(p) {
 
 function startGame(room) {
   // Ərzaqların yerləşdirilməsi
-  const slots = shuffle(makeItemSlots());
+  const catalog = getMapItems(room.map || 'market');
+  const need = catalog.length;
+  const slots = shuffle(makeItemSlots(room.map || 'market'));
   const chosen = [];
   for (const s of slots) {
     if (chosen.every((c) => Math.hypot(c.x - s.x, c.z - s.z) > 1.8 || Math.abs(c.y - s.y) > 0.3)) chosen.push(s);
-    if (chosen.length === NEED) break;
+    if (chosen.length === need) break;
   }
-  const names = shuffle([...Array(NEED).keys()]);
+  const names = shuffle([...Array(need).keys()]);
   room.items = new Map();
   const itemsOut = chosen.map((s, i) => {
     const it = { id: i, n: names[i], x: s.x, y: s.y, z: s.z, got: false };
@@ -145,7 +148,7 @@ function startGame(room) {
   room.lastTick = Date.now();
   room.nextEventAt = Date.now() + 60000;
   room.activeEvents = {};
-  broadcast(room, { t: 'start', items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need: NEED });
+  broadcast(room, { t: 'start', map: room.map || 'market', catalog, items: itemsOut, players: out, cd: COUNTDOWN, dur: GAME_SECONDS, need });
   broadcast(room, { t: 'room', room: roomInfo(room) });
 }
 
@@ -155,7 +158,7 @@ function endGame(room, winner, reason) {
     id: q.id, name: q.name, team: q.team, picks: q.picks, catches: q.catches,
   }));
   room.phase = 'lobby';
-  broadcast(room, { t: 'end', winner, reason, stats, collected: room.collected, need: NEED });
+  broadcast(room, { t: 'end', winner, reason, stats, collected: room.collected, need: getMapItems(room.map || 'market').length });
   for (const q of room.players.values()) q.jailed = false;
   broadcast(room, { t: 'room', room: roomInfo(room) });
 }
@@ -280,6 +283,7 @@ function handle(p, m) {
         name: cleanText(m.name, `${p.name} serveri`, 24),
         max: clamp(parseInt(m.max, 10) || 8, 2, MAX_POLICE + MAX_FRIENDS),
         isPublic: m.pub !== false,
+        map: 'market',
         hostId: p.id,
         players: new Map(),
         phase: 'lobby',
@@ -301,6 +305,14 @@ function handle(p, m) {
       addToRoom(room, p);
       send(p.ws, { t: 'joined', room: roomInfo(room) });
       broadcast(room, { t: 'room', room: roomInfo(room) }, p.id);
+      break;
+    }
+    case 'map': {
+      const room = p.room;
+      if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
+      if (!MAPS.some((entry) => entry.id === m.map)) return;
+      room.map = m.map;
+      broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
     case 'leave':
@@ -388,7 +400,7 @@ function handle(p, m) {
       room.collected++;
       p.picks++;
       broadcast(room, { t: 'got', id: it.id, n: it.n, by: p.id, name: p.name, c: room.collected });
-      if (room.collected >= NEED) endGame(room, 'friends', 'Bütün 30 ərzaq yığıldı!');
+      if (room.collected >= getMapItems(room.map || 'market').length) endGame(room, 'friends', 'Bütün əşyalar tapıldı!');
       break;
     }
     case 'catch': {
