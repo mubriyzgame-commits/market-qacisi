@@ -57,11 +57,16 @@ export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
 
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
-  if (mapId === 'school') return [
-    [-12, -10, -18, -7], [-12, -10, 3, 14], [10, 12, -18, -7], [10, 12, 3, 14],
-    [-30, -28, -18, -7], [-30, -28, 3, 14], [28, 30, -18, -7], [28, 30, 3, 14],
-    [-5, 5, -2, 0], [-5, 5, 8, 10], [-5, 5, 18, 20]
-  ];
+  if (mapId === 'school') {
+    const boxes = [];
+    for (const z of [-19, -8, 4, 15]) for (const x of [-25, -17, -7, 7, 17, 25]) {
+      boxes.push([x - 1.05, x + 1.05, z - 0.625, z + 0.625]);
+    }
+    for (const x of [-31, -13, 13, 31]) for (const z of [-18, 5]) {
+      boxes.push([x - 0.9, x + 0.9, z - 0.275, z + 0.275]);
+    }
+    return boxes;
+  }
   if (mapId === 'factory') return [
     [-32, -30, -22, 22], [30, 32, -22, 22],
     [-26, 26, -17, -15], [-26, 26, -5, -3], [-26, 26, 7, 9],
