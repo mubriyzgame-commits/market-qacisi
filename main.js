@@ -808,6 +808,10 @@ function playerCard(p) {
 }
 function renderLobby() {
   $('#lobby-name').textContent = room.name;
+  const mapSelect = $('#lobby-map-select');
+  mapSelect.value = room.map || 'market';
+  mapSelect.disabled = room.hostId !== myId;
+  $('#lobby-map-hint').textContent = room.hostId === myId ? 'Xəritəni sən seçirsən.' : 'Xəritəni server sahibi seçir.';
   $('#lobby-code').textContent = room.code;
   const pol = room.players.filter((p) => p.team === 'police');
   const fr = room.players.filter((p) => p.team === 'friends');
@@ -832,6 +836,7 @@ function updateSpeakingUI() {
   $$('.pcard[data-id]').forEach((el) => el.classList.toggle('speaking', speaking.has(+el.dataset.id)));
   if (inGame) renderHudPlayers();
 }
+$('#lobby-map-select').addEventListener('change', (e) => send({ t: 'map', map: e.target.value }));
 $('#join-police').addEventListener('click', () => send({ t: 'team', team: 'police' }));
 $('#join-friends').addEventListener('click', () => send({ t: 'team', team: 'friends' }));
 $('#btn-start').addEventListener('click', () => send({ t: 'start' }));
