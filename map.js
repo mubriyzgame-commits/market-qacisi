@@ -64,7 +64,7 @@ export function getColliders(includeShelves = true, includeTables = true, mapId 
       { x1: 6, x2: 26, cx: 16 },
     ];
     // Dəhlizdən otaqlara giriş boşluğu saxlanılan arakəsmələr
-    for (const x of [-14, 6]) for (const [z1,z2] of [[-22,-2],[2,22]]) {
+    for (const x of [-14, 6, 26]) for (const [z1,z2] of [[-22,-2],[2,22]]) {
       boxes.push([x-0.16,x+0.16,z1,z2]);
     }
     for (const room of rooms) for (const z of [-2,2]) {
@@ -130,8 +130,11 @@ export function resolveCollisions(pos, r, boxes) {
 export function makeItemSlots(mapId = 'market') {
   if (mapId === 'school') {
     const slots = [];
-    for (const z of [-19, -8, 4, 15]) for (const x of [-25, -17, -7, 7, 17, 25]) {
-      for (const side of [-1, 1]) slots.push({ x: x + side * 1.1, y: 0.92, z });
+    const rooms = [-24.5, -4, 16];
+    for (const cx of rooms) for (const row of [-12, 12]) {
+      for (const [dx,dz] of [[-5,-4],[0,-4],[5,-4],[-2.5,4],[2.5,4]]) {
+        slots.push({ x: cx + dx, y: 0.92, z: row + dz });
+      }
     }
     return slots;
   }
@@ -170,18 +173,6 @@ export const MAP_ITEMS = {
     ['Qrammatika kitabı','#c76c5e'],['Xəritə kitabı','#5a9d83'],['Təcrübə dəftəri','#b2a05e'],
     ['Sözlük','#9a7b5e'],['İş dəftəri','#d0a2d8'],['Məntiq kitabı','#7d91b7'],
     ['Rəngli atlas','#e17d54'],['Oxu gündəliyi','#73a8a1'],['Kitabça','#d4bd78']
-  ],
-  factory: [
-    ['Oyuncaq maşın','#e84b3c'],['Teddy ayı','#b98558'],['Robot','#7c8da8'],
-    ['Top','#f0c342'],['Oyuncaq qatar','#4c9b75'],['Puzzle','#a27ac7'],
-    ['Lego qutusu','#e77a36'],['Dinozavr','#5d9b55'],['Oyuncaq təyyarə','#77a8d8'],
-    ['Gəlincik','#d889aa'],['Yoyo','#e6a93e'],['Rubik kubu','#4f83c6'],
-    ['Oyuncaq gəmi','#5aa7ad'],['Mini futbol topu','#e9e9e9'],['Raket','#a45fc0'],
-    ['Taxta at','#b57c4b'],['Oyuncaq telefon','#68a6bb'],['Rəngli kubiklər','#e5b84d'],
-    ['Əl kuklası','#b96b65'],['Oyuncaq avtobus','#e3a13b'],['Robot dəsti','#6678c8'],
-    ['Plastik qılınc','#8c9aa8'],['Oyuncaq kamera','#d77c9a'],['Yumşaq dovşan','#d9d0c5'],
-    ['Ksilofon','#d8a24e'],['Oyuncaq traktor','#5b9b58'],['Taxta pazl','#bb875c'],
-    ['Mini basketbol','#df8742'],['Oyuncaq dron','#6a9fc4'],['Sürpriz qutu','#a67ac2']
   ]
 };
 export function getMapItems(id = 'market') {
