@@ -1536,9 +1536,9 @@ function updateGame(dt) {
   if (me.y < 0) { me.y = 0; me.vy = 0; }
   const pos = { x: me.x, z: me.z };
   // Super jump zamanı əvvəl meyvə masalarının, sonra hündür rəflərin baryerini keçməyə icazə ver.
-  const jumpColliders = me.y > SHELF.h
+  const jumpColliders = activeMap === 'parkour' && me.y > 0.45 ? COLLIDERS_NO_SHELVES : (me.y > SHELF.h
     ? COLLIDERS_NO_SHELVES
-    : me.y > 0.9 ? COLLIDERS_NO_TABLES : colliders;
+    : me.y > 0.9 ? COLLIDERS_NO_TABLES : colliders);
   resolveCollisions(pos, PLAYER_R, jumpColliders);
   if (me.jailed) {
     pos.x = clamp(pos.x, PRISON.inner.minX, PRISON.inner.maxX);
