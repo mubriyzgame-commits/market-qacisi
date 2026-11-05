@@ -89,9 +89,7 @@ function listRooms() {
 const teamCount = (room, team) => [...room.players.values()].filter((p) => p.team === team).length;
 
 function addToRoom(room, p) {
-  const mode = room.mode || 'market';
-  if (mode === 'parkour') p.team = 'friends';
-  else if (teamCount(room, 'friends') < room.friendsMax) p.team = 'friends';
+  if (teamCount(room, 'friends') < room.friendsMax) p.team = 'friends';
   else p.team = 'police';
   room.players.set(p.id, p);
   p.room = room;
@@ -288,18 +286,16 @@ function handle(p, m) {
     case 'create': {
       if (p.room) return;
       const max = clamp(parseInt(m.max, 10) || 8, 2, MAX_PLAYERS);
-      const mode = m.mode === 'parkour' ? 'parkour' : 'market';
+      const mode = 'market';
       const defaultPolice = Math.min(DEFAULT_POLICE, max - 1);
       const requestedPolice = Number.parseInt(m.policeMax, 10);
-      const policeMax = mode === 'parkour' ? 0 : clamp(Number.isFinite(requestedPolice) ? requestedPolice : defaultPolice, 0, max - 1);
-      const friendsMax = mode === 'parkour' ? max : clamp(parseInt(m.friendsMax, 10) || Math.max(1, max - policeMax), 1, max);
+      const policeMax = clamp(Number.isFinite(requestedPolice) ? requestedPolice : defaultPolice, 0, max - 1);
+      const friendsMax = clamp(parseInt(m.friendsMax, 10) || Math.max(1, max - policeMax), 1, max);
       if (policeMax + friendsMax > max) return send(p.ws, { t: 'error', msg: 'Komanda limitlərinin cəmi maksimum oyunçu sayından çox ola bilməz' });
       const room = {
         code: genCode(),
         name: cleanText(m.name, `${p.name} serveri`, 24),
         max, policeMax, friendsMax,
-        marketPoliceMax: mode === 'parkour' ? Math.min(DEFAULT_POLICE, max - 1) : policeMax,
-        marketFriendsMax: mode === 'parkour' ? Math.max(1, max - Math.min(DEFAULT_POLICE, max - 1)) : friendsMax,
         isPublic: m.pub !== false,
         map: mode, mode,
         hostId: p.id,
@@ -321,7 +317,7 @@ function handle(p, m) {
       if (room.phase !== 'lobby') return send(p.ws, { t: 'error', msg: 'Oyun artıq başlayıb' });
       if (room.players.size >= room.max) return send(p.ws, { t: 'error', msg: 'Server doludur' });
       const hasFriendSlot = teamCount(room, 'friends') < room.friendsMax;
-      const hasPoliceSlot = room.mode !== 'parkour' && teamCount(room, 'police') < room.policeMax;
+      const hasPoliceSlot = teamCount(room, 'police') < room.policeMax;
       if (!hasFriendSlot && !hasPoliceSlot) return send(p.ws, { t: 'error', msg: 'Komandaların yerləri doludur' });
       addToRoom(room, p);
       send(p.ws, { t: 'joined', room: roomInfo(room) });
@@ -331,20 +327,8 @@ function handle(p, m) {
     case 'map': {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
-      if (!MAPS.some((entry) => entry.id === m.map)) return;
-      if (m.map === 'parkour') {
-        room.marketPoliceMax = room.policeMax;
-        room.marketFriendsMax = room.friendsMax;
-        room.mode = 'parkour'; room.map = 'parkour';
-        room.policeMax = 0; room.friendsMax = room.max;
-        for (const q of room.players.values()) q.team = 'friends';
-      } else {
-        room.mode = 'market'; room.map = 'market';
-        room.policeMax = room.marketPoliceMax ?? Math.min(DEFAULT_POLICE, room.max - 1);
-        room.friendsMax = room.marketFriendsMax ?? (room.max - room.policeMax);
-        let friendSlots = room.friendsMax;
-        for (const q of room.players.values()) q.team = friendSlots-- > 0 ? 'friends' : 'police';
-      }
+      if (m.map !== 'market') return;
+      room.mode = 'market'; room.map = 'market';
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
@@ -355,7 +339,7 @@ function handle(p, m) {
     case 'team': {
       const room = p.room;
       if (!room || room.phase !== 'lobby') return;
-      const team = room.mode === 'parkour' ? 'friends' : (m.team === 'police' ? 'police' : 'friends');
+      const team = m.team === 'police' ? 'police' : 'friends';
       if (p.team === team) return;
       const limit = team === 'police' ? room.policeMax : room.friendsMax;
       if (teamCount(room, team) >= limit) return send(p.ws, { t: 'error', msg: 'Bu komanda doludur' });
@@ -367,7 +351,6 @@ function handle(p, m) {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
       if (teamCount(room, 'friends') < 1) return send(p.ws, { t: 'error', msg: 'Ən azı 1 dost lazımdır' });
-      if (room.mode !== 'parkour' && teamCount(room, 'police') > room.policeMax) return send(p.ws, { t: 'error', msg: 'Polis limiti aşılıb' });
       startGame(room);
       break;
     }
@@ -413,7 +396,6 @@ function handle(p, m) {
     case 'adminJail': {
       const room = p.room;
       if (!p.adminEligible || !p.admin || !room || room.phase !== 'play') return;
-      if (room.mode === 'parkour') return send(p.ws, { t: 'error', msg: 'Parkur rejimində türmə yoxdur' });
       const target = room.players.get(Number(m.target));
       if (!target || target.id === p.id) return send(p.ws, { t: 'error', msg: 'Oyunçu seçimi yanlışdır' });
       if (m.enabled) {
