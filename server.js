@@ -288,8 +288,9 @@ function handle(p, m) {
       if (p.room) return;
       const max = clamp(parseInt(m.max, 10) || 8, 2, MAX_PLAYERS);
       const mode = m.mode === 'parkour' ? 'parkour' : 'market';
-      const policeMax = mode === 'parkour' ? 0 : clamp(parseInt(m.policeMax, 10) || DEFAULT_POLICE, 0, max);
-      const friendsMax = mode === 'parkour' ? max : clamp(parseInt(m.friendsMax, 10) || DEFAULT_FRIENDS, 1, max);
+      const defaultPolice = Math.min(DEFAULT_POLICE, max - 1);
+      const policeMax = mode === 'parkour' ? 0 : clamp(parseInt(m.policeMax, 10) || defaultPolice, 0, max - 1);
+      const friendsMax = mode === 'parkour' ? max : clamp(parseInt(m.friendsMax, 10) || Math.max(1, max - policeMax), 1, max);
       if (policeMax + friendsMax > max) return send(p.ws, { t: 'error', msg: 'Komanda limitlərinin cəmi maksimum oyunçu sayından çox ola bilməz' });
       const room = {
         code: genCode(),
@@ -325,6 +326,9 @@ function handle(p, m) {
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
       if (!MAPS.some((entry) => entry.id === m.map)) return;
       room.map = m.map;
+      room.mode = m.map;
+      if (room.mode === 'parkour') { room.policeMax = 0; room.friendsMax = room.max; for (const q of room.players.values()) q.team = 'friends'; }
+      else { room.policeMax = Math.min(DEFAULT_POLICE, room.max - 1); room.friendsMax = room.max - room.policeMax; }
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
