@@ -9,7 +9,7 @@ export const ITEMS = [
   ['Qaymaq', '#fff3e0'], ['Qatıq', '#cfe3ff'], ['Düyü', '#f5f0e6'], ['Makaron', '#e9b44c'], ['Un', '#fafafa'],
   ['Şəkər', '#ffffff'], ['Duz', '#dfe6e9'], ['Çay', '#8b4513'], ['Qəhvə', '#6b3e26'], ['Alma', '#e63946'],
   ['Banan', '#ffe135'], ['Portağal', '#ff8c00'], ['Pomidor', '#d62828'], ['Xiyar', '#4caf50'], ['Kartof', '#b08968'],
-  ['Soğan', '#c77dff'], ['Yağ', '#f4d35e'], ['Toyuq', '#f1b98a'], ['Qiymə', '#c1453b'], ['Bal', '#f0a202'],
+];
 
 // Rəflər
 export const SHELF = { d: 1.4, h: 2.0, boards: [0.3, 0.85, 1.4] };
