@@ -780,7 +780,7 @@ updateCreateLimits();
 $('#btn-create').addEventListener('click', async () => {
   ac();
   await ensureMic();
-  send({ t: 'create', name: $('#cr-name').value.trim(), max: +$('#cr-max').value, policeMax: +$('#cr-police').value, friendsMax: +$('#cr-friends').value, mode: $('#cr-mode').value, pub: $('#cr-pub').checked });
+  send({ t: 'create', name: $('#cr-name').value.trim(), max: +$('#cr-max').value, policeMax: +$('#cr-police').value, friendsMax: +$('#cr-friends').value, pub: $('#cr-pub').checked });
 });
 
 // Profil
