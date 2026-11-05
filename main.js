@@ -112,8 +112,8 @@ adminPanel.innerHTML = `
     </div>
     <div class="admin-scare">
       <label for="admin-target">😈 Jumpscare üçün oyunçu</label>
-      <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
+      <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
     </div>
     <div class="admin-scare">
       <strong>⛓️ Müddətsiz həbs</strong>
