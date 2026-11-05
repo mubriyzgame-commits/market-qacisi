@@ -654,7 +654,7 @@ function setActiveMap(id) {
   }
   zoneRing = null; zoneDisc = null;
   buildWorld();
-  COLLIDERS = getColliders(true, true, activeMap);
+  COLLIDERS.splice(0, COLLIDERS.length, ...getColliders(true, true, activeMap));
   COLLIDERS_NO_TABLES = getColliders(true, false, activeMap);
   COLLIDERS_NO_SHELVES = getColliders(false, false, activeMap);
 }
