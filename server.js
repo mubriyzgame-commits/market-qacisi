@@ -77,7 +77,7 @@ function roomInfo(room) {
     map: room.map || 'market',
     phase: room.phase,
     players: [...room.players.values()].map((p) => ({
-      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
+      id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, adminJailed: !!p.adminJailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
     })),
   };
 }
@@ -289,7 +289,8 @@ function handle(p, m) {
       const max = clamp(parseInt(m.max, 10) || 8, 2, MAX_PLAYERS);
       const mode = m.mode === 'parkour' ? 'parkour' : 'market';
       const defaultPolice = Math.min(DEFAULT_POLICE, max - 1);
-      const policeMax = mode === 'parkour' ? 0 : clamp(parseInt(m.policeMax, 10) || defaultPolice, 0, max - 1);
+      const requestedPolice = Number.parseInt(m.policeMax, 10);
+      const policeMax = mode === 'parkour' ? 0 : clamp(Number.isFinite(requestedPolice) ? requestedPolice : defaultPolice, 0, max - 1);
       const friendsMax = mode === 'parkour' ? max : clamp(parseInt(m.friendsMax, 10) || Math.max(1, max - policeMax), 1, max);
       if (policeMax + friendsMax > max) return send(p.ws, { t: 'error', msg: 'Komanda limitlərinin cəmi maksimum oyunçu sayından çox ola bilməz' });
       const room = {
@@ -316,6 +317,9 @@ function handle(p, m) {
       if (!room) return send(p.ws, { t: 'error', msg: 'Belə server tapılmadı' });
       if (room.phase !== 'lobby') return send(p.ws, { t: 'error', msg: 'Oyun artıq başlayıb' });
       if (room.players.size >= room.max) return send(p.ws, { t: 'error', msg: 'Server doludur' });
+      const hasFriendSlot = teamCount(room, 'friends') < room.friendsMax;
+      const hasPoliceSlot = room.mode !== 'parkour' && teamCount(room, 'police') < room.policeMax;
+      if (!hasFriendSlot && !hasPoliceSlot) return send(p.ws, { t: 'error', msg: 'Komandaların yerləri doludur' });
       addToRoom(room, p);
       send(p.ws, { t: 'joined', room: roomInfo(room) });
       broadcast(room, { t: 'room', room: roomInfo(room) }, p.id);
