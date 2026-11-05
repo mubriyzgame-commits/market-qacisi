@@ -76,7 +76,7 @@ let room = null;
 let myId = null;
 let inGame = false;
 let gamePhase = 'lobby';
-let timeLeft = 0, cdLeft = 0, collected = 0, relProg = 0, relActive = false, needCount = 30;
+let timeLeft = 0, cdLeft = 0, collected = 0, relProg = 0, relActive = false, needCount = 20;
 let lastCd = 99;
 const me = { x: 0, y: 0, z: 0, vy: 0, yaw: 0, pitch: 0, team: 'friends', jailed: false, stamina: 100, exhausted: false, bob: 0, moving: false };
 const remotes = new Map();   // id -> { av, x,y,z,ry, tx,ty,tz,try, j, has }
