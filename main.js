@@ -115,6 +115,12 @@ adminPanel.innerHTML = `
       <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
     </div>
+    <div class="admin-scare">
+      <strong>🚫 Oyunçunu serverdən çıxart</strong>
+      <p>Siyahıdan oyunçu seç və göndəriləcək mesajı özün yaz.</p>
+      <input id="admin-kick-message" type="text" maxlength="100" placeholder="Kick mesajını yaz..." />
+      <button id="admin-kick" class="admin-option scare-option" type="button">🚫 KICK ET</button>
+    </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
@@ -236,6 +242,25 @@ $('#admin-jumpscare').addEventListener('click', () => {
   toast('Jumpscare göndərildi!');
 });
 
+$('#admin-kick').addEventListener('click', () => {
+  if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
+  if (!adminMode) return toast('Əvvəl Ctrl + 0 ilə admini aktiv et', true);
+  const target = Number(selectedAdminTarget);
+  if (!target) return toast('Əvvəl siyahıdan oyunçu seç', true);
+  if (!room?.players.some((p) => Number(p.id) === target)) {
+    adminPlayerOptionsKey = '';
+    selectedAdminTarget = '';
+    updateAdminPanel();
+    return toast('Oyunçu artıq serverdə deyil', true);
+  }
+  const input = $('#admin-kick-message');
+  const message = input.value.trim();
+  if (!message) return toast('Kick mesajını özün yaz', true);
+  send({ t: 'kick', target, message });
+  input.value = '';
+  toast('Kick əmri göndərildi');
+});
+
 /* =====================================================================
    Şəbəkə
    ===================================================================== */
@@ -283,6 +308,13 @@ function onMsg(m) {
     case 'room': if (room) { room = m.room; onRoomUpdate(); } break;
     case 'left': break;
     case 'error': toast(m.msg, true); break;
+    case 'system': toast(m.msg); break;
+    case 'kicked':
+      toast(`Serverdən çıxarıldın: ${m.msg}`, true);
+      room = null;
+      closeAllPeers();
+      resetToMenu();
+      break;
     case 'start': startGame(m); break;
     case 's': applyState(m); break;
     case 'go': flash('BAŞLA!', '#fff'); sfx.go(); break;
