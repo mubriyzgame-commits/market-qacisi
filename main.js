@@ -116,6 +116,12 @@ adminPanel.innerHTML = `
       <button id="admin-jumpscare" class="admin-option scare-option" type="button">💀 JUMPSCARE GÖNDƏR</button>
     </div>
     <div class="admin-scare">
+      <strong>⛓️ Müddətsiz həbs</strong>
+      <p>Seçilmiş oyunçu admin azad edənə qədər türmədə qalacaq.</p>
+      <button id="admin-jail" class="admin-option scare-option" type="button">⛓️ Müddətsiz həbs et</button>
+      <button id="admin-release" class="admin-option" type="button">🔓 Admin həbsindən azad et</button>
+    </div>
+    <div class="admin-scare">
       <strong>🚫 Oyunçunu serverdən çıxart</strong>
       <p>Siyahıdan oyunçu seç və göndəriləcək mesajı özün yaz.</p>
       <input id="admin-kick-message" type="text" maxlength="100" placeholder="Kick mesajını yaz..." />
@@ -185,12 +191,15 @@ function updateAdminPanel() {
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
+  const selectedPlayer = (room?.players || []).find((p) => String(p.id) === String(selectedAdminTarget));
+  $('#admin-jail').disabled = !selectedPlayer || selectedPlayer.jailed;
+  $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.adminJailed;
 
   // Native select əvəzinə görünən düymə siyahısı: brauzer dropdown problemi aradan qalxır.
   const list = $('#admin-target-list');
   if (!list) return;
   const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
-  const key = players.map((p) => `${p.id}:${p.name}:${p.team}`).join('|');
+  const key = players.map((p) => `${p.id}:${p.name}:${p.team}:${p.jailed ? 1 : 0}:${p.adminJailed ? 1 : 0}`).join('|');
   if (key !== adminPlayerOptionsKey) {
     if (!players.some((p) => String(p.id) === selectedAdminTarget)) selectedAdminTarget = '';
     list.innerHTML = players.length
@@ -225,6 +234,18 @@ $('#admin-target-list').addEventListener('click', (e) => {
   if (!button) return;
   selectedAdminTarget = button.dataset.playerId;
   updateAdminPanel();
+});
+$('#admin-jail').addEventListener('click', () => {
+  const target = Number(selectedAdminTarget);
+  if (!adminMode || !target) return toast('Əvvəl admini aktiv et və oyunçu seç', true);
+  send({ t: 'adminJail', target, enabled: true });
+  toast('Müddətsiz həbs əmri göndərildi');
+});
+$('#admin-release').addEventListener('click', () => {
+  const target = Number(selectedAdminTarget);
+  if (!adminMode || !target) return toast('Əvvəl admini aktiv et və oyunçu seç', true);
+  send({ t: 'adminJail', target, enabled: false });
+  toast('Azad etmə əmri göndərildi');
 });
 $('#admin-jumpscare').addEventListener('click', () => {
   if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
