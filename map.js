@@ -52,19 +52,8 @@ export const SPAWNS = {
   police: [[16, 12], [16, 16], [16, 20]],
 };
 export const SPAWN_YAW = { friends: -Math.PI / 2, police: Math.PI / 2 };
-export const PARKOUR_OBSTACLES = [
-  { x: -24, z: -12, w: 3.2, d: 2.2, h: 0.7 }, { x: -17, z: -7, w: 2.2, d: 3.2, h: 0.7 },
-  { x: -10, z: -13, w: 3.2, d: 2.2, h: 0.7 }, { x: -3, z: -7, w: 2.2, d: 3.2, h: 0.7 },
-  { x: 4, z: -13, w: 3.2, d: 2.2, h: 0.7 }, { x: 11, z: -7, w: 2.2, d: 3.2, h: 0.7 },
-  { x: 18, z: -13, w: 3.2, d: 2.2, h: 0.7 }, { x: 25, z: -7, w: 2.2, d: 3.2, h: 0.7 },
-  { x: -20, z: 5, w: 2.2, d: 3.2, h: 0.7 }, { x: -12, z: 10, w: 3.2, d: 2.2, h: 0.7 },
-  { x: -4, z: 5, w: 2.2, d: 3.2, h: 0.7 }, { x: 4, z: 10, w: 3.2, d: 2.2, h: 0.7 },
-  { x: 12, z: 5, w: 2.2, d: 3.2, h: 0.7 }, { x: 20, z: 10, w: 3.2, d: 2.2, h: 0.7 },
-];
-
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
-  if (mapId === 'parkour') return includeShelves ? PARKOUR_OBSTACLES.map((o) => [o.x - o.w / 2, o.x + o.w / 2, o.z - o.d / 2, o.z + o.d / 2]) : [];
   const c = [];
   if (includeShelves) {
     for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
@@ -110,7 +99,6 @@ export function resolveCollisions(pos, r, boxes) {
 
 // Ərzağların yerləşə biləcəyi rəf yuvaları
 export function makeItemSlots(mapId = 'market') {
-  if (mapId === 'parkour') return Array.from({ length: ITEMS.length }, (_, i) => ({ x: -29 + (i % 10) * 6.2, y: 0.75, z: i < 10 ? -17 + (i % 2) * 4 : 2 + (i % 2) * 4 }));
   const slots = [];
   for (const s of SHELVES) {
     const n = Math.floor(s.w / 1.5);
@@ -131,9 +119,8 @@ export function makeItemSlots(mapId = 'market') {
 
 export const MAPS = [
   { id: 'market', name: '🛒 Market rejimi' },
-  { id: 'parkour', name: '🏃 Parkur rejimi' },
 ];
-export const MAP_ITEMS = { market: ITEMS, parkour: ITEMS };
+export const MAP_ITEMS = { market: ITEMS };
 export function getMapItems(id = 'market') {
   return MAP_ITEMS[id] || ITEMS;
 }
