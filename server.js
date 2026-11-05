@@ -329,10 +329,19 @@ function handle(p, m) {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
       if (!MAPS.some((entry) => entry.id === m.map)) return;
-      room.map = m.map;
-      room.mode = m.map;
-      if (room.mode === 'parkour') { room.policeMax = 0; room.friendsMax = room.max; for (const q of room.players.values()) q.team = 'friends'; }
-      else { room.policeMax = Math.min(DEFAULT_POLICE, room.max - 1); room.friendsMax = room.max - room.policeMax; }
+      if (m.map === 'parkour') {
+        room.marketPoliceMax = room.policeMax;
+        room.marketFriendsMax = room.friendsMax;
+        room.mode = 'parkour'; room.map = 'parkour';
+        room.policeMax = 0; room.friendsMax = room.max;
+        for (const q of room.players.values()) q.team = 'friends';
+      } else {
+        room.mode = 'market'; room.map = 'market';
+        room.policeMax = room.marketPoliceMax ?? Math.min(DEFAULT_POLICE, room.max - 1);
+        room.friendsMax = room.marketFriendsMax ?? (room.max - room.policeMax);
+        let friendSlots = room.friendsMax;
+        for (const q of room.players.values()) q.team = friendSlots-- > 0 ? 'friends' : 'police';
+      }
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
@@ -401,6 +410,7 @@ function handle(p, m) {
     case 'adminJail': {
       const room = p.room;
       if (!p.adminEligible || !p.admin || !room || room.phase !== 'play') return;
+      if (room.mode === 'parkour') return send(p.ws, { t: 'error', msg: 'Parkur rejimində türmə yoxdur' });
       const target = room.players.get(Number(m.target));
       if (!target || target.id === p.id) return send(p.ws, { t: 'error', msg: 'Oyunçu seçimi yanlışdır' });
       if (m.enabled) {
