@@ -297,6 +297,8 @@ function handle(p, m) {
         code: genCode(),
         name: cleanText(m.name, `${p.name} serveri`, 24),
         max, policeMax, friendsMax,
+        marketPoliceMax: mode === 'parkour' ? Math.min(DEFAULT_POLICE, max - 1) : policeMax,
+        marketFriendsMax: mode === 'parkour' ? Math.max(1, max - Math.min(DEFAULT_POLICE, max - 1)) : friendsMax,
         isPublic: m.pub !== false,
         map: mode, mode,
         hostId: p.id,
