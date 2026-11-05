@@ -64,7 +64,7 @@ export const PARKOUR_OBSTACLES = [
 
 // Toqquşma qutuları [minX, maxX, minZ, maxZ]
 export function getColliders(includeShelves = true, includeTables = true, mapId = 'market') {
-  if (mapId === 'parkour') return PARKOUR_OBSTACLES.map((o) => [o.x - o.w / 2, o.x + o.w / 2, o.z - o.d / 2, o.z + o.d / 2]);
+  if (mapId === 'parkour') return includeShelves ? PARKOUR_OBSTACLES.map((o) => [o.x - o.w / 2, o.x + o.w / 2, o.z - o.d / 2, o.z + o.d / 2]) : [];
   const c = [];
   if (includeShelves) {
     for (const s of SHELVES) c.push([s.x - s.w / 2, s.x + s.w / 2, s.z - s.d / 2, s.z + s.d / 2]);
