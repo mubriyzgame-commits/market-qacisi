@@ -88,8 +88,6 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .code b { color: var(--accent); letter-spacing: .25em; font-size: 20px; }
 .lobby-actions { display: flex; gap: 8px; }
 .teams { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; min-height: 0; }
-.teams.parkour-mode { grid-template-columns: 1fr; }
-.teams.parkour-mode .team.friends { max-width: 100%; }
 .team { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
 .team.police { border-top: 4px solid var(--police); }
 .team.friends { border-top: 4px solid var(--friends); }
