@@ -99,6 +99,7 @@ export function resolveCollisions(pos, r, boxes) {
 
 // Ərzağların yerləşə biləcəyi rəf yuvaları
 export function makeItemSlots(mapId = 'market') {
+  if (mapId === 'parkour') return Array.from({ length: ITEMS.length }, (_, i) => ({ x: -29 + (i % 10) * 6.2, y: 0.75, z: i < 10 ? -17 + (i % 2) * 4 : 2 + (i % 2) * 4 }));
   const slots = [];
   for (const s of SHELVES) {
     const n = Math.floor(s.w / 1.5);
@@ -118,9 +119,10 @@ export function makeItemSlots(mapId = 'market') {
 
 
 export const MAPS = [
-  { id: 'market', name: '🛒 Market' },
+  { id: 'market', name: '🛒 Market rejimi' },
+  { id: 'parkour', name: '🏃 Parkur rejimi' },
 ];
-export const MAP_ITEMS = { market: ITEMS };
+export const MAP_ITEMS = { market: ITEMS, parkour: ITEMS };
 export function getMapItems(id = 'market') {
-  return ITEMS;
+  return MAP_ITEMS[id] || ITEMS;
 }
