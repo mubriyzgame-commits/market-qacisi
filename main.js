@@ -780,11 +780,41 @@ $('#btn-join').addEventListener('click', () => {
   joinRoom(code);
 });
 $('#jn-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btn-join').click(); });
-$('#cr-max').addEventListener('input', () => { $('#cr-max-val').textContent = $('#cr-max').value; });
+function updateCreateLimits() {
+  const max = +$('#cr-max').value;
+  const parkour = $('#cr-mode').value === 'parkour';
+  $('#cr-max-val').textContent = max;
+  $('#cr-police').max = Math.max(0, max - 1);
+  $('#cr-friends').max = max;
+  if (parkour) {
+    $('#cr-police').value = 0;
+    $('#cr-friends').value = max;
+  } else {
+    if (+$('#cr-police').value >= max) $('#cr-police').value = max - 1;
+    if (+$('#cr-friends').value + +$('#cr-police').value > max) {
+      $('#cr-friends').value = Math.max(1, max - +$('#cr-police').value);
+    }
+  }
+  $('#cr-police-val').textContent = $('#cr-police').value;
+  $('#cr-friends-val').textContent = $('#cr-friends').value;
+  $('#cr-police').disabled = parkour;
+  $('#cr-friends').disabled = parkour;
+}
+$('#cr-max').addEventListener('input', updateCreateLimits);
+$('#cr-mode').addEventListener('change', () => {
+  if ($('#cr-mode').value === 'market') {
+    $('#cr-police').value = Math.min(3, +$('#cr-max').value - 1);
+    $('#cr-friends').value = Math.max(1, +$('#cr-max').value - +$('#cr-police').value);
+  }
+  updateCreateLimits();
+});
+$('#cr-police').addEventListener('input', updateCreateLimits);
+$('#cr-friends').addEventListener('input', updateCreateLimits);
+updateCreateLimits();
 $('#btn-create').addEventListener('click', async () => {
   ac();
   await ensureMic();
-  send({ t: 'create', name: $('#cr-name').value.trim(), max: +$('#cr-max').value, pub: $('#cr-pub').checked });
+  send({ t: 'create', name: $('#cr-name').value.trim(), max: +$('#cr-max').value, policeMax: +$('#cr-police').value, friendsMax: +$('#cr-friends').value, mode: $('#cr-mode').value, pub: $('#cr-pub').checked });
 });
 
 // Profil
