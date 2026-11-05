@@ -3,15 +3,13 @@
 export const WORLD = { minX: -35, maxX: 35, minZ: -25, maxZ: 25 };
 export const PLAYER_R = 0.4;
 
-// Siyahıdakı 30 ərzaq: [ad, rəng]
+// Siyahıdakı 20 ərzaq: [ad, rəng]
 export const ITEMS = [
   ['Çörək', '#d9a35b'], ['Süd', '#f4f4f4'], ['Yumurta', '#f2e2b8'], ['Pendir', '#ffd23f'], ['Kərə yağı', '#f7e98e'],
   ['Qaymaq', '#fff3e0'], ['Qatıq', '#cfe3ff'], ['Düyü', '#f5f0e6'], ['Makaron', '#e9b44c'], ['Un', '#fafafa'],
   ['Şəkər', '#ffffff'], ['Duz', '#dfe6e9'], ['Çay', '#8b4513'], ['Qəhvə', '#6b3e26'], ['Alma', '#e63946'],
   ['Banan', '#ffe135'], ['Portağal', '#ff8c00'], ['Pomidor', '#d62828'], ['Xiyar', '#4caf50'], ['Kartof', '#b08968'],
   ['Soğan', '#c77dff'], ['Yağ', '#f4d35e'], ['Toyuq', '#f1b98a'], ['Qiymə', '#c1453b'], ['Bal', '#f0a202'],
-  ['Mürəbbə', '#9b2335'], ['Meyvə şirəsi', '#ff9f1c'], ['Su', '#4cc9f0'], ['Peçenye', '#c68642'], ['Şokolad', '#7b4a2a'],
-];
 
 // Rəflər
 export const SHELF = { d: 1.4, h: 2.0, boards: [0.3, 0.85, 1.4] };
