@@ -1499,7 +1499,7 @@ function doAction() {
 /* =====================================================================
    Oyun yenilənməsi
    ===================================================================== */
-const colliders = COLLIDERS;
+var colliders = COLLIDERS;
 function updateGame(dt) {
   const frozen = me.team === 'police' && gamePhase === 'countdown';
   const active = (isLocked() || adminMode) && !frozen && gamePhase !== 'lobby';
