@@ -96,6 +96,7 @@ function addToRoom(room, p) {
   room.players.set(p.id, p);
   p.room = room;
   p.jailed = false;
+  p.adminJailed = false;
   p.picks = 0;
   p.catches = 0;
 }
