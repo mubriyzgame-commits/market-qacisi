@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {
-  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON, MAPS, PARKOUR_OBSTACLES, getMapItems,
+  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON, getMapItems,
   getColliders, resolveCollisions,
 } from './map.js';
 
@@ -471,25 +471,6 @@ let activeMap = 'market';
 let activeItems = ITEMS;
 function buildWorld() {
   const W = WORLD.maxX - WORLD.minX, D = WORLD.maxZ - WORLD.minZ;
-  if (activeMap === 'parkour') {
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), L(0x24334a));
-    floor.rotation.x = -Math.PI / 2; world.add(floor);
-    box(W + 1, 2, 0.5, 0x1b2538, 0, 1, WORLD.minZ - 0.25);
-    box(W + 1, 2, 0.5, 0x1b2538, 0, 1, WORLD.maxZ + 0.25);
-    box(0.5, 2, D, 0x1b2538, WORLD.minX - 0.25, 1, 0);
-    box(0.5, 2, D, 0x1b2538, WORLD.maxX + 0.25, 1, 0);
-    box(5, 0.16, 5, 0x28b463, -30, 0.08, -2);
-    box(5, 0.16, 5, 0xf1c40f, 30, 0.08, 13);
-    for (const o of PARKOUR_OBSTACLES) {
-      box(o.w, o.h, o.d, 0x536b91, o.x, o.h / 2, o.z);
-      box(o.w + 0.12, 0.08, o.d + 0.12, 0x35c9ff, o.x, o.h + 0.04, o.z);
-    }
-    const startTag = textSprite('START', { color: '#8dffc4', height: 0.8 });
-    startTag.position.set(-30, 2.2, -2); world.add(startTag);
-    const finishTag = textSprite('FINISH', { color: '#ffe16b', height: 0.8 });
-    finishTag.position.set(30, 2.2, 13); world.add(finishTag);
-    return;
-  }
   // Döşəmə
   const ft = checkerTexture('#cfd6e4', '#b3bccf'); ft.repeat.set(W / 4, D / 4);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshLambertMaterial({ map: ft }));
@@ -645,7 +626,7 @@ let COLLIDERS = getColliders();
 let COLLIDERS_NO_TABLES = getColliders(true, false);
 let COLLIDERS_NO_SHELVES = getColliders(false, false);
 function setActiveMap(id) {
-  const next = id === 'parkour' ? 'parkour' : 'market';
+  const next = 'market';
   if (next === activeMap && world.children.length) return;
   activeMap = next;
   while (world.children.length) {
@@ -782,32 +763,17 @@ $('#btn-join').addEventListener('click', () => {
 $('#jn-code').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#btn-join').click(); });
 function updateCreateLimits() {
   const max = +$('#cr-max').value;
-  const parkour = $('#cr-mode').value === 'parkour';
   $('#cr-max-val').textContent = max;
   $('#cr-police').max = Math.max(0, max - 1);
   $('#cr-friends').max = max;
-  if (parkour) {
-    $('#cr-police').value = 0;
-    $('#cr-friends').value = max;
-  } else {
-    if (+$('#cr-police').value >= max) $('#cr-police').value = max - 1;
-    if (+$('#cr-friends').value + +$('#cr-police').value > max) {
-      $('#cr-friends').value = Math.max(1, max - +$('#cr-police').value);
-    }
+  if (+$('#cr-police').value >= max) $('#cr-police').value = max - 1;
+  if (+$('#cr-friends').value + +$('#cr-police').value > max) {
+    $('#cr-friends').value = Math.max(1, max - +$('#cr-police').value);
   }
   $('#cr-police-val').textContent = $('#cr-police').value;
   $('#cr-friends-val').textContent = $('#cr-friends').value;
-  $('#cr-police').disabled = parkour;
-  $('#cr-friends').disabled = parkour;
 }
 $('#cr-max').addEventListener('input', updateCreateLimits);
-$('#cr-mode').addEventListener('change', () => {
-  if ($('#cr-mode').value === 'market') {
-    $('#cr-police').value = Math.min(3, +$('#cr-max').value - 1);
-    $('#cr-friends').value = Math.max(1, +$('#cr-max').value - +$('#cr-police').value);
-  }
-  updateCreateLimits();
-});
 $('#cr-police').addEventListener('input', updateCreateLimits);
 $('#cr-friends').addEventListener('input', updateCreateLimits);
 updateCreateLimits();
@@ -853,13 +819,7 @@ function playerCard(p) {
 }
 function renderLobby() {
   $('#lobby-name').textContent = room.name;
-  const mapSelect = $('#lobby-map-select');
-  mapSelect.value = room.mode || room.map || 'market';
-  mapSelect.disabled = room.hostId !== myId;
-  const parkour = (room.mode || room.map) === 'parkour';
-  $('.team.police').classList.toggle('hidden', parkour);
-  $('.teams').classList.toggle('parkour-mode', parkour);
-  $('#lobby-map-hint').textContent = 'Oyun rejimini server sahibi seçir.';
+  $('#lobby-map-label').textContent = '🛒 MARKET';
   $('#lobby-code').textContent = room.code;
   const pol = room.players.filter((p) => p.team === 'police');
   const fr = room.players.filter((p) => p.team === 'friends');
@@ -869,7 +829,7 @@ function renderLobby() {
   $('#cnt-police').textContent = `${pol.length}/${room.policeMax || 0}`;
   $('#cnt-friends').textContent = `${fr.length}/${room.friendsMax || room.max}`;
   const mine = room.players.find((p) => p.id === myId);
-  $('#join-police').disabled = !mine || mine.team === 'police' || parkour || pol.length >= (room.policeMax || 0);
+  $('#join-police').disabled = !mine || mine.team === 'police' || pol.length >= (room.policeMax || 0);
   $('#join-friends').disabled = !mine || mine.team === 'friends' || fr.length >= (room.friendsMax || room.max);
   const host = room.hostId === myId;
   const btn = $('#btn-start');
@@ -884,7 +844,6 @@ function updateSpeakingUI() {
   $$('.pcard[data-id]').forEach((el) => el.classList.toggle('speaking', speaking.has(+el.dataset.id)));
   if (inGame) renderHudPlayers();
 }
-$('#lobby-map-select').addEventListener('change', (e) => send({ t: 'map', map: e.target.value }));
 $('#join-police').addEventListener('click', () => send({ t: 'team', team: 'police' }));
 $('#join-friends').addEventListener('click', () => send({ t: 'team', team: 'friends' }));
 $('#btn-start').addEventListener('click', () => send({ t: 'start' }));
@@ -1536,7 +1495,7 @@ function updateGame(dt) {
   if (me.y < 0) { me.y = 0; me.vy = 0; }
   const pos = { x: me.x, z: me.z };
   // Super jump zamanı əvvəl meyvə masalarının, sonra hündür rəflərin baryerini keçməyə icazə ver.
-  const jumpColliders = activeMap === 'parkour' && me.y > 0.45 ? COLLIDERS_NO_SHELVES : (me.y > SHELF.h
+  const jumpColliders = me.y > SHELF.h
     ? COLLIDERS_NO_SHELVES
     : me.y > 0.9 ? COLLIDERS_NO_TABLES : colliders);
   resolveCollisions(pos, PLAYER_R, jumpColliders);
