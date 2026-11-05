@@ -9,8 +9,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 
 // ---- Qaydalar ----
-const MAX_POLICE = 3;
-const MAX_FRIENDS = 5;
+const DEFAULT_POLICE = 3;
+const DEFAULT_FRIENDS = 5;
+const MAX_PLAYERS = 15;
 const GAME_SECONDS = 600;
 const COUNTDOWN = Number(process.env.COUNTDOWN) || 10;
 const RELEASE_SECONDS = Number(process.env.RELEASE_SECONDS) || 5; // dostu azad etmək üçün türmənin qarşısında dayanma müddəti
@@ -69,6 +70,9 @@ function roomInfo(room) {
     name: room.name,
     hostId: room.hostId,
     max: room.max,
+    policeMax: room.policeMax,
+    friendsMax: room.friendsMax,
+    mode: room.mode || 'market',
     isPublic: room.isPublic,
     map: room.map || 'market',
     phase: room.phase,
@@ -85,8 +89,10 @@ function listRooms() {
 const teamCount = (room, team) => [...room.players.values()].filter((p) => p.team === team).length;
 
 function addToRoom(room, p) {
-  // Komandanı oyunçu əlavə olunmazdan ƏVVƏL hesabla (yoxsa özünü də sayır)
-  p.team = teamCount(room, 'friends') < MAX_FRIENDS ? 'friends' : 'police';
+  const mode = room.mode || 'market';
+  if (mode === 'parkour') p.team = 'friends';
+  else if (teamCount(room, 'friends') < room.friendsMax) p.team = 'friends';
+  else p.team = 'police';
   room.players.set(p.id, p);
   p.room = room;
   p.jailed = false;
@@ -135,7 +141,7 @@ function startGame(room) {
     const sp = p.team === 'police' ? spawnSet.police[pi++ % spawnSet.police.length] : spawnSet.friends[fi++ % spawnSet.friends.length];
     p.x = sp[0]; p.z = sp[1]; p.y = 0;
     p.ry = SPAWN_YAW[p.team];
-    p.jailed = false; p.picks = 0; p.catches = 0; p.catchCd = 0;
+    p.jailed = false; p.adminJailed = false; p.picks = 0; p.catches = 0; p.catchCd = 0;
     p.ignoreUntil = Date.now() + 500;
     out.push({ id: p.id, team: p.team, x: p.x, z: p.z, ry: p.ry });
   }
@@ -175,6 +181,7 @@ function jail(room, target, by) {
   const idx = [...room.players.values()].filter((p) => p.jailed).length;
   const slot = PRISON.slots[idx % PRISON.slots.length];
   target.jailed = true;
+  target.adminJailed = false;
   target.jailedAt = Date.now();
   target.x = slot[0]; target.z = slot[1]; target.y = 0;
   target.ignoreUntil = Date.now() + 400;
@@ -184,7 +191,7 @@ function jail(room, target, by) {
 }
 
 function freeOne(room) {
-  const jailed = [...room.players.values()].filter((p) => p.jailed).sort((a, b) => a.jailedAt - b.jailedAt);
+  const jailed = [...room.players.values()].filter((p) => p.jailed && !p.adminJailed).sort((a, b) => a.jailedAt - b.jailedAt);
   const t = jailed[0];
   if (!t) return;
   t.jailed = false;
@@ -279,12 +286,17 @@ function handle(p, m) {
       break;
     case 'create': {
       if (p.room) return;
+      const max = clamp(parseInt(m.max, 10) || 8, 2, MAX_PLAYERS);
+      const mode = m.mode === 'parkour' ? 'parkour' : 'market';
+      const policeMax = mode === 'parkour' ? 0 : clamp(parseInt(m.policeMax, 10) || DEFAULT_POLICE, 0, max);
+      const friendsMax = mode === 'parkour' ? max : clamp(parseInt(m.friendsMax, 10) || DEFAULT_FRIENDS, 1, max);
+      if (policeMax + friendsMax > max) return send(p.ws, { t: 'error', msg: 'Komanda limitlərinin cəmi maksimum oyunçu sayından çox ola bilməz' });
       const room = {
         code: genCode(),
         name: cleanText(m.name, `${p.name} serveri`, 24),
-        max: clamp(parseInt(m.max, 10) || 8, 2, MAX_POLICE + MAX_FRIENDS),
+        max, policeMax, friendsMax,
         isPublic: m.pub !== false,
-        map: 'market',
+        map: mode, mode,
         hostId: p.id,
         players: new Map(),
         phase: 'lobby',
@@ -323,9 +335,10 @@ function handle(p, m) {
     case 'team': {
       const room = p.room;
       if (!room || room.phase !== 'lobby') return;
-      const team = m.team === 'police' ? 'police' : 'friends';
+      const team = room.mode === 'parkour' ? 'friends' : (m.team === 'police' ? 'police' : 'friends');
       if (p.team === team) return;
-      // Oyunçular istədikləri komandanı seçə bilərlər; komanda limiti yoxdur.
+      const limit = team === 'police' ? room.policeMax : room.friendsMax;
+      if (teamCount(room, team) >= limit) return send(p.ws, { t: 'error', msg: 'Bu komanda doludur' });
       p.team = team;
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
@@ -334,6 +347,7 @@ function handle(p, m) {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
       if (teamCount(room, 'friends') < 1) return send(p.ws, { t: 'error', msg: 'Ən azı 1 dost lazımdır' });
+      if (room.mode !== 'parkour' && teamCount(room, 'police') > room.policeMax) return send(p.ws, { t: 'error', msg: 'Polis limiti aşılıb' });
       startGame(room);
       break;
     }
@@ -374,6 +388,29 @@ function handle(p, m) {
       broadcast(room, { t: 'system', msg: `${target.name} serverdən çıxarıldı: ${reason}` });
       send(target.ws, { t: 'kicked', msg: reason });
       leaveRoom(target);
+      break;
+    }
+    case 'adminJail': {
+      const room = p.room;
+      if (!p.adminEligible || !p.admin || !room || room.phase !== 'play') return;
+      const target = room.players.get(Number(m.target));
+      if (!target || target.id === p.id) return send(p.ws, { t: 'error', msg: 'Oyunçu seçimi yanlışdır' });
+      if (m.enabled) {
+        if (target.jailed) return;
+        const slotIndex = [...room.players.values()].filter((q) => q.jailed).length;
+        const slot = PRISON.slots[slotIndex % PRISON.slots.length];
+        target.jailed = true; target.adminJailed = true; target.jailedAt = Date.now();
+        target.x = slot[0]; target.z = slot[1]; target.y = 0;
+        target.ignoreUntil = Date.now() + 400;
+        broadcast(room, { t: 'caught', id: target.id, by: p.id, name: target.name, byName: p.name, x: slot[0], z: slot[1], admin: true });
+      } else {
+        if (!target.adminJailed) return send(p.ws, { t: 'error', msg: 'Bu oyunçu admin tərəfindən həbs edilməyib' });
+        target.jailed = false; target.adminJailed = false;
+        target.x = PRISON.exit.x; target.z = PRISON.exit.z; target.y = 0;
+        target.ignoreUntil = Date.now() + 400;
+        broadcast(room, { t: 'freed', id: target.id, name: target.name, x: target.x, z: target.z, admin: true });
+      }
+      broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
     case 'jumpscare': {
