@@ -59,9 +59,6 @@
     <div class="panel">
       <h2>Server yarat</h2>
       <label>Server adı<input id="cr-name" maxlength="24" placeholder="Məsələn: Bakı marketi"></label>
-      <label>Oyun rejimi
-        <select id="cr-mode"><option value="market">🛒 Market</option><option value="parkour">🏃 Parkur</option></select>
-      </label>
       <label>Maksimum oyunçu: <b id="cr-max-val">8</b>
         <input id="cr-max" type="range" min="2" max="15" value="8">
       </label>
@@ -72,7 +69,7 @@
         <input id="cr-friends" type="range" min="1" max="15" value="5">
       </label>
       <label class="check"><input id="cr-pub" type="checkbox" checked> Hamı görə bilsin (açıq server)</label>
-      <p class="hint">Market rejimində polis və dost sayını özün təyin et. Parkurda hamı dost olur, polis olmur.</p>
+      <p class="hint">Polis və dost sayını özün təyin et.</p>
       <div class="row">
         <button class="btn" data-go="main">← Geri</button>
         <button class="btn primary" id="btn-create">Yarat</button>
@@ -139,7 +136,7 @@
         <button id="btn-leave" class="mini danger">Çıx</button>
       </div>
     </div>
-    <div class="lobby-map"><label for="lobby-map-select">🎮 OYUN REJİMİ</label><select id="lobby-map-select"><option value="market">🛒 Market</option><option value="parkour">🏃 Parkur</option></select><small id="lobby-map-hint">Rejimi server sahibi seçir.</small></div>
+    <div class="lobby-map"><strong id="lobby-map-label">🛒 MARKET</strong></div>
     <div class="teams">
       <div class="team police">
         <h3>POLİS <span id="cnt-police">0/8</span></h3>
