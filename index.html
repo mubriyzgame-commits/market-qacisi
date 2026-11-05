@@ -59,11 +59,20 @@
     <div class="panel">
       <h2>Server yarat</h2>
       <label>Server adı<input id="cr-name" maxlength="24" placeholder="Məsələn: Bakı marketi"></label>
+      <label>Oyun rejimi
+        <select id="cr-mode"><option value="market">🛒 Market</option><option value="parkour">🏃 Parkur</option></select>
+      </label>
       <label>Maksimum oyunçu: <b id="cr-max-val">8</b>
-        <input id="cr-max" type="range" min="2" max="8" value="8">
+        <input id="cr-max" type="range" min="2" max="15" value="8">
+      </label>
+      <label>Polis limiti: <b id="cr-police-val">3</b>
+        <input id="cr-police" type="range" min="0" max="14" value="3">
+      </label>
+      <label>Dost limiti: <b id="cr-friends-val">5</b>
+        <input id="cr-friends" type="range" min="1" max="15" value="5">
       </label>
       <label class="check"><input id="cr-pub" type="checkbox" checked> Hamı görə bilsin (açıq server)</label>
-      <p class="hint">Lobbidə hər kəs istədiyi komandanı seçə bilər.</p>
+      <p class="hint">Market rejimində polis və dost sayını özün təyin et. Parkurda hamı dost olur, polis olmur.</p>
       <div class="row">
         <button class="btn" data-go="main">← Geri</button>
         <button class="btn primary" id="btn-create">Yarat</button>
@@ -109,8 +118,8 @@
       <h2>Necə oynanır</h2>
       <div class="how">
         <p><b>Süjet:</b> Anan sənə 30 ərzaqlıq siyahı verib. Dostlarınla marketə gedirsiniz, amma bir həftə əvvəl stəkanları sındırdığınıza görə mühafizə sizi içəri buraxmır və tutmağa çalışır.</p>
-        <p><b class="c-f">Dostlar (5):</b> Siyahıdakı bütün 30 ərzağı rəflərdən yığın. Tutulan dost türməyə düşür; azad etmək üçün başqa bir dost türmənin qarşısındakı yaşıl zonada <b>10 saniyə</b> dayanmalıdır.</p>
-        <p><b class="c-p">Polis (3):</b> Bütün dostları tutub türməyə salın. Oyun başlayanda 10 saniyə gözləyirsiniz.</p>
+        <p><b class="c-f">Dostlar:</b> Siyahıdakı bütün 20 ərzağı rəflərdən yığın. Tutulan dost türməyə düşür; azad etmək üçün başqa bir dost türmənin qarşısındakı yaşıl zonada <b>10 saniyə</b> dayanmalıdır.</p>
+        <p><b class="c-p">Polis:</b> Bütün dostları tutub türməyə salın. Oyun başlayanda 10 saniyə gözləyirsiniz.</p>
         <p class="keys"><kbd>W A S D</kbd> hərəkət · <kbd>Shift</kbd> qaç · <kbd>Space</kbd> tullan · <kbd>E</kbd> götür / tut · <kbd>M</kbd> mikrofon · <kbd>Tab</kbd> siyahı</p>
         <p class="hint">Səs çat: dostlar bir-birini həmişə eşidir. Polis və dostlar bir-birini yalnız yaxında olanda eşidir.</p>
       </div>
@@ -130,7 +139,7 @@
         <button id="btn-leave" class="mini danger">Çıx</button>
       </div>
     </div>
-    <div class="lobby-map"><label for="lobby-map-select">🗺️ XƏRİTƏ</label><select id="lobby-map-select"><option value="market">🛒 Market</option></select><small id="lobby-map-hint">Xəritəni server sahibi seçir.</small></div>
+    <div class="lobby-map"><label for="lobby-map-select">🎮 OYUN REJİMİ</label><select id="lobby-map-select"><option value="market">🛒 Market</option><option value="parkour">🏃 Parkur</option></select><small id="lobby-map-hint">Rejimi server sahibi seçir.</small></div>
     <div class="teams">
       <div class="team police">
         <h3>POLİS <span id="cnt-police">0/8</span></h3>
