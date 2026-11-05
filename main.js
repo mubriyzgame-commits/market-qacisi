@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {
-  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON, MAPS, getMapItems,
+  WORLD, PLAYER_R, ITEMS, SHELF, SHELVES, COUNTERS, TABLES, PILLARS, FRIDGE_WALL, PRISON, MAPS, PARKOUR_OBSTACLES, getMapItems,
   getColliders, resolveCollisions,
 } from './map.js';
 
@@ -450,6 +450,25 @@ let activeMap = 'market';
 let activeItems = ITEMS;
 function buildWorld() {
   const W = WORLD.maxX - WORLD.minX, D = WORLD.maxZ - WORLD.minZ;
+  if (activeMap === 'parkour') {
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), L(0x24334a));
+    floor.rotation.x = -Math.PI / 2; world.add(floor);
+    box(W + 1, 2, 0.5, 0x1b2538, 0, 1, WORLD.minZ - 0.25);
+    box(W + 1, 2, 0.5, 0x1b2538, 0, 1, WORLD.maxZ + 0.25);
+    box(0.5, 2, D, 0x1b2538, WORLD.minX - 0.25, 1, 0);
+    box(0.5, 2, D, 0x1b2538, WORLD.maxX + 0.25, 1, 0);
+    box(5, 0.16, 5, 0x28b463, -30, 0.08, -2);
+    box(5, 0.16, 5, 0xf1c40f, 30, 0.08, 13);
+    for (const o of PARKOUR_OBSTACLES) {
+      box(o.w, o.h, o.d, 0x536b91, o.x, o.h / 2, o.z);
+      box(o.w + 0.12, 0.08, o.d + 0.12, 0x35c9ff, o.x, o.h + 0.04, o.z);
+    }
+    const startTag = textSprite('START', { color: '#8dffc4', height: 0.8 });
+    startTag.position.set(-30, 2.2, -2); world.add(startTag);
+    const finishTag = textSprite('FINISH', { color: '#ffe16b', height: 0.8 });
+    finishTag.position.set(30, 2.2, 13); world.add(finishTag);
+    return;
+  }
   // Döşəmə
   const ft = checkerTexture('#cfd6e4', '#b3bccf'); ft.repeat.set(W / 4, D / 4);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshLambertMaterial({ map: ft }));
@@ -605,7 +624,7 @@ let COLLIDERS = getColliders();
 let COLLIDERS_NO_TABLES = getColliders(true, false);
 let COLLIDERS_NO_SHELVES = getColliders(false, false);
 function setActiveMap(id) {
-  const next = 'market';
+  const next = id === 'parkour' ? 'parkour' : 'market';
   if (next === activeMap && world.children.length) return;
   activeMap = next;
   while (world.children.length) {
