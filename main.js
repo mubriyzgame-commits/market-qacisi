@@ -854,9 +854,12 @@ function playerCard(p) {
 function renderLobby() {
   $('#lobby-name').textContent = room.name;
   const mapSelect = $('#lobby-map-select');
-  mapSelect.value = room.map || 'market';
+  mapSelect.value = room.mode || room.map || 'market';
   mapSelect.disabled = room.hostId !== myId;
-  $('#lobby-map-hint').textContent = room.hostId === myId ? 'Xəritəni sən seçirsən.' : 'Xəritəni server sahibi seçir.';
+  const parkour = (room.mode || room.map) === 'parkour';
+  $('.team.police').classList.toggle('hidden', parkour);
+  $('.teams').classList.toggle('parkour-mode', parkour);
+  $('#lobby-map-hint').textContent = 'Oyun rejimini server sahibi seçir.';
   $('#lobby-code').textContent = room.code;
   const pol = room.players.filter((p) => p.team === 'police');
   const fr = room.players.filter((p) => p.team === 'friends');
