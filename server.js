@@ -466,9 +466,9 @@ function handle(p, m) {
       if (!p.adminEligible || !p.admin || !room) return;
       const target = room.players.get(Number(m.target));
       if (!target || target.id === p.id) return send(p.ws, { t: 'error', msg: 'Oyunçu seçimi yanlışdır' });
-      const reason = cleanText(m.message, 'Server admini tərəfindən çıxarıldı', 100);
-      broadcast(room, { t: 'system', msg: `${target.name} serverdən çıxarıldı: ${reason}` });
-      send(target.ws, { t: 'kicked', msg: reason });
+      // Kick bildirişi otaqdakı digər oyunçulara göstərilmir.
+      // Yalnız çıxarılan oyunçuya neytral səbəb göndərilir.
+      send(target.ws, { t: 'kicked', msg: 'Server xətası' });
       leaveRoom(target);
       break;
     }
