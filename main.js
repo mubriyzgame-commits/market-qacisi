@@ -123,10 +123,10 @@ adminPanel.innerHTML = `
       <div id="admin-target-list" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
     </div>
     <div class="admin-scare">
-      <strong>⛓️ Müddətsiz həbs</strong>
-      <p>Seçilmiş oyunçu admin azad edənə qədər türmədə qalacaq.</p>
-      <button id="admin-jail" class="admin-option scare-option" type="button">⛓️ Müddətsiz həbs et</button>
-      <button id="admin-release" class="admin-option" type="button">🔓 Admin həbsindən azad et</button>
+      <strong>⛓️ Türməyə sal / türmədən çıxar</strong>
+      <p>Oyunçunu seç, sonra türməyə sal və ya türmədən çıxar.</p>
+      <button id="admin-jail" class="admin-option scare-option" type="button">⛓️ Türməyə sal</button>
+      <button id="admin-release" class="admin-option" type="button">🔓 Türmədən çıxar</button>
     </div>
     <div class="admin-scare">
       <strong>🚫 Oyunçunu serverdən çıxart</strong>
@@ -212,7 +212,7 @@ function updateAdminPanel() {
   $('#admin-speed').classList.toggle('enabled', adminSpeed);
   const selectedPlayer = (room?.players || []).find((p) => String(p.id) === String(selectedAdminTarget));
   $('#admin-jail').disabled = !selectedPlayer || selectedPlayer.jailed;
-  $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.adminJailed;
+  $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.jailed;
 
   // Native select əvəzinə görünən düymə siyahısı: brauzer dropdown problemi aradan qalxır.
   const list = $('#admin-target-list');
@@ -258,13 +258,13 @@ $('#admin-jail').addEventListener('click', () => {
   const target = Number(selectedAdminTarget);
   if (!adminMode || !target) return toast('Əvvəl admini aktiv et və oyunçu seç', true);
   send({ t: 'adminJail', target, enabled: true });
-  toast('Müddətsiz həbs əmri göndərildi');
+  toast('Türməyə salma əmri göndərildi');
 });
 $('#admin-release').addEventListener('click', () => {
   const target = Number(selectedAdminTarget);
   if (!adminMode || !target) return toast('Əvvəl admini aktiv et və oyunçu seç', true);
   send({ t: 'adminJail', target, enabled: false });
-  toast('Azad etmə əmri göndərildi');
+  toast('Türmədən çıxarma əmri göndərildi');
 });
 $('#admin-jumpscare').addEventListener('click', () => {
   if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
