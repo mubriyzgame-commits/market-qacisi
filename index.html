@@ -149,6 +149,17 @@
         <button id="join-friends" class="tbtn">Dost ol</button>
       </div>
     </div>
+    <div id="lobby-team-settings" class="lobby-team-settings hidden">
+      <strong>⚙️ Komanda sayları</strong>
+      <label>Polis: <b id="lobby-police-val">3</b>
+        <input id="lobby-police-limit" type="range" min="0" max="14" value="3">
+      </label>
+      <label>Dostlar: <b id="lobby-friends-val">5</b>
+        <input id="lobby-friends-limit" type="range" min="1" max="15" value="5">
+      </label>
+      <button id="lobby-save-limits" class="mini" type="button">Yadda saxla</button>
+      <small>Yalnız server sahibi dəyişə bilər. Limitlərin cəmi maksimum oyunçu sayını keçməməlidir.</small>
+    </div>
     <div class="lobby-foot">
       <p id="lobby-hint"></p>
       <button id="btn-start" class="start">OYUNU BAŞLAT</button>
