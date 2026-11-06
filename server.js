@@ -94,6 +94,11 @@ function addToRoom(room, p) {
   else p.team = 'police';
   room.players.set(p.id, p);
   p.room = room;
+  // Admin olan oyunçu server başçısı olur; artıq admin varsa, mövcud başçı qalır.
+  if (p.adminEligible || !room.players.has(room.hostId)) {
+    const currentAdminHost = [...room.players.values()].some((player) => player.id === room.hostId && player.adminEligible);
+    if (p.adminEligible || !currentAdminHost) room.hostId = p.id;
+  }
   p.jailed = false;
   p.adminJailed = false;
   p.picks = 0;
@@ -111,7 +116,10 @@ function leaveRoom(p) {
     rooms.delete(room.code);
     return;
   }
-  if (room.hostId === p.id) room.hostId = [...room.players.keys()][0];
+  if (room.hostId === p.id) {
+    const nextHost = [...room.players.values()].find((player) => player.adminEligible) || [...room.players.values()][0];
+    room.hostId = nextHost?.id ?? null;
+  }
   broadcast(room, { t: 'room', room: roomInfo(room) });
   if (room.phase === 'lobby' && room.vote) evaluateLobbyVote(room);
   if (room.phase === 'play' || room.phase === 'countdown') checkEnd(room);
@@ -325,7 +333,14 @@ function handle(p, m) {
       const cleanName = cleanText(rawName.replace(/00_/g, '').trim(), 'Oyunçu', 16);
       p.name = p.adminEligible ? `👑 ${cleanName}` : cleanName;
       if (typeof m.color === 'string' && /^#[0-9a-fA-F]{6}$/.test(m.color)) p.color = m.color;
-      if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
+      if (p.room) {
+        if (p.adminEligible) p.room.hostId = p.id;
+        else if (p.room.hostId === p.id && !p.adminEligible) {
+          const nextHost = [...p.room.players.values()].find((player) => player.id !== p.id && player.adminEligible);
+          if (nextHost) p.room.hostId = nextHost.id;
+        }
+        broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
+      }
       break;
     }
     case 'list':
