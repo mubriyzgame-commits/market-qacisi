@@ -76,6 +76,7 @@ function roomInfo(room) {
     isPublic: room.isPublic,
     map: room.map || 'market',
     phase: room.phase,
+    vote: room.vote ? { yes: [...room.vote.yes], holdouts: room.vote.holdouts || [], deadline: room.vote.deadline || 0 } : null,
     players: [...room.players.values()].map((p) => ({
       id: p.id, name: p.name, color: p.color, team: p.team, jailed: p.jailed, adminJailed: !!p.adminJailed, admin: !!p.admin, adminEligible: !!p.adminEligible, invisible: !!p.invisible,
     })),
@@ -103,6 +104,7 @@ function leaveRoom(p) {
   const room = p.room;
   if (!room) return;
   room.players.delete(p.id);
+  if (room.vote) { room.vote.yes.delete(p.id); room.vote.holdouts = (room.vote.holdouts || []).filter((id) => id !== p.id); }
   p.room = null;
   p.jailed = false;
   if (room.players.size === 0) {
@@ -114,7 +116,51 @@ function leaveRoom(p) {
   if (room.phase === 'play' || room.phase === 'countdown') checkEnd(room);
 }
 
+function evaluateLobbyVote(room) {
+  if (!room || room.phase !== 'lobby' || !room.vote) return;
+  const remaining = [...room.players.values()].filter((player) => !room.vote.yes.has(player.id));
+  if (remaining.length === 0) {
+    if (teamCount(room, 'friends') < 1) {
+      room.vote = null;
+      broadcast(room, { t: 'system', msg: 'Başlamaq üçün ən azı 1 dost lazımdır.' });
+      broadcast(room, { t: 'room', room: roomInfo(room) });
+      return;
+    }
+    startGame(room);
+    return;
+  }
+  if (remaining.length === 2 && !room.vote.deadline) {
+    room.vote.holdouts = remaining.map((player) => player.id);
+    room.vote.deadline = Date.now() + 15000;
+    broadcast(room, { t: 'system', msg: '2 oyunçu razılıq verməyib. Onlara 15 saniyə vaxt verildi.' });
+    broadcast(room, { t: 'room', room: roomInfo(room) });
+  } else if (remaining.length !== 2 && room.vote.deadline) {
+    room.vote.deadline = 0;
+    room.vote.holdouts = [];
+    broadcast(room, { t: 'system', msg: 'Səsvermə davam edir.' });
+    broadcast(room, { t: 'room', room: roomInfo(room) });
+  }
+}
+
+function finishLobbyVote(room) {
+  if (!room || room.phase !== 'lobby' || !room.vote || !room.vote.deadline) return;
+  const remaining = [...room.players.values()].filter((player) => !room.vote.yes.has(player.id));
+  if (remaining.length !== 2) { evaluateLobbyVote(room); return; }
+  for (const target of remaining) {
+    send(target.ws, { t: 'kicked', msg: 'Səsvermədə 15 saniyə ərzində razılıq vermədin.' });
+    leaveRoom(target);
+  }
+  room.vote = null;
+  broadcast(room, { t: 'system', msg: 'Razılıq verməyən 2 oyunçu çıxarıldı. Oyun başlayır!' });
+  if (room.players.size > 0 && teamCount(room, 'friends') > 0) startGame(room);
+  else {
+    broadcast(room, { t: 'system', msg: 'Oyun başlamaq üçün ən azı 1 dost və 1 oyunçu lazımdır.' });
+    broadcast(room, { t: 'room', room: roomInfo(room) });
+  }
+}
+
 function startGame(room) {
+  room.vote = null;
   // Ərzaqların yerləşdirilməsi
   const catalog = getMapItems(room.map || 'market');
   const need = catalog.length;
@@ -261,6 +307,7 @@ function tickRoom(room, dt) {
 setInterval(() => {
   const now = Date.now();
   for (const room of rooms.values()) {
+    if (room.phase === 'lobby' && room.vote && room.vote.deadline && now >= room.vote.deadline) finishLobbyVote(room);
     if (room.phase === 'countdown' || room.phase === 'play') {
       const dt = Math.min(0.2, (now - room.lastTick) / 1000);
       room.lastTick = now;
@@ -301,6 +348,7 @@ function handle(p, m) {
         hostId: p.id,
         players: new Map(),
         phase: 'lobby',
+        vote: null,
         activeEvents: {},
         items: new Map(),
         cd: 0, timeLeft: 0, collected: 0, rp: 0, ra: false, lastTick: Date.now(),
@@ -368,8 +416,20 @@ function handle(p, m) {
     case 'start': {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
+      if (room.vote) return send(p.ws, { t: 'error', msg: 'Səsvermə artıq davam edir.' });
       if (teamCount(room, 'friends') < 1) return send(p.ws, { t: 'error', msg: 'Ən azı 1 dost lazımdır' });
-      startGame(room);
+      room.vote = { yes: new Set([p.id]), holdouts: [], deadline: 0 };
+      broadcast(room, { t: 'system', msg: 'Oyun başlama səsverməsi başladı!' });
+      evaluateLobbyVote(room);
+      broadcast(room, { t: 'room', room: roomInfo(room) });
+      break;
+    }
+    case 'voteYes': {
+      const room = p.room;
+      if (!room || room.phase !== 'lobby' || !room.vote) return;
+      room.vote.yes.add(p.id);
+      evaluateLobbyVote(room);
+      if (room.phase === 'lobby') broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
     case 'admin': {
