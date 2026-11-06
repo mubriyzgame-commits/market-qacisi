@@ -113,6 +113,7 @@ function leaveRoom(p) {
   }
   if (room.hostId === p.id) room.hostId = [...room.players.keys()][0];
   broadcast(room, { t: 'room', room: roomInfo(room) });
+  if (room.phase === 'lobby' && room.vote) evaluateLobbyVote(room);
   if (room.phase === 'play' || room.phase === 'countdown') checkEnd(room);
 }
 
