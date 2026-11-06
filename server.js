@@ -407,7 +407,7 @@ function handle(p, m) {
         target.ignoreUntil = Date.now() + 400;
         broadcast(room, { t: 'caught', id: target.id, by: p.id, name: target.name, byName: p.name, x: slot[0], z: slot[1], admin: true });
       } else {
-        if (!target.adminJailed) return send(p.ws, { t: 'error', msg: 'Bu oyunçu admin tərəfindən həbs edilməyib' });
+        if (!target.jailed) return send(p.ws, { t: 'error', msg: 'Bu oyunçu türmədə deyil' });
         target.jailed = false; target.adminJailed = false;
         target.x = PRISON.exit.x; target.z = PRISON.exit.z; target.y = 0;
         target.ignoreUntil = Date.now() + 400;
