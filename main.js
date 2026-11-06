@@ -862,11 +862,15 @@ function renderLobby() {
     $('#lobby-friends-val').textContent = room.friendsMax;
   }
   const btn = $('#btn-start');
-  btn.classList.toggle('hidden', !host);
+  btn.classList.toggle('hidden', !host || !!room.vote);
   btn.disabled = fr.length < 1;
   $('#lobby-hint').textContent = host
-    ? (fr.length < 1 ? 'Başlamaq üçün ən azı 1 dost lazımdır.' : (pol.length < 1 ? 'Polis yoxdur — məşq rejimi kimi başlaya bilərsən.' : 'Hazırsan? Oyunu başlat!'))
-    : 'Server sahibinin oyunu başlatmasını gözlə…';
+    ? (fr.length < 1 ? 'Başlamaq üçün ən azı 1 dost lazımdır.' : (pol.length < 1 ? 'Polis yoxdur — məşq rejimi kimi başlaya bilərsən.' : 'Səsverməni başladaraq oyuna keç.'))
+    : 'Server sahibinin səsverməni başlatmasını gözlə…';
+  const voteBtn = $('#btn-vote-yes');
+  voteBtn.classList.toggle('hidden', !room.vote || !!(room.vote && room.vote.yes.includes(myId)));
+  voteBtn.disabled = !room.vote || room.phase !== 'lobby';
+  renderVoteStatus();
   updateMicUI();
 }
 function updateSpeakingUI() {
@@ -876,6 +880,25 @@ function updateSpeakingUI() {
 $('#join-police').addEventListener('click', () => send({ t: 'team', team: 'police' }));
 $('#join-friends').addEventListener('click', () => send({ t: 'team', team: 'friends' }));
 $('#btn-start').addEventListener('click', () => send({ t: 'start' }));
+$('#btn-vote-yes').addEventListener('click', () => send({ t: 'voteYes' }));
+function renderVoteStatus() {
+  const status = $('#lobby-vote-status');
+  if (!status || !room) return;
+  if (!room.vote) { status.textContent = ''; return; }
+  const yes = room.vote.yes.length;
+  const total = room.players.length;
+  const holdout = (room.vote.holdouts || []).includes(myId);
+  if (room.vote.deadline && holdout) {
+    const left = Math.max(0, Math.ceil((room.vote.deadline - Date.now()) / 1000));
+    status.textContent = `⚠️ Razılıq verməsən, ${left} saniyəyə serverdən çıxarılacaqsan!`;
+  } else if (room.vote.deadline) {
+    const left = Math.max(0, Math.ceil((room.vote.deadline - Date.now()) / 1000));
+    status.textContent = `2 oyunçu üçün ${left} saniyəlik vaxt qalıb. (${yes}/${total} razıdır)`;
+  } else {
+    status.textContent = `Səsvermə: ${yes}/${total} oyunçu razıdır.`;
+  }
+}
+setInterval(renderVoteStatus, 250);
 function updateLobbyTeamLimitLabels() {
   $('#lobby-police-val').textContent = $('#lobby-police-limit').value;
   $('#lobby-friends-val').textContent = $('#lobby-friends-limit').value;
