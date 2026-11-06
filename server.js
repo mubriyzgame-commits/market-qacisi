@@ -347,6 +347,24 @@ function handle(p, m) {
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
+    case 'teamLimits': {
+      const room = p.room;
+      if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
+      const policeMax = Number(m.policeMax);
+      const friendsMax = Number(m.friendsMax);
+      if (!Number.isInteger(policeMax) || !Number.isInteger(friendsMax) ||
+          policeMax < 0 || friendsMax < 1 || policeMax + friendsMax > room.max) {
+        return send(p.ws, { t: 'error', msg: 'Komanda limitləri düzgün deyil.' });
+      }
+      if (teamCount(room, 'police') > policeMax || teamCount(room, 'friends') > friendsMax) {
+        return send(p.ws, { t: 'error', msg: 'Əvvəlcə artıq oyunçular başqa komandaya keçsin.' });
+      }
+      room.policeMax = policeMax;
+      room.friendsMax = friendsMax;
+      broadcast(room, { t: 'room', room: roomInfo(room) });
+      send(p.ws, { t: 'system', msg: 'Polis və dost limitləri yeniləndi.' });
+      break;
+    }
     case 'start': {
       const room = p.room;
       if (!room || room.hostId !== p.id || room.phase !== 'lobby') return;
