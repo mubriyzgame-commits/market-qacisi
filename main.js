@@ -124,13 +124,15 @@ adminPanel.innerHTML = `
     </div>
     <div class="admin-scare">
       <strong>⛓️ Türməyə sal / türmədən çıxar</strong>
-      <p>Oyunçunu seç, sonra türməyə sal və ya türmədən çıxar.</p>
+      <p>Əvvəl siyahıdan oyunçu seç.</p>
+      <div id="admin-target-list-jail" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <button id="admin-jail" class="admin-option scare-option" type="button">⛓️ Türməyə sal</button>
       <button id="admin-release" class="admin-option" type="button">🔓 Türmədən çıxar</button>
     </div>
     <div class="admin-scare">
       <strong>🚫 Oyunçunu serverdən çıxart</strong>
       <p>Siyahıdan oyunçu seç və göndəriləcək mesajı özün yaz.</p>
+      <div id="admin-target-list-kick" class="admin-target-list"><div class="admin-target-empty">Oyunçular yüklənir...</div></div>
       <input id="admin-kick-message" type="text" maxlength="100" placeholder="Kick mesajını yaz..." />
       <button id="admin-kick" class="admin-option scare-option" type="button">🚫 KICK ET</button>
     </div>
@@ -214,19 +216,21 @@ function updateAdminPanel() {
   $('#admin-jail').disabled = !selectedPlayer || selectedPlayer.jailed;
   $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.jailed;
 
-  // Native select əvəzinə görünən düymə siyahısı: brauzer dropdown problemi aradan qalxır.
-  const list = $('#admin-target-list');
-  if (!list) return;
+  // Eyni oyunçu siyahısını jumpscare, türmə və kick bölmələrində göstər.
+  const lists = ['#admin-target-list', '#admin-target-list-jail', '#admin-target-list-kick']
+    .map((selector) => $(selector)).filter(Boolean);
   const players = (room?.players || []).filter((p) => String(p.id) !== String(myId));
   const key = players.map((p) => `${p.id}:${p.name}:${p.team}:${p.jailed ? 1 : 0}:${p.adminJailed ? 1 : 0}`).join('|');
+  if (!players.some((p) => String(p.id) === selectedAdminTarget)) selectedAdminTarget = '';
   if (key !== adminPlayerOptionsKey) {
-    if (!players.some((p) => String(p.id) === selectedAdminTarget)) selectedAdminTarget = '';
-    list.innerHTML = players.length
+    const html = players.length
       ? players.map((p) => `<button type="button" class="admin-target-player ${String(p.id) === selectedAdminTarget ? 'selected' : ''}" data-player-id="${p.id}">${esc(p.name)} <small>${p.team === 'police' ? 'Polis' : 'Dost'}</small></button>`).join('')
       : '<div class="admin-target-empty">Başqa oyunçu yoxdur. Otağa oyunçu qoşulsun.</div>';
+    lists.forEach((list) => { list.innerHTML = html; });
     adminPlayerOptionsKey = key;
   } else {
-    list.querySelectorAll('.admin-target-player').forEach((b) => b.classList.toggle('selected', b.dataset.playerId === selectedAdminTarget));
+    lists.forEach((list) => list.querySelectorAll('.admin-target-player')
+      .forEach((b) => b.classList.toggle('selected', b.dataset.playerId === selectedAdminTarget)));
   }
 }
 function sendAdminState() {
@@ -237,22 +241,22 @@ $('#admin-close').addEventListener('click', () => {
   adminPanel.classList.add('hidden');
   if (inGame) tryLock();
 });
+$('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
+$('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
+$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
 adminPanel.addEventListener('click', (e) => {
+  const playerButton = e.target.closest('.admin-target-player');
+  if (playerButton) {
+    selectedAdminTarget = playerButton.dataset.playerId;
+    updateAdminPanel();
+    return;
+  }
   const button = e.target.closest('[data-event]');
   if (!button) return;
   if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
   if (!adminMode) return toast('Əvvəl admini aktiv et: Ctrl + 0', true);
   send({ t: 'controlEvent', name: button.dataset.event });
   toast(button.dataset.event === 'stop' ? 'Hadisə dayandırıldı' : 'Hadisə başladıldı');
-});
-$('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
-$('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
-$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
-$('#admin-target-list').addEventListener('click', (e) => {
-  const button = e.target.closest('.admin-target-player');
-  if (!button) return;
-  selectedAdminTarget = button.dataset.playerId;
-  updateAdminPanel();
 });
 $('#admin-jail').addEventListener('click', () => {
   const target = Number(selectedAdminTarget);
