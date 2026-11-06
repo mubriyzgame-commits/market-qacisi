@@ -28,6 +28,13 @@ const COLORS = ['#ff5a5f', '#ffb400', '#2ec4b6', '#4cc9f0', '#9b5de5', '#f15bb5'
 function loadProfile() {
   let p = {};
   try { p = JSON.parse(localStorage.getItem('mq_profile') || '{}'); } catch { /* ignore */ }
+  // Bir dəfəlik ümumi ad sıfırlaması: hər brauzer yenilənmiş oyuna ilk dəfə girəndə köhnə adı təzələyir.
+  try {
+    if (localStorage.getItem('mq_name_reset_v1') !== '1') {
+      p.name = '';
+      localStorage.setItem('mq_name_reset_v1', '1');
+    }
+  } catch { /* ignore */ }
   return {
     name: p.name || ('Oyunçu' + Math.floor(100 + Math.random() * 900)),
     color: p.color || COLORS[Math.floor(Math.random() * COLORS.length)],
