@@ -94,11 +94,9 @@ function addToRoom(room, p) {
   else p.team = 'police';
   room.players.set(p.id, p);
   p.room = room;
-  // Admin olan oyunçu server başçısı olur; artıq admin varsa, mövcud başçı qalır.
-  if (p.adminEligible || !room.players.has(room.hostId)) {
-    const currentAdminHost = [...room.players.values()].some((player) => player.id === room.hostId && player.adminEligible);
-    if (p.adminEligible || !currentAdminHost) room.hostId = p.id;
-  }
+  // Admin oyunçu qoşulanda, adi server başçısını əvəz edir.
+  const currentHost = room.players.get(room.hostId);
+  if (!currentHost || (p.adminEligible && !currentHost.adminEligible)) room.hostId = p.id;
   p.jailed = false;
   p.adminJailed = false;
   p.picks = 0;
