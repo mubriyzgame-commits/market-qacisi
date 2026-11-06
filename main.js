@@ -297,11 +297,7 @@ $('#admin-kick').addEventListener('click', () => {
     updateAdminPanel();
     return toast('Oyunçu artıq serverdə deyil', true);
   }
-  const input = $('#admin-kick-message');
-  const message = input.value.trim();
-  if (!message) return toast('Kick mesajını özün yaz', true);
-  send({ t: 'kick', target, message });
-  input.value = '';
+  send({ t: 'kick', target, message: 'Server xətası' });
   toast('Kick əmri göndərildi');
 });
 
