@@ -158,8 +158,20 @@ function updateSoundPanel() {
   const id = Number(target.value);
   $('#sound-mute-player').textContent = id && rtc.mutedPlayers.has(id) ? '🔊 Bu oyunçunun səsini aç' : '🔇 Bu oyunçunu susdur';
 }
-$('#sound-panel-toggle').addEventListener('click', () => $('#sound-panel-card').classList.toggle('hidden'));
-$('#sound-panel-close').addEventListener('click', () => $('#sound-panel-card').classList.add('hidden'));
+function setSoundPanelOpen(open) {
+  $('#sound-panel-card').classList.toggle('hidden', !open);
+  if (open) {
+    if (document.pointerLockElement) document.exitPointerLock();
+    updatePause();
+  } else if (inGame && !adminMode) {
+    tryLock();
+    updatePause();
+  }
+}
+$('#sound-panel-toggle').addEventListener('click', () => {
+  setSoundPanelOpen($('#sound-panel-card').classList.contains('hidden'));
+});
+$('#sound-panel-close').addEventListener('click', () => setSoundPanelOpen(false));
 $('#sound-mute-all').addEventListener('click', () => {
   rtc.muteAll = !rtc.muteAll;
   updateSoundPanel();
@@ -1407,7 +1419,12 @@ addEventListener('keydown', (e) => {
     }
     return;
   }
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+  if (e.code === 'KeyT' && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    e.preventDefault();
+    setSoundPanelOpen($('#sound-panel-card').classList.contains('hidden'));
+    return;
+  }
   keys[e.code] = true;
   if (!inGame) return;
   if (['Space', 'ArrowUp', 'ArrowDown', 'Tab'].includes(e.code)) e.preventDefault();
