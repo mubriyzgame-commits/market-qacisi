@@ -851,6 +851,16 @@ function renderLobby() {
   $('#join-police').disabled = !mine || mine.team === 'police' || pol.length >= (room.policeMax || 0);
   $('#join-friends').disabled = !mine || mine.team === 'friends' || fr.length >= (room.friendsMax || room.max);
   const host = room.hostId === myId;
+  const settings = $('#lobby-team-settings');
+  settings.classList.toggle('hidden', !host || room.phase !== 'lobby');
+  if (host && document.activeElement?.id !== 'lobby-police-limit' && document.activeElement?.id !== 'lobby-friends-limit') {
+    $('#lobby-police-limit').max = Math.max(0, room.max - 1);
+    $('#lobby-friends-limit').max = room.max;
+    $('#lobby-police-limit').value = room.policeMax;
+    $('#lobby-friends-limit').value = room.friendsMax;
+    $('#lobby-police-val').textContent = room.policeMax;
+    $('#lobby-friends-val').textContent = room.friendsMax;
+  }
   const btn = $('#btn-start');
   btn.classList.toggle('hidden', !host);
   btn.disabled = fr.length < 1;
@@ -866,6 +876,19 @@ function updateSpeakingUI() {
 $('#join-police').addEventListener('click', () => send({ t: 'team', team: 'police' }));
 $('#join-friends').addEventListener('click', () => send({ t: 'team', team: 'friends' }));
 $('#btn-start').addEventListener('click', () => send({ t: 'start' }));
+function updateLobbyTeamLimitLabels() {
+  $('#lobby-police-val').textContent = $('#lobby-police-limit').value;
+  $('#lobby-friends-val').textContent = $('#lobby-friends-limit').value;
+}
+$('#lobby-police-limit').addEventListener('input', updateLobbyTeamLimitLabels);
+$('#lobby-friends-limit').addEventListener('input', updateLobbyTeamLimitLabels);
+$('#lobby-save-limits').addEventListener('click', () => {
+  if (!room || room.hostId !== myId || room.phase !== 'lobby') return toast('Yalnız lobbinin sahibi dəyişə bilər', true);
+  const policeMax = Number($('#lobby-police-limit').value);
+  const friendsMax = Number($('#lobby-friends-limit').value);
+  if (policeMax + friendsMax > room.max) return toast('Polis və dost limitlərinin cəmi server limitindən çoxdur', true);
+  send({ t: 'teamLimits', policeMax, friendsMax });
+});
 $('#btn-copy').addEventListener('click', () => {
   navigator.clipboard?.writeText(room.code).then(() => toast('Kod kopyalandı'), () => toast(room.code));
 });
