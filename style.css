@@ -668,14 +668,30 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   font-size: 12px;
 }
 #admin-panel #admin-kick-message {
+  position: relative;
+  z-index: 1003;
+  display: block;
   width: 100%;
   min-width: 0;
+  min-height: 38px;
   margin-top: 5px;
-  padding: 8px;
+  padding: 8px 10px;
   border: 1px solid #38445b;
   border-radius: 8px;
   background: #202a3c;
   color: #eef2ff;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  touch-action: auto;
+  cursor: text;
+}
+#admin-panel #admin-kick-message:focus {
+  border-color: #ffd166;
+  box-shadow: 0 0 0 2px #ffd16633;
 }
 #admin-panel .admin-note { margin-top: 7px; }
 @media (max-width: 600px) {
