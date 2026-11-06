@@ -697,6 +697,9 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #admin-panel .admin-target-list { max-height: 64px; }
 }
 
+.lobby-vote-box { width:min(560px,100%); display:grid; gap:8px; justify-items:center; margin:8px auto; text-align:center; color:#ffd166; font-weight:800; }
+#lobby-vote-status { font-size:13px; line-height:1.4; }
+
 /* Komanda limitlərini lobbinin içindən idarə et */
 .lobby-team-settings {
   width:min(560px,100%); margin:16px auto; padding:14px 16px;
