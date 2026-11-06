@@ -618,3 +618,81 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .lobby-map select:disabled{opacity:.8}
 .lobby-map small{color:#9aa8c2;font-size:11px}
 @media(max-width:600px){.lobby-map{gap:7px;padding:9px}.lobby-map select{width:100%;min-width:0}.lobby-map small{width:100%}}
+
+
+/* Admin panel: kompakt düzülüş — idarələr bir ekranda görünsün */
+#admin-panel {
+  padding: 10px;
+  overflow: auto;
+  align-items: center;
+}
+#admin-panel .admin-card {
+  width: min(900px, 96vw);
+  max-height: calc(100dvh - 20px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 14px;
+}
+#admin-panel .admin-head,
+#admin-panel .admin-card > p,
+#admin-panel .admin-note {
+  grid-column: 1 / -1;
+}
+#admin-panel .admin-head { font-size: 17px; }
+#admin-panel .admin-card > p { margin: 5px 0; }
+#admin-panel .admin-option {
+  margin-top: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+#admin-panel .admin-scare {
+  min-width: 0;
+  margin-top: 8px;
+  padding-top: 7px;
+}
+#admin-panel .admin-scare p {
+  margin: 4px 0;
+  font-size: 11px;
+}
+#admin-panel .admin-target-list {
+  max-height: 86px;
+  gap: 4px;
+  margin: 5px 0;
+}
+#admin-panel .admin-target-player {
+  min-height: 30px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+#admin-panel #admin-kick-message {
+  width: 100%;
+  min-width: 0;
+  margin-top: 5px;
+  padding: 8px;
+  border: 1px solid #38445b;
+  border-radius: 8px;
+  background: #202a3c;
+  color: #eef2ff;
+}
+#admin-panel .admin-note { margin-top: 7px; }
+@media (max-width: 600px) {
+  #admin-panel { padding: 6px; align-items: start; }
+  #admin-panel .admin-card {
+    width: 100%;
+    max-height: calc(100dvh - 12px);
+    padding: 10px;
+    grid-template-columns: 1fr;
+  }
+  #admin-panel .admin-head,
+  #admin-panel .admin-card > p,
+  #admin-panel .admin-note { grid-column: 1; }
+}
+@media (max-height: 700px) and (min-width: 601px) {
+  #admin-panel .admin-card { padding: 8px 12px; }
+  #admin-panel .admin-scare { margin-top: 5px; padding-top: 5px; }
+  #admin-panel .admin-option { margin-top: 4px; padding: 6px 8px; }
+  #admin-panel .admin-target-list { max-height: 64px; }
+}
