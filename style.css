@@ -696,3 +696,14 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
   #admin-panel .admin-option { margin-top: 4px; padding: 6px 8px; }
   #admin-panel .admin-target-list { max-height: 64px; }
 }
+
+/* Komanda limitlərini lobbinin içindən idarə et */
+.lobby-team-settings {
+  width:min(560px,100%); margin:16px auto; padding:14px 16px;
+  border:1px solid #ffffff20; border-radius:12px; background:#111827;
+  display:grid; gap:9px; color:#eef2ff;
+}
+.lobby-team-settings.hidden { display:none !important; }
+.lobby-team-settings label { display:grid; grid-template-columns:1fr auto; gap:5px; font-size:14px; }
+.lobby-team-settings input[type="range"] { grid-column:1/-1; width:100%; }
+.lobby-team-settings small { color:#98a2bd; font-size:12px; }
