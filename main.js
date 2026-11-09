@@ -614,9 +614,9 @@ function buildWorld() {
   ink.textAlign = 'center'; ink.textBaseline = 'middle';
   ink.lineJoin = 'round'; ink.lineCap = 'round';
   ink.strokeStyle = 'rgba(48,25,12,0.45)'; ink.lineWidth = 1.8;
-  ink.strokeText('Əsgərxan göt', 0, 0);
+  ink.strokeText('Əsgərxan ❤️ Yağmur', 0, 0);
   ink.fillStyle = '#29170d';
-  ink.fillText('Əsgərxan göt', 0, 0);
+  ink.fillText('Əsgərxan ❤️ Yağmur', 0, 0);
   ink.restore();
   const inkTexture = new THREE.CanvasTexture(inkCanvas);
   inkTexture.colorSpace = THREE.SRGBColorSpace;
