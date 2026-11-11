@@ -1727,7 +1727,8 @@ function updateHudFrame(dt) {
     if (n <= 3 && n !== lastCd) { sfx.beep(); }
     lastCd = n;
   } else if (me.jailed) {
-    banner.innerHTML = 'Türmədəsən<small>Dostların yaşıl zonada 5 saniyə dayanıb səni azad etməlidir.</small>';
+    const rescuers = me.team === 'police' ? 'Polis yoldaşların' : 'Dostların';
+    banner.innerHTML = 'Türmədəsən<small>' + rescuers + ' yaşıl zonada 5 saniyə dayanıb səni azad etməlidir.</small>';
   } else banner.innerHTML = '';
   // Çağırış
   const pr = $('#hud-prompt');
@@ -1740,8 +1741,8 @@ function updateHudFrame(dt) {
   if (relActive && gamePhase === 'play') {
     rl.style.display = 'block';
     $('#hud-release-fill').style.width = `${clamp(relProg / 5, 0, 1) * 100}%`;
-    $('#hud-release-text').textContent = me.jailed ? `Dostların səni azad edir… ${relProg.toFixed(1)} / 5 san`
-      : me.team === 'police' ? `Dostlar türməni açır! ${relProg.toFixed(1)} / 5 san` : `Dost azad edilir… ${relProg.toFixed(1)} / 5 san`;
+    $('#hud-release-text').textContent = me.jailed ? `${me.team === 'police' ? 'Polis yoldaşların' : 'Dostların'} səni azad edir… ${relProg.toFixed(1)} / 5 san`
+      : me.team === 'police' ? `Polis yoldaşını azad edir! ${relProg.toFixed(1)} / 5 san` : `Dost azad edilir… ${relProg.toFixed(1)} / 5 san`;
   } else rl.style.display = 'none';
   // Dözümlülük
   const sf = $('#hud-stamina-fill');
