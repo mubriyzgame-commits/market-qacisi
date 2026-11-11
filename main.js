@@ -136,6 +136,12 @@ adminPanel.innerHTML = `
       <input id="admin-kick-message" type="text" maxlength="100" placeholder="Kick mesajını yaz..." />
       <button id="admin-kick" class="admin-option scare-option" type="button">🚫 KICK ET</button>
     </div>
+    <div class="admin-scare">
+      <strong>📢 Server elanı</strong>
+      <p>Elan bütün oyunçulara görünəcək.</p>
+      <input id="admin-announcement-text" type="text" maxlength="120" placeholder="Elanını yaz..." />
+      <button id="admin-announcement-send" class="admin-option scare-option" type="button">📢 ELANI GÖNDƏR</button>
+    </div>
     <div class="admin-note">Panel: Ctrl + 0</div>
   </div>`;
 document.body.appendChild(adminPanel);
@@ -301,6 +307,17 @@ $('#admin-kick').addEventListener('click', () => {
   toast('Kick əmri göndərildi');
 });
 
+$('#admin-announcement-send').addEventListener('click', () => {
+  if (!wsOpen) return toast('Serverə bağlantı yoxdur', true);
+  if (!adminMode) return toast('Əvvəl Ctrl + 0 ilə admini aktiv et', true);
+  const input = $('#admin-announcement-text');
+  const message = input.value.trim();
+  if (!message) return toast('Əvvəl elan yaz', true);
+  send({ t: 'announcement', message });
+  input.value = '';
+  toast('Elan göndərildi');
+});
+
 /* =====================================================================
    Şəbəkə
    ===================================================================== */
@@ -364,6 +381,7 @@ function onMsg(m) {
     case 'end': onEnd(m); break;
     case 'rtc': onRtc(m); break;
     case 'speak': if (m.on) speaking.add(m.id); else speaking.delete(m.id); updateSpeakingUI(); break;
+    case 'announcement': toast(`📢 ${m.name}: ${m.message}`); break;
     case 'jumpscare': showJumpscare(); break;
     case 'event': applyRandomEvent(m); break;
     default: break;
