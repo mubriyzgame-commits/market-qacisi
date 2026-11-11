@@ -251,7 +251,8 @@ $('#admin-close').addEventListener('click', () => {
 });
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
-$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });\n$('#admin-catch-range').addEventListener('click', () => { adminCatchRange = !adminCatchRange; sendAdminState(); });
+$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
+$('#admin-catch-range').addEventListener('click', () => { adminCatchRange = !adminCatchRange; sendAdminState(); });
 adminPanel.addEventListener('click', (e) => {
   const playerButton = e.target.closest('.admin-target-player');
   if (playerButton) {
