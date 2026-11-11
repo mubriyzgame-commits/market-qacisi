@@ -217,7 +217,9 @@ function updateAdminPanel() {
   $('#admin-speed').textContent = `⚡ Super sürət: ${adminSpeed ? 'ON' : 'OFF'}`;
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
-  $('#admin-speed').classList.toggle('enabled', adminSpeed);\n  $('#admin-catch-range').textContent = `♾️ Infinity Range: ${adminCatchRange ? 'ON' : 'OFF'}`;\n  $('#admin-catch-range').classList.toggle('enabled', adminCatchRange);
+  $('#admin-speed').classList.toggle('enabled', adminSpeed);
+  $('#admin-catch-range').textContent = `♾️ Infinity Range: ${adminCatchRange ? 'ON' : 'OFF'}`;
+  $('#admin-catch-range').classList.toggle('enabled', adminCatchRange);
   const selectedPlayer = (room?.players || []).find((p) => String(p.id) === String(selectedAdminTarget));
   $('#admin-jail').disabled = !selectedPlayer || selectedPlayer.jailed;
   $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.jailed;
@@ -1543,7 +1545,7 @@ function doAction() {
   if (me.team === 'friends') {
     // Düymə basılan anda ən yaxın ərzağı yenidən hesabla; köhnə nearItem dəyərinə güvənmə.
     let target = null;
-    let best = 1.5;
+    let best = adminMode && adminCatchRange ? Infinity : 1.5;
     for (const it of itemsMap.values()) {
       if (it.got) continue;
       const d = Math.hypot(it.x - me.x, it.z - me.z);
