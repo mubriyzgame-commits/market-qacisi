@@ -548,7 +548,7 @@ function handle(p, m) {
       if (!room || room.phase !== 'play' || p.team !== 'friends' || p.jailed) return;
       const it = room.items.get(m.id);
       if (!it || it.got) return;
-      if (Math.hypot(it.x - p.x, it.z - p.z) > PICK_RANGE) return;
+      if (!(p.admin && p.adminCatchRange) && Math.hypot(it.x - p.x, it.z - p.z) > PICK_RANGE) return;
       it.got = true;
       room.collected++;
       p.picks++;
