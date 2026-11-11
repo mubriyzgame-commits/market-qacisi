@@ -1650,7 +1650,7 @@ function updateGame(dt) {
       for (const [id, r] of remotes) {
         if (!r.has || r.j === 1) continue;
         const p = room?.players.find((q) => q.id === id);
-        if (!p || (!adminCatchRange && p.team !== 'friends')) continue;
+        if (!p || p.team !== 'friends') continue;
         const d = Math.hypot(r.x - me.x, r.z - me.z);
         if (d < best) { best = d; nearFriend = { id, name: p.name }; }
       }
