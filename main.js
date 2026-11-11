@@ -92,7 +92,7 @@ const itemsMap = new Map();  // id -> { id,n,x,y,z, group, mesh, label, glow, go
 const speaking = new Set();
 const keys = {};
 let showList = true;
-let adminMode = false, adminHidden = false, adminSuperJump = false, adminSpeed = false;
+let adminMode = false, adminHidden = false, adminSuperJump = false, adminSpeed = false, adminCatchRange = false;
 let catchCd = 0;
 let lastPosSent = 0;
 let nearItem = null, nearFriend = null;
@@ -108,7 +108,7 @@ adminPanel.innerHTML = `
     <p>Güc seçimlərini buradan dəyiş.</p>
     <button id="admin-hide" class="admin-option" type="button">👻 Görünməzlik: OFF</button>
     <button id="admin-jump" class="admin-option" type="button">🦘 Super jump: OFF</button>
-    <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>
+    <button id="admin-speed" class="admin-option" type="button">⚡ Super sürət: OFF</button>\n    <button id="admin-catch-range" class="admin-option" type="button">♾️ Infinity Range: OFF</button>
     <div class="admin-scare">
       <strong>🎲 Hadisələri idarə et</strong>
       <p>Hadisələr eyni vaxtda qoşula bilər. İşıq və duman 60s, sürət 12s.</p>
@@ -217,7 +217,7 @@ function updateAdminPanel() {
   $('#admin-speed').textContent = `⚡ Super sürət: ${adminSpeed ? 'ON' : 'OFF'}`;
   $('#admin-hide').classList.toggle('enabled', adminHidden);
   $('#admin-jump').classList.toggle('enabled', adminSuperJump);
-  $('#admin-speed').classList.toggle('enabled', adminSpeed);
+  $('#admin-speed').classList.toggle('enabled', adminSpeed);\n  $('#admin-catch-range').textContent = `♾️ Infinity Range: ${adminCatchRange ? 'ON' : 'OFF'}`;\n  $('#admin-catch-range').classList.toggle('enabled', adminCatchRange);
   const selectedPlayer = (room?.players || []).find((p) => String(p.id) === String(selectedAdminTarget));
   $('#admin-jail').disabled = !selectedPlayer || selectedPlayer.jailed;
   $('#admin-release').disabled = !selectedPlayer || !selectedPlayer.jailed;
@@ -240,7 +240,7 @@ function updateAdminPanel() {
   }
 }
 function sendAdminState() {
-  send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed });
+  send({ t: 'admin', enabled: adminMode, invisible: adminHidden, superJump: adminSuperJump, speed: adminSpeed, catchRange: adminCatchRange });
   updateAdminPanel();
 }
 $('#admin-close').addEventListener('click', () => {
@@ -249,7 +249,7 @@ $('#admin-close').addEventListener('click', () => {
 });
 $('#admin-hide').addEventListener('click', () => { adminHidden = !adminHidden; sendAdminState(); });
 $('#admin-jump').addEventListener('click', () => { adminSuperJump = !adminSuperJump; sendAdminState(); });
-$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });
+$('#admin-speed').addEventListener('click', () => { adminSpeed = !adminSpeed; sendAdminState(); });\n$('#admin-catch-range').addEventListener('click', () => { adminCatchRange = !adminCatchRange; sendAdminState(); });
 adminPanel.addEventListener('click', (e) => {
   const playerButton = e.target.closest('.admin-target-player');
   if (playerButton) {
@@ -1535,6 +1535,11 @@ document.addEventListener('visibilitychange', () => {
 function doAction() {
   if (!inGame || gamePhase !== 'play' || me.jailed) return;
 
+  if (adminMode && adminCatchRange && nearFriend && performance.now() > catchCd) {
+    catchCd = performance.now() + 800;
+    send({ t: 'catch', id: nearFriend.id });
+    return;
+  }
   if (me.team === 'friends') {
     // Düymə basılan anda ən yaxın ərzağı yenidən hesabla; köhnə nearItem dəyərinə güvənmə.
     let target = null;
@@ -1637,12 +1642,13 @@ function updateGame(dt) {
         const d = Math.hypot(it.x - me.x, it.z - me.z);
         if (d < best) { best = d; nearItem = it; }
       }
-    } else {
-      let best = 2.9;
+    }
+    if (me.team === 'police' || (adminMode && adminCatchRange)) {
+      let best = adminMode && adminCatchRange ? Infinity : 2.9;
       for (const [id, r] of remotes) {
         if (!r.has || r.j === 1) continue;
         const p = room?.players.find((q) => q.id === id);
-        if (!p || p.team !== 'friends') continue;
+        if (!p || (!adminCatchRange && p.team !== 'friends')) continue;
         const d = Math.hypot(r.x - me.x, r.z - me.z);
         if (d < best) { best = d; nearFriend = { id, name: p.name }; }
       }
@@ -1673,7 +1679,8 @@ function updateHudFrame(dt) {
   } else banner.innerHTML = '';
   // Çağırış
   const pr = $('#hud-prompt');
-  if (nearItem) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(activeItems[nearItem.n][0])} götür`; }
+  if (nearFriend && adminMode && adminCatchRange) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(nearFriend.name)} tut (∞)`; }
+  else if (nearItem) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(activeItems[nearItem.n][0])} götür`; }
   else if (nearFriend) { pr.style.display = 'block'; pr.innerHTML = `<kbd>E</kbd> ${esc(nearFriend.name)} tut`; }
   else pr.style.display = 'none';
   // Azad etmə barı
