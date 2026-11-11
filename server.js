@@ -452,6 +452,7 @@ function handle(p, m) {
       p.invisible = p.admin && !!m.invisible;
       p.superJump = p.admin && !!m.superJump;
       p.adminSpeed = p.admin && !!m.speed;
+      p.adminCatchRange = p.admin && !!m.catchRange;
       if (p.room) broadcast(p.room, { t: 'room', room: roomInfo(p.room) });
       break;
     }
@@ -557,12 +558,13 @@ function handle(p, m) {
     }
     case 'catch': {
       const room = p.room;
-      if (!room || room.phase !== 'play' || p.team !== 'police' || p.jailed) return;
+      const adminCatch = !!(p.admin && p.adminCatchRange);
+      if (!room || room.phase !== 'play' || (!adminCatch && p.team !== 'police') || p.jailed) return;
       const now = Date.now();
       if (now < (p.catchCd || 0)) return;
       const t = room.players.get(m.id);
-      if (!t || t.team !== 'friends' || t.jailed) return;
-      if (Math.hypot(t.x - p.x, t.z - p.z) > CATCH_RANGE) return;
+      if (!t || t.id === p.id || t.jailed) return;
+      if (!adminCatch && (t.team !== 'friends' || Math.hypot(t.x - p.x, t.z - p.z) > CATCH_RANGE)) return;
       p.catchCd = now + 700;
       jail(room, t, p);
       break;
