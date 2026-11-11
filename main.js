@@ -1153,6 +1153,18 @@ function onEnd(m) {
   $('#end-title').textContent = m.winner === 'friends' ? '🛒 DOSTLAR QAZANDI!' : '🚓 POLİS QAZANDI!';
   $('#end-title').style.color = m.winner === 'friends' ? 'var(--friends)' : '#7da2ff';
   $('#end-reason').textContent = `${m.reason} · Yığılan ərzaq: ${m.collected}/${m.need}`;
+  const ranked = [...m.stats].sort((a, b) =>
+    (Number(b.picks || 0) + Number(b.catches || 0)) -
+    (Number(a.picks || 0) + Number(a.catches || 0)));
+  const medals = ['🥇', '🥈', '🥉'];
+  $('#end-podium').innerHTML = ranked.slice(0, 3).map((s, i) => `
+    <div class="podium-place place-${i + 1}">
+      <span class="podium-medal">${medals[i]}</span>
+      <strong>${esc(s.name)}${s.id === myId ? ' (sən)' : ''}</strong>
+      <small>${s.team === 'police' ? 'Polis' : 'Dost'}</small>
+      <b>${Number(s.picks || 0) + Number(s.catches || 0)} xal</b>
+      <small>🛍️ ${Number(s.picks || 0)} · 🚓 ${Number(s.catches || 0)}</small>
+    </div>`).join('');
   $('#end-stats').innerHTML = m.stats.map((s) =>
     `<div class="trow"><span>${esc(s.name)}${s.id === myId ? ' (sən)' : ''}</span><span>${s.team === 'police' ? 'Polis' : 'Dost'}</span><span>${s.picks}</span><span>${s.catches}</span></div>`).join('');
   showScreen('end');
