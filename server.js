@@ -246,8 +246,8 @@ function jail(room, target, by) {
   checkEnd(room);
 }
 
-function freeOne(room) {
-  const jailed = [...room.players.values()].filter((p) => p.jailed && !p.adminJailed).sort((a, b) => a.jailedAt - b.jailedAt);
+function freeOne(room, team) {
+  const jailed = [...room.players.values()].filter((p) => p.jailed && !p.adminJailed && p.team === team).sort((a, b) => a.jailedAt - b.jailedAt);
   const t = jailed[0];
   if (!t) return;
   t.jailed = false;
@@ -298,18 +298,21 @@ function tickRoom(room, dt) {
       room.activeEvents[eventName] = now + duration;
       broadcast(room, { t: 'event', name: eventName, active: true, duration: duration / 1000 });
     }
-    // Azad etmə məntiqi: azad dost türmənin qarşısındakı zonada dayanmalıdır
-    const jailedCount = [...room.players.values()].filter((p) => p.jailed).length;
+    // Türmədəki oyunçunu yalnız öz komandası azad edə bilər.
     const z = PRISON.zone;
-    const occupied = [...room.players.values()].some(
-      (p) => p.team === 'friends' && !p.jailed && Math.hypot(p.x - z.x, p.z - z.z) <= z.r,
+    const nextToFree = [...room.players.values()]
+      .filter((p) => p.jailed && !p.adminJailed)
+      .sort((a, b) => a.jailedAt - b.jailedAt)[0];
+    const releaseTeam = nextToFree?.team || null;
+    const occupied = !!releaseTeam && [...room.players.values()].some(
+      (p) => p.team === releaseTeam && !p.jailed && Math.hypot(p.x - z.x, p.z - z.z) <= z.r,
     );
-    room.ra = jailedCount > 0 && occupied;
+    room.ra = !!nextToFree && occupied;
     if (room.ra) {
       room.rp += dt;
       if (room.rp >= RELEASE_SECONDS) {
         room.rp = 0;
-        freeOne(room);
+        freeOne(room, releaseTeam);
       }
     } else {
       room.rp = 0;
