@@ -508,6 +508,14 @@ function handle(p, m) {
       broadcast(room, { t: 'room', room: roomInfo(room) });
       break;
     }
+    case 'announcement': {
+      const room = p.room;
+      if (!p.adminEligible || !p.admin || !room) return;
+      const message = cleanText(String(m.message || '').trim(), '', 120);
+      if (!message) return send(p.ws, { t: 'error', msg: 'Elan boş ola bilməz' });
+      broadcast(room, { t: 'announcement', name: p.name, message });
+      break;
+    }
     case 'jumpscare': {
       const room = p.room;
       if (!p.adminEligible || !p.admin || !room) return;
