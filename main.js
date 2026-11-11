@@ -1570,6 +1570,10 @@ function releaseAllControls() {
   lookPointer = null;
 }
 addEventListener('blur', releaseAllControls);
+// Yazı sahəsinə klikləyəndə saxlanmış bütün hərəkət düymələrini dərhal burax.
+document.addEventListener('focusin', (e) => {
+  if (e.target.matches('input, textarea, [contenteditable="true"]')) releaseAllControls();
+});
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) releaseAllControls();
 });
@@ -1611,8 +1615,9 @@ function doAction() {
    ===================================================================== */
 var colliders = COLLIDERS;
 function updateGame(dt) {
+  const typing = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
   const frozen = me.team === 'police' && gamePhase === 'countdown';
-  const active = (isLocked() || adminMode) && !frozen && gamePhase !== 'lobby';
+  const active = (isLocked() || adminMode) && !typing && !frozen && gamePhase !== 'lobby';
   me.moving = false;
   if (active) {
     const f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
