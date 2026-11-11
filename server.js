@@ -559,12 +559,12 @@ function handle(p, m) {
     case 'catch': {
       const room = p.room;
       const adminCatch = !!(p.admin && p.adminCatchRange);
-      if (!room || room.phase !== 'play' || (!adminCatch && p.team !== 'police') || p.jailed) return;
+      if (!room || room.phase !== 'play' || p.team !== 'police' || p.jailed) return;
       const now = Date.now();
       if (now < (p.catchCd || 0)) return;
       const t = room.players.get(m.id);
       if (!t || t.id === p.id || t.jailed) return;
-      if (!adminCatch && (t.team !== 'friends' || Math.hypot(t.x - p.x, t.z - p.z) > CATCH_RANGE)) return;
+      if (t.team !== 'friends' || (!adminCatch && Math.hypot(t.x - p.x, t.z - p.z) > CATCH_RANGE)) return;
       p.catchCd = now + 700;
       jail(room, t, p);
       break;
