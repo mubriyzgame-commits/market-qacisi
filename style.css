@@ -726,3 +726,57 @@ kbd { background: rgba(255,255,255,.12); border: 1px solid var(--line); border-r
 .lobby-team-settings label { display:grid; grid-template-columns:1fr auto; gap:5px; font-size:14px; }
 .lobby-team-settings input[type="range"] { grid-column:1/-1; width:100%; }
 .lobby-team-settings small { color:#98a2bd; font-size:12px; }
+
+
+/* Kahoot üslubunda raund podiumu */
+.podium-heading {
+  margin: 22px 0 12px;
+  color: #ffd166;
+  text-align: center;
+  letter-spacing: .06em;
+}
+.end-podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+  width: min(620px, 100%);
+  margin: 0 auto 22px;
+}
+.podium-place {
+  min-width: 0;
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 8px;
+  border: 1px solid #ffffff25;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #25334b, #151d2d);
+  color: #f8fafc;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.podium-place.place-1 {
+  min-height: 164px;
+  border-color: #ffd166;
+  background: linear-gradient(160deg, #69501d, #282033);
+  box-shadow: 0 8px 28px #ffd16622;
+}
+.podium-place.place-2 { border-color: #c4d0df88; }
+.podium-place.place-3 { border-color: #c58a5b88; }
+.podium-medal { font-size: 30px; line-height: 1; }
+.podium-place strong { font-size: 14px; }
+.podium-place small { color: #c5cee0; font-size: 11px; }
+.podium-place b { color: #ffd166; font-size: 17px; }
+@media (max-width: 520px) {
+  .end-podium { gap: 6px; }
+  .podium-place { min-height: 120px; padding: 9px 4px; }
+  .podium-place.place-1 { min-height: 145px; }
+  .podium-medal { font-size: 25px; }
+  .podium-place strong { font-size: 11px; }
+  .podium-place small { font-size: 9px; }
+  .podium-place b { font-size: 14px; }
+}
