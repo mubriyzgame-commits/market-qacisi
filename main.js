@@ -1207,8 +1207,7 @@ function onEnd(m) {
       <b>${Number(s.picks || 0) + Number(s.catches || 0)} xal</b>
       <small>🛍️ ${Number(s.picks || 0)} · 🚓 ${Number(s.catches || 0)}</small>
     </div>`).join('');
-  $('#end-stats').innerHTML = m.stats.map((s) =>
-    `<div class="trow"><span>${esc(s.name)}${s.id === myId ? ' (sən)' : ''}</span><span>${s.team === 'police' ? 'Polis' : 'Dost'}</span><span>${s.picks}</span><span>${s.catches}</span></div>`).join('');
+
   showScreen('end');
 }
 $('#btn-back-lobby').addEventListener('click', () => { if (room) showScreen('lobby'); else showScreen('main'); });
