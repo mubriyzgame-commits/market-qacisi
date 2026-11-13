@@ -179,9 +179,6 @@ function startGame(room) {
   }
   const names = shuffle([...Array(need).keys()]);
   room.items = new Map();
-  room.superFruit = null;
-  room.superFruitSpawned = false;
-  room.superFruitSpawnAt = 0;
   const itemsOut = chosen.map((s, i) => {
     const it = { id: i, n: names[i], x: s.x, y: s.y, z: s.z, got: false };
     room.items.set(i, it);
@@ -195,7 +192,6 @@ function startGame(room) {
   for (const p of room.players.values()) {
     const sp = p.team === 'police' ? spawnSet.police[pi++ % spawnSet.police.length] : spawnSet.friends[fi++ % spawnSet.friends.length];
     p.x = sp[0]; p.z = sp[1]; p.y = 0;
-    p.superBoostUntil = 0;
     p.ry = SPAWN_YAW[p.team];
     p.jailed = false; p.adminJailed = false; p.picks = 0; p.catches = 0; p.catchCd = 0;
     p.ignoreUntil = Date.now() + 500;
@@ -262,27 +258,11 @@ function tickRoom(room, dt) {
     if (room.cd <= 0) {
       room.cd = 0;
       room.phase = 'play';
-      room.superFruitSpawnAt = Date.now() + 60000;
       broadcast(room, { t: 'go' });
     }
   } else if (room.phase === 'play') {
     room.timeLeft -= dt;
     const now = Date.now();
-    if (!room.superFruitSpawned && room.superFruitSpawnAt && now >= room.superFruitSpawnAt) {
-      const fruitSlots = makeItemSlots(room.map || 'market');
-      const slot = fruitSlots[Math.floor(Math.random() * fruitSlots.length)];
-      if (slot) {
-        room.superFruit = { id: 'super', x: slot.x, y: slot.y, z: slot.z };
-        room.superFruitSpawned = true;
-        broadcast(room, { t: 'superFruitSpawn', fruit: room.superFruit });
-      }
-    }
-    for (const p of room.players.values()) {
-      if (p.superBoostUntil && now >= p.superBoostUntil) {
-        p.superBoostUntil = 0;
-        send(p.ws, { t: 'superBoostEnd' });
-      }
-    }
     let eventExpired = false;
     for (const [eventName, endsAt] of Object.entries(room.activeEvents || {})) {
       if (now >= endsAt) {
@@ -557,7 +537,7 @@ function handle(p, m) {
       if (x === null || y === null || z === null || ry === null) return;
       x = clamp(x, WORLD.minX, WORLD.maxX);
       z = clamp(z, WORLD.minZ, WORLD.maxZ);
-      y = clamp(y, 0, (p.admin && p.superJump) || p.superBoostUntil > Date.now() ? 8 : 3);
+      y = clamp(y, 0, p.admin && p.superJump ? 8 : 3);
       if (p.jailed) {
         x = clamp(x, PRISON.inner.minX, PRISON.inner.maxX);
         z = clamp(z, PRISON.inner.minZ, PRISON.inner.maxZ);
@@ -577,16 +557,6 @@ function handle(p, m) {
       p.picks++;
       broadcast(room, { t: 'got', id: it.id, n: it.n, by: p.id, name: p.name, c: room.collected });
       if (room.collected >= getMapItems(room.map || 'market').length) endGame(room, 'friends', 'Bütün əşyalar tapıldı!');
-      break;
-    }
-    case 'superPickup': {
-      const room = p.room;
-      const fruit = room?.superFruit;
-      if (!room || room.phase !== 'play' || p.team !== 'friends' || p.jailed || !fruit) return;
-      if (Math.hypot(fruit.x - p.x, fruit.z - p.z) > 1.8) return;
-      room.superFruit = null;
-      p.superBoostUntil = Date.now() + 45000;
-      broadcast(room, { t: 'superFruitGot', id: p.id, name: p.name, expiresAt: p.superBoostUntil });
       break;
     }
     case 'catch': {
@@ -623,7 +593,7 @@ function handle(p, m) {
 wss.on('connection', (ws) => {
   const p = {
     id: nextId++, ws, name: 'Oyunçu', color: '#ffb400', room: null, team: 'friends',
-    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, admin: false, adminEligible: false, invisible: false, superJump: false, adminSpeed: false, superBoostUntil: 0, alive: true,
+    x: 0, y: 0, z: 0, ry: 0, jailed: false, jailedAt: 0, picks: 0, catches: 0, ignoreUntil: 0, catchCd: 0, admin: false, adminEligible: false, invisible: false, superJump: false, adminSpeed: false, alive: true,
   };
   players.set(p.id, p);
   send(ws, { t: 'welcome', id: p.id });
