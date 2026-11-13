@@ -93,7 +93,7 @@ const speaking = new Set();
 const keys = {};
 let showList = true;
 let adminMode = false, adminHidden = false, adminSuperJump = false, adminSpeed = false, adminCatchRange = false;
-let superFruitObj = null, superBoostUntil = 0;
+
 let catchCd = 0;
 let lastPosSent = 0;
 let nearItem = null, nearFriend = null;
@@ -380,9 +380,6 @@ function onMsg(m) {
     case 's': applyState(m); break;
     case 'go': flash('BAŞLA!', '#fff'); sfx.go(); break;
     case 'got': onGot(m); break;
-    case 'superFruitSpawn': onSuperFruitSpawn(m.fruit); break;
-    case 'superFruitGot': onSuperFruitGot(m); break;
-    case 'superBoostEnd': superBoostUntil = 0; toast('Super meyvə gücü bitdi.'); break;
     case 'caught': onCaught(m); break;
     case 'freed': onFreed(m); break;
     case 'end': onEnd(m); break;
@@ -705,43 +702,7 @@ function spawnItem(d) {
 function clearItems() {
   for (const it of itemsMap.values()) itemGroup.remove(it.group);
   itemsMap.clear();
-  if (superFruitObj) itemGroup.remove(superFruitObj.group);
-  superFruitObj = null;
-  superBoostUntil = 0;
 }
-function spawnSuperFruit(d) {
-  if (!d) return;
-  if (superFruitObj) itemGroup.remove(superFruitObj.group);
-  const g = new THREE.Group();
-  g.position.set(d.x, d.y, d.z);
-  const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 16), new THREE.MeshStandardMaterial({ color: 0xffb52e, emissive: 0xff7a00, emissiveIntensity: 1.1, roughness: 0.28 }));
-  fruit.scale.set(1, 1.12, 0.9); g.add(fruit);
-  const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.25, 8), new THREE.MeshStandardMaterial({ color: 0x45d46a, emissive: 0x145b24, emissiveIntensity: 0.4 }));
-  leaf.position.set(0, 0.48, 0); g.add(leaf);
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color: 0xffb52e, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.95 }));
-  glow.scale.set(2.5, 2.5, 1); g.add(glow);
-  const label = textSprite('SUPER MEYVƏ', { color: '#ffe36b', bg: 'rgba(30,18,0,.82)', font: 58, depthTest: false, height: 0.36 });
-  label.position.y = 0.85; g.add(label);
-  const arrow = textSprite('⬇', { color: '#fff16b', bg: 'rgba(20,15,0,.8)', font: 110, depthTest: false, height: 0.9 });
-  arrow.position.y = 4.4; arrow.visible = true; g.add(arrow);
-  itemGroup.add(g);
-  superFruitObj = { group: g, fruit, glow, arrow, baseY: d.y, ph: Math.random() * 6, x: d.x, y: d.y, z: d.z };
-}
-function onSuperFruitSpawn(d) {
-  spawnSuperFruit(d);
-  toast('🍉 SUPER MEYVƏ PEYDA OLDU!');
-}
-function onSuperFruitGot(m) {
-  if (superFruitObj) itemGroup.remove(superFruitObj.group);
-  superFruitObj = null;
-  if (m.id === myId) {
-    superBoostUntil = m.expiresAt || (Date.now() + 45000);
-    toast('🚀 Super sürət və Super Jump aktivdir! (45 saniyə)');
-  } else {
-    toast(`${m.name} super meyvəni götürdü!`);
-  }
-}
-
 /* ---------------- Avatarlar ---------------- */
 function makeAvatar(p) {
   const g = new THREE.Group();
@@ -1586,10 +1547,6 @@ function doAction() {
     return;
   }
   if (me.team === 'friends') {
-    if (superFruitObj && Math.hypot(superFruitObj.x - me.x, superFruitObj.z - me.z) <= 1.8) {
-      send({ t: 'superPickup' });
-      return;
-    }
     // Düymə basılan anda ən yaxın ərzağı yenidən hesabla; köhnə nearItem dəyərinə güvənmə.
     let target = null;
     let best = adminMode && adminCatchRange ? Infinity : 1.5;
@@ -1630,7 +1587,6 @@ function updateGame(dt) {
     }
     const police = me.team === 'police';
     let speed = adminMode && adminSpeed ? 12 : (police ? 4.7 : 4.5);
-    if (superBoostUntil > Date.now()) speed *= 1.55; else if (superBoostUntil) superBoostUntil = 0;
     if (activeRandomEvents.has('speed')) speed *= 1.55;
     const wantSprint = (keys.ShiftLeft || keys.ShiftRight) && me.moving && !me.jailed && !me.exhausted;
     if (wantSprint && me.stamina > 0) {
@@ -1643,7 +1599,7 @@ function updateGame(dt) {
     }
     if (me.jailed) speed = 3;
     me.x += mx * speed * dt; me.z += mz * speed * dt;
-    if (keys.Space && me.y <= 0.001 && !me.jailed) me.vy = (adminMode && adminSuperJump) || superBoostUntil > Date.now() ? 11 : 6;
+    if (keys.Space && me.y <= 0.001 && !me.jailed) me.vy = adminMode && adminSuperJump ? 11 : 6;
     me.bob += dt * (wantSprint ? 13 : 9) * (me.moving ? 1 : 0);
   }
   // Cazibə
@@ -1782,12 +1738,6 @@ function frame(now) {
       && remainingItems.length > 0 && remainingItems.length <= 3 && !it.got;
     it.locationArrow.position.y = 4.2 + Math.sin(tt * 3 + it.ph) * 0.18;
     it.locationArrow.quaternion.copy(camera.quaternion);
-  }
-  if (superFruitObj) {
-    superFruitObj.fruit.rotation.y += dt * 1.8;
-    superFruitObj.group.position.y = superFruitObj.baseY + Math.sin(tt * 2.5 + superFruitObj.ph) * 0.12;
-    superFruitObj.glow.material.opacity = 0.72 + Math.sin(tt * 4 + superFruitObj.ph) * 0.2;
-    superFruitObj.arrow.quaternion.copy(camera.quaternion);
   }
   if (zoneRing) {
     const pulse = 0.55 + Math.sin(tt * 3) * 0.25;
