@@ -1,7 +1,7 @@
 {
-  "name": "market-qacisi",
+  "name": "rush-point",
   "version": "1.0.0",
-  "description": "Market Qaçışı - 3D onlayn komanda oyunu",
+  "description": "Rush Point - 3D onlayn komanda oyunu",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
