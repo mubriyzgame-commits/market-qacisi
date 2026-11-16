@@ -620,5 +620,5 @@ setInterval(() => {
 }, 30000);
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Market Qaçışı serveri işləyir: http://localhost:${PORT}`);
+  console.log(`Rush Point serveri işləyir: http://localhost:${PORT}`);
 });
